@@ -8,10 +8,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{url_for('.static', filename='js/stats.js')}}"></script>
-<script src="{{url_for('.static', filename='js/detector.js')}}"></script>
-<script src="{{url_for('.static', filename='js/three.min.js')}}"></script>
-<script src="{{url_for('.static', filename='js/Madeleine.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/stats.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/detector.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/three.min.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/Madeleine.js')}}"></script>
 {{super()}}
 {% endblock %}
 
