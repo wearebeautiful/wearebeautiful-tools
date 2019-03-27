@@ -8,4 +8,4 @@ docker run -d \
     --env "LETSENCRYPT_HOST=wearebeautiful.info" \
     --env "LETSENCRYPT_EMAIL=mayhem@gmail.com" \
     --network=website-network \
-    wearebeautiful.info-beta:beta
+    wearebeautiful.info:beta

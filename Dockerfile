@@ -17,5 +17,5 @@ COPY . /code/wearebeautiful.info
 RUN pip3.6 install -r requirements.txt
 
 CMD uwsgi --gid=www-data --uid=www-data --http-socket :3031 \
-          --vhost --module=server --callable=app --chdir=/code/wearebeautiful.info \
+          --vhost --module=app --callable=app --chdir=/code/wearebeautiful.info/wearebeautiful \
           --enable-threads --processes=10
