@@ -14,3 +14,19 @@ Bootstrap(app)
 @app.route('/')
 def index():
     return render_template("index.html")
+
+@app.route('/team')
+def team():
+    return render_template("team.html")
+
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
+@app.route('/view')
+def browse():
+    return render_template("view.html")
+
+@app.route('/company')
+def company():
+    return render_template("company.html")

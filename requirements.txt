@@ -1,3 +1,8 @@
-flask
-flask-bootstrap
-jinja2
+Bootstrap-Flask==1.0.10
+Click==7.0
+Flask==1.0.2
+itsdangerous==1.1.0
+Jinja2==2.10
+MarkupSafe==1.1.1
+Werkzeug==0.15.1
+wheel==0.24.0

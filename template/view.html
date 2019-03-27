@@ -1,0 +1,28 @@
+{%- extends 'base.html' -%}
+{%- block content -%}
+  <div class="row">
+    <div class="col-10">
+       <div>
+       <div id="target" class="madeleine"></div>
+       <h2>A project by Eternal Gratitude... </h2>
+       <h4>...and maybe a white russian.</h4>
+    </div>
+  </div>
+{% endblock%}
+
+{% block scripts %}
+{{ bootstrap.load_js() }}
+<script src="{{url_for('.static', filename='js/lib/stats.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/detector.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/three.min.js')}}"></script>
+<script src="{{url_for('.static', filename='js/lib/Madeleine.js')}}"></script>
+<script>
+window.onload = function(){
+    var madeleine = new Madeleine({
+      target: 'target', // target div id
+      data: '/static/models/clitoris.stl', // data path
+      path: '/static/js'  // path to source directory from current html file
+    });
+}; 
+</script>
+{% endblock %}
