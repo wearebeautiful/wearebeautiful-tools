@@ -3,8 +3,16 @@
 
 {% block styles %}
 {{super()}}
-<link rel="stylesheet"
-      href="{{url_for('.static', filename='css/wab.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='css/wab.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='css/Madeleine.css')}}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{{url_for('.static', filename='js/stats.js')}}"></script>
+<script src="{{url_for('.static', filename='js/detector.js')}}"></script>
+<script src="{{url_for('.static', filename='js/three.min.js')}}"></script>
+<script src="{{url_for('.static', filename='js/Madeleine.js')}}"></script>
+{{super()}}
 {% endblock %}
 
 <!-- 
@@ -21,12 +29,24 @@
       <div class="col">
       </div>
       <div class="col">
+         <div>
          <h1>We Are Beautiful!</h1>
          <h2>A project by Eternal Gratitude... </h2>
          <h4>...and maybe a white russian.</h4>
+         <div id="target" class="madeleine"></div>
       </div>
       <div class="col">
       </div>
     </div>
   </div>
+
+<script>
+window.onload = function(){
+    var madeleine = new Madeleine({
+      target: 'target', // target div id
+      data: '/static/models/clitoris.stl', // data path
+      path: '/static/js'  // path to source directory from current html file
+    });
+}; 
+</script>
 {% endblock %}
