@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker rm -f ismaydeadyet-co-uk-beta
+docker rm -f wearebeautiful.info-beta
