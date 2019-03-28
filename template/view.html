@@ -1,9 +1,26 @@
 {%- extends 'base.html' -%}
 {%- block content -%}
-  <div class="row">
-    <div class="col-10">
-       <div>
-       <div id="target" class="madeleine"></div>
+  <div class="row h-100">
+    <div class="col-9">
+       <div id="target" class="madeleine h-100"></div>
+    </div>
+    <div class="col-3">
+    <h5>
+    Human model information:
+    </h5>
+    <table class="table table-striped table-bordered"></tr>
+        <tr><td>country</td><td>Switzerland</td></tr>
+        <tr><td>age</td><td>27</td></tr>
+        <tr><td>ethnicity</td><td>caucasian</td></tr>
+        <tr><td>body type</td><td>slim</td></tr>
+    </table> 
+    <h5>
+    3D model information:
+    </h5>
+    <table class="table table-striped table-bordered"></tr>
+        <tr><td>size</td><td>7MB</td></tr>
+        <tr><td>format</td><td>STL</td></tr>
+    </table> 
     </div>
   </div>
 {% endblock%}
@@ -19,7 +36,12 @@ window.onload = function(){
     var madeleine = new Madeleine({
       target: 'target', // target div id
       data: '/static/models/{{ model }}', // data path
-      path: '/static/madeleine/src'  // path to source directory from current html file
+      path: '/static/madeleine/src',  // path to source directory from current html file
+      objectColor: "DD0022",
+      viewer: {
+         height: $("#target").height(),
+         width: $("#target").width()
+      }
     });
 }; 
 </script>

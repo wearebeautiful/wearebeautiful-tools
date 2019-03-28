@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     {% block head %}
     <meta charset="utf-8">
@@ -8,16 +8,16 @@
     {% block styles %}
     {{ bootstrap.load_css() }}
     <link rel="stylesheet" href="{{url_for('.static', filename='css/wab.css')}}">
-    <link rel="stylesheet" href="{{url_for('.static', filename='css/Madeleine.css')}}">
+    <link rel="stylesheet" href="{{url_for('.static', filename='madeleine/src/css/Madeleine.css')}}">
     {% endblock %}
 
     <title>{% block title %}We are beautiful!{% endblock %}</title>
     {% endblock %}
   </head>
-  <body>
+  <body class="h-100">
 
   {%- include 'navbar.html' -%}
-  <div class="container">
+  <div class="container-fluid h-100">
     {% block content %}
     {% endblock%}
   </div>
