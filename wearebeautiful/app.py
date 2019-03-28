@@ -1,5 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, url_for
 from flask_bootstrap import Bootstrap
+import config
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "../static"
@@ -9,6 +10,7 @@ app = Flask(__name__,
             static_url_path = STATIC_PATH,
             static_folder = STATIC_FOLDER,
             template_folder = TEMPLATE_FOLDER)
+app.secret_key = config.SECRET_KEY
 Bootstrap(app)
 
 @app.route('/')
@@ -23,9 +25,14 @@ def team():
 def about():
     return render_template("about.html")
 
-@app.route('/view')
-def browse():
-    return render_template("view.html")
+@app.route('/view/')
+def view_root():
+    flash('You need to provide a model id to view.')
+    return render_template("error.html")
+
+@app.route('/view/<model>')
+def browse(model):
+    return render_template("view.html", model=model)
 
 @app.route('/company')
 def company():

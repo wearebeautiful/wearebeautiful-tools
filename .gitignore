@@ -103,3 +103,5 @@ venv.bak/
 
 .ve
 .DS_Store
+config.py
+*.swp
