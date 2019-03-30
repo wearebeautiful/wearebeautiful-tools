@@ -8,8 +8,8 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('index') }}">browse</a>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('browse') }}">browse</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('about') }}">about</a>
@@ -19,6 +19,9 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('company') }}">company</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('donate') }}">donate!</a>
       </li>
     </ul>
   </div>

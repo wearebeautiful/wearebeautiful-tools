@@ -17,6 +17,10 @@ Bootstrap(app)
 def index():
     return render_template("index.html")
 
+@app.route('/browse')
+def browse():
+    return render_template("browse.html")
+
 @app.route('/team')
 def team():
     return render_template("team.html")
@@ -31,9 +35,13 @@ def view_root():
     return render_template("error.html")
 
 @app.route('/view/<model>')
-def browse(model):
+def view(model):
     return render_template("view.html", model=model)
 
 @app.route('/company')
 def company():
     return render_template("company.html")
+
+@app.route('/donate')
+def donate():
+    return render_template("donate.html")

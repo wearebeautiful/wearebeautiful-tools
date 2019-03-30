@@ -2,9 +2,26 @@
     max-width: 500px;
 }
 
-.text-index {
+.text-well {
     padding: 20px;
     margin: 5px;
+    background-color: #eee;
+}
+
+.team-name {
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+.team-title {
+    font-style: italic;
+    margin-top: -15px;
+    color: #888;
+}
+
+.quote {
+    font-style: italic;
+    margin-left: 25px;
 }
 
 .img-index {
