@@ -1,0 +1,21 @@
+.flex-column {
+    max-width: 500px;
+}
+
+.text-index {
+    padding: 20px;
+    margin: 5px;
+}
+
+.img-index {
+    padding: 5px;
+}
+
+.scale {
+    transform: scaleY(1.05);
+    padding-top: 5px; 
+}
+
+.model-link {
+    text-decoration: none;
+}
