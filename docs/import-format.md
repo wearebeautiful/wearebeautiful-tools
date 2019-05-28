@@ -26,12 +26,12 @@ folowing keys:
 ```json
 {
     "id":             "<model ID>",
-    "created":        "2019-05-27T23:27:56+00:00"
+    "created":        "2019-05-27T23:27:56+00:00",
     "gender":         "female",
     "gender_comment": "",
     "country":        "ES",
     "age":            34,
-    "ethnicity":      "black"
+    "ethnicity":      "black",
     "body_type":      "thin",
     "comment":        "of carribean descent"       
 }
