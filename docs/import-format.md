@@ -23,24 +23,24 @@ manifest.json
 The manifest.json file should be a valid JSON document that contains the 
 folowing keys:
 
-  {
-      "id":             "<model ID>",                # The unique ID of the model
-      "created":        "2019-05-27T23:27:56+00:00"  # An ISO 8601 timestamp of when model was created.
-      "gender":         "female",                    # See below for allawable values
-      "gender_comment": ""                           # Comment that refines possible gender information.
-      "country":        "ES",                        # A two character ISO country code
-      "age":            34,                          # Age in years of the model when model was created.
-      "ethnicity":      "black"                      # Ethnicity of model. See below
-      "body type":      "thin",                      # Body type. See below
-      "comment":        "of carribean descent"       # General comments about the model. 
-  }
+`{
+    "id":             "<model ID>",                # The unique ID of the model
+    "created":        "2019-05-27T23:27:56+00:00"  # An ISO 8601 timestamp of when model was created.
+    "gender":         "female",                    # See below for allawable values
+    "gender_comment": ""                           # Comment that refines possible gender information.
+    "country":        "ES",                        # A two character ISO country code
+    "age":            34,                          # Age in years of the model when model was created.
+    "ethnicity":      "black"                      # Ethnicity of model. See below
+    "body type":      "thin",                      # Body type. See below
+    "comment":        "of carribean descent"       # General comments about the model. 
+}`
 
 Gender
 ------
 
 Allowable values: 
  
->  "female", "male", "trans-mtf", "trans-ftm", "other". 
+`"female", "male", "trans-mtf", "trans-ftm", "other"`
 
 If other is given for gender, a command giving more information must be present in
 the "gender_comment" field.
@@ -59,4 +59,4 @@ Body type
 
 Allowable values:
 
->  "thin", "fit", "full", "overweight"
+`"thin", "fit", "full", "overweight"`
