@@ -23,7 +23,8 @@ manifest.json
 The manifest.json file should be a valid JSON document that contains the 
 folowing keys:
 
-```{
+```json
+{
     "id":             "<model ID>",                # The unique ID of the model
     "created":        "2019-05-27T23:27:56+00:00"  # An ISO 8601 timestamp of when model was created.
     "gender":         "female",                    # See below for allawable values
@@ -33,7 +34,8 @@ folowing keys:
     "ethnicity":      "black"                      # Ethnicity of model. See below
     "body type":      "thin",                      # Body type. See below
     "comment":        "of carribean descent"       # General comments about the model. 
-}```
+}
+```
 
 Gender
 ------
