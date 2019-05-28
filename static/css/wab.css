@@ -1,11 +1,15 @@
-.flex-column {
-    max-width: 500px;
-}
-
-.text-well {
+.text-column {
     padding: 20px;
     margin: 5px;
     background-color: #eee;
+    max-width: 750px;
+}
+
+.index-text-column {
+    padding: 20px;
+    margin: 5px;
+    background-color: #eee;
+    max-width: 500px;
 }
 
 .team-name {

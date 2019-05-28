@@ -1,36 +1,34 @@
 {%- extends 'base.html' -%}
 {%- block content -%}
   <div class="d-flex flex-row flex-wrap justify-content-center">
-    <div class="d-flex flex-column">
-      <div class="text-well">
-         <p>
-            We are Beautiful ... is a project designed to lift the mystery
-            that surrounds human genitalia. In many cultures and through a 
-            lot of human history it has been taboo to look at other human
-            genitalia. 
-         </p>
-         <p>
-            We aim to change this by presenting educational, respectul
-            and representative models of average humans. You may <a 
-            a href="{{ url_for("browse") }}">browse the collection of 3D models</a> 
-            and you can even download and print these models on your own 
-            3D printer.
-         </p>
-         <p>
-            Our goal is to provide educational models that sex educators
-            everywhere can download, print and use in their classes. Also,
-            if you have questions about your own genitalia, have a look
-            at other humans -- we come in many different shapes and
-            sizes.
-         </p>
-         <p>
-            Click on any model to view the 3D version of it or to download
-            the model. We encourage you to find out more <a href="{{ url_for("about") }}">about
-            this project</a> and <a href="{{ url_for("team") }}">our team</a>. Also, please
-            consider making a small <a href="{{ url_for("donate") }}">donation</> to help
-            cover our operating costs.
-         </p>
-      </div>
+    <div class="d-flex flex-column index-text-column">
+      <p>
+         We are Beautiful ... is a project designed to lift the mystery
+         that surrounds human genitalia. In many cultures and through a 
+         lot of human history it has been taboo to look at other human
+         genitalia. 
+      </p>
+      <p>
+         We aim to change this by presenting educational, respectul
+         and representative models of average humans. You may <a 
+         a href="{{ url_for("browse") }}">browse the collection of 3D models</a> 
+         and you can even download and print these models on your own 
+         3D printer.
+      </p>
+      <p>
+         Our goal is to provide educational models that sex educators
+         everywhere can download, print and use in their classes. Also,
+         if you have questions about your own genitalia, have a look
+         at other humans -- we come in many different shapes and
+         sizes.
+      </p>
+      <p>
+         Click on any model to view the 3D version of it or to download
+         the model. We encourage you to find out more <a href="{{ url_for("about") }}">about
+         this project</a> and <a href="{{ url_for("team") }}">our team</a>. Also, please
+         consider making a small <a href="{{ url_for("donate") }}">donation</> to help
+         cover our operating costs.
+      </p>
       <a class="model-link" href="/view/dubstep-pendulum.stl">
         <img src="/static/img/dubstep-pendulum.png" class="img-fluid img-index">
       </a>
