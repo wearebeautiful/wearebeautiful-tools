@@ -8,7 +8,6 @@
     {% block styles %}
     {{ bootstrap.load_css() }}
     <link rel="stylesheet" href="{{url_for('.static', filename='css/wab.css')}}">
-    <link rel="stylesheet" href="{{url_for('.static', filename='madeleine/src/css/Madeleine.css')}}">
     {% endblock %}
 
     <title>{% block title %}We are beautiful!{% endblock %}</title>

@@ -27,22 +27,24 @@
 
 {% block scripts %}
 {{ bootstrap.load_js() }}
-<script src="{{url_for('.static', filename='madeleine/src/lib/stats.js')}}"></script>
-<script src="{{url_for('.static', filename='madeleine/src/lib/detector.js')}}"></script>
-<script src="{{url_for('.static', filename='madeleine/src/lib/three.min.js')}}"></script>
-<script src="{{url_for('.static', filename='madeleine/src/Madeleine.js')}}"></script>
+<script src="{{url_for('.static', filename='js/stl_viewer/stl_viewer.min.js')}}"></script>
 <script>
-window.onload = function(){
-    var madeleine = new Madeleine({
-      target: 'target', // target div id
-      data: '/static/models/{{ model }}', // data path
-      path: '/static/madeleine/src',  // path to source directory from current html file
-      objectColor: "DD0022",
-      viewer: {
-         height: $("#target").height() - 55,
-         width: $("#target").width() - 15
-      }
-    });
-}; 
+
+var viewer=new StlViewer(document.getElementById("target"), 
+    { 
+      models: [ {id:0, 
+                 filename:"/static/models/{{ model }}",
+                 rotationx: 0.0,
+                 rotationy: 0.0,
+                 rotationz: 0.0, //-(3.141/2.0), 
+                } ],
+      load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
+      all_loaded_callback : on_loaded,
+    }
+);
+function on_loaded() 
+{
+     viewer.set_scale(0, .9);
+}
 </script>
 {% endblock %}

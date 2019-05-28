@@ -11,4 +11,5 @@ pip3 install -r requirements.txt
 
 export FLASK_APP=wearebeautiful/app.py
 export FLAK_ENV=development
+export FLASK_DEBUG=1
 flask run
