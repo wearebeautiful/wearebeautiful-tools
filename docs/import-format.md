@@ -71,9 +71,8 @@ Age in years of the model when model was created.
 ethnicity
 ---------
 
-TBC -- looking for some international standard that we can follow.
-
-We may decide on a smaller list of ethnicities and then also add a ehtnicity_comment field.
+This is a free form text field that the model should self declare. There is no existing taxonomy that handles
+this well on a glabal scale. 
 
 
 body_type
