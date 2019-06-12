@@ -2,9 +2,10 @@
 {%- block content -%}
   <div class="row h-100">
     <div class="col-9">
-       <div id="target" class="madeleine h-100"></div>
+       <div id="target" class="h-100"></div>
     </div>
     <div class="col-3">
+    <div id="progress">loading ...</div>
     <h5>
     Human model information:
     </h5>
@@ -28,23 +29,37 @@
 {% block scripts %}
 {{ bootstrap.load_js() }}
 <script src="{{url_for('.static', filename='js/stl_viewer/stl_viewer.min.js')}}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
 
 var viewer=new StlViewer(document.getElementById("target"), 
     { 
       models: [ {id:0, 
                  filename:"/static/models/{{ model }}",
-                 rotationx: 0.0,
-                 rotationy: 0.0,
-                 rotationz: 0.0, //-(3.141/2.0), 
+                 rotationx: 0, 
+                 rotationy: 0,
+                 rotationz: -3.141,
+                 color: "#FF6000",
                 } ],
       load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
       all_loaded_callback : on_loaded,
+      loading_progress_callback : load_progress,
     }
 );
 function on_loaded() 
 {
+     $("#progress").toggleClass("d-none");
      viewer.set_scale(0, .9);
+}
+function load_progress(status, session)
+{
+     if (status[0].loaded == status[0].total)
+        $("#progress").text("rendering...");
+     else
+     {
+         percent = (status[0].loaded * 100) / status[0].total;
+         $("#progress").text("loading " + percent + "%");
+     }
 }
 </script>
 {% endblock %}
