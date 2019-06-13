@@ -37,7 +37,11 @@ def view_root():
 
 @app.route('/view/<model>')
 def view(model):
-    return render_template("view.html", model=model, name=os.path.splitext(model)[0])
+    return render_template("view.html", 
+        model=model, 
+        model_info = "28 year old white female from switzerland with a thin body",
+        name=os.path.splitext(model)[0])
+
 
 @app.route('/company')
 def company():

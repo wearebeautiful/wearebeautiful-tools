@@ -8,23 +8,18 @@
   <div id="progress">
       loading ...
   </div>
-  <div id="info-buttons">
-    <button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" 
-            data-content="Human model info">
-            human model info
-    </button>
-    <button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" 
-            data-content="3D model info here">
-            3D model info
-    </button>
+  <div id="info" class="text-right">
+     {{ model_info }}
   </div>
 {% endblock%}
 
 {% block scripts %}
 {{ bootstrap.load_js() }}
 <script src="{{url_for('.static', filename='js/stl_viewer/stl_viewer.min.js')}}"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
+
+var default_color = "#FF6000";
+
 
 var viewer=new StlViewer(document.getElementById("stl_div"), 
     { 
@@ -33,27 +28,34 @@ var viewer=new StlViewer(document.getElementById("stl_div"),
                  rotationx: 0, 
                  rotationy: 0,
                  rotationz: -3.141,
-                 color: "#FF6000",
                 } ],
       load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
       all_loaded_callback : on_loaded,
       loading_progress_callback : load_progress,
+      on_model_drop : on_drop,
     }
 );
+viewer.set_drag_and_drop(true);
+
+function on_drop(filename)
+{
+    viewer.clean();
+    viewer.add_model({id:0, filename:filename });
+}
 function on_loaded() 
 {
-     $("#progress").text("{{ name }}");
-     viewer.set_scale(0, .9);
+    viewer.set_color(0, default_color);
+    $("#progress").text("{{ name }}");
 }
 function load_progress(status, session)
 {
-     if (status[0].loaded == status[0].total)
-        $("#progress").html('rendering<span class="one">.</span><span class="two">.</span><span class="three">.</span>');
-     else
-     {
-         percent = Math.trunc((status[0].loaded * 100) / status[0].total);
-         $("#progress").html("loading " + percent + '%');
-     }
+    if (status[0].loaded == status[0].total)
+       $("#progress").html('rendering<span class="one">.</span><span class="two">.</span><span class="three">.</span>');
+    else
+    {
+        percent = Math.trunc((status[0].loaded * 100) / status[0].total);
+        $("#progress").html("loading " + percent + '%');
+    }
 }
 </script>
 {% endblock %}
