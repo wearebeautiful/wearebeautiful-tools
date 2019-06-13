@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, flash, url_for
 from flask_bootstrap import Bootstrap
 import config
@@ -36,7 +37,7 @@ def view_root():
 
 @app.route('/view/<model>')
 def view(model):
-    return render_template("view.html", model=model)
+    return render_template("view.html", model=model, name=os.path.splitext(model)[0])
 
 @app.route('/company')
 def company():
