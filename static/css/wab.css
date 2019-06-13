@@ -41,30 +41,7 @@
     text-decoration: none;
 }
 
-#info-buttons {
-    position: absolute;
-    right: 10px;
-    top: 100px;
-}
-
-#progress {
-    position: absolute;
-    left: 10px;
-    top: 60px;
-    width: 50%;
-    height: 150px;
-
-    font-size: 24pt;
-    color: #BBB;
-}
-
-#info {
-    position: absolute;
-    right: 10px;
-    top: 60px;
-    width: 50%;
-    height: 150px;
-
+#info-row {
     font-size: 18pt;
     color: #BBB;
 }

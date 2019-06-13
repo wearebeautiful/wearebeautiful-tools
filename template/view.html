@@ -1,16 +1,20 @@
 {%- extends 'base.html' -%}
 {%- block content -%}
+  <div class="row" id="info-row">
+      <div id="progress" class="col-6">
+          loading ...
+      </div>
+      <div id="info" class="col-6 text-right">
+         {{ model_info }}
+      </div>
+  </div>
+
   <div class="row h-100">
     <div class="col-12">
        <div id="stl_div" class="h-100"></div>
     </div>
   </div>
-  <div id="progress">
-      loading ...
-  </div>
-  <div id="info" class="text-right">
-     {{ model_info }}
-  </div>
+
 {% endblock%}
 
 {% block scripts %}
