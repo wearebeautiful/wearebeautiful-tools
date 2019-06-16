@@ -37,7 +37,7 @@ folowing keys:
     "ethnicity":      "of carribean descent",
     "modification":   "none",
     "comment":        "",       
-    "other"           {}
+    "other":          {}
 }
 ```
 
