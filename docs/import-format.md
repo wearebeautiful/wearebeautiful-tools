@@ -25,6 +25,7 @@ folowing keys:
 
 ```json
 {
+    "version":        1,
     "id":             "<model ID>",
     "created":        "2019-05",
     "gender":         "female",
@@ -33,9 +34,9 @@ folowing keys:
     "age":            34,
     "body_type":      "thin",
     "mother":         "false",
-    "ethnicity":      "of carribean descent"       
-    "modification":   "none"
-    "comment":        ""       
+    "ethnicity":      "of carribean descent",
+    "modification":   "none",
+    "comment":        "",       
     "other"           {}
 }
 ```
