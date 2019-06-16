@@ -33,6 +33,7 @@ folowing keys:
     "age":            34,
     "ethnicity":      "black",
     "body_type":      "thin",
+    "mother":         "false",
     "comment":        "of carribean descent"       
 }
 ```
@@ -81,6 +82,11 @@ body_type
 Allowable values:
 
 `"thin", "fit", "full", "overweight"`
+
+mother
+------
+
+Is the model a mother? Boolean.
 
 comment
 -------
