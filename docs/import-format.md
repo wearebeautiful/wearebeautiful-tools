@@ -26,15 +26,17 @@ folowing keys:
 ```json
 {
     "id":             "<model ID>",
-    "created":        "2019-05-27T23:27:56+00:00",
+    "created":        "2019-05",
     "gender":         "female",
     "gender_comment": "",
     "country":        "ES",
     "age":            34,
-    "ethnicity":      "black",
     "body_type":      "thin",
     "mother":         "false",
-    "comment":        "of carribean descent"       
+    "ethnicity":      "of carribean descent"       
+    "modification":   "none"
+    "comment":        ""       
+    "other"           {}
 }
 ```
 
@@ -46,7 +48,8 @@ The unique ID of the model
 created
 -------
 
-An ISO 8601 timestamp of when model was created.
+A partial ISO 8601 timestamp of when model was created: YYYY-MM
+
 
 gender
 ------
@@ -88,7 +91,22 @@ mother
 
 Is the model a mother? Boolean.
 
+
 comment
 -------
 
-General comments about the model. 
+General comment about the model not captured in other metadata.
+
+
+modification
+------------
+
+Indicates modifciation of the model. Accepted values:
+
+   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male","male-to-female"
+
+other
+-----
+
+Free form dictionary for custom data fields -- these fields may be accepted as full fiels in the future.
+
