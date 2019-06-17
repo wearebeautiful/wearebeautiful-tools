@@ -53,16 +53,11 @@ def parse_args():
     return parser.parse_args();
 
 
-def main():
-    args = parse_args();
-    mesh = pymesh.meshio.load_mesh(args.in_mesh);
-
-    mesh = fix_mesh(mesh, target_len = args.len);
-
-    pymesh.meshio.save_mesh(args.out_mesh, mesh);
-
-    if args.timing:
-        pymesh.timethis.summarize();
+def scale_mesh(in_file, out_file, target_len):
+    mesh = pymesh.meshio.load_mesh(in_file);
+    mesh = fix_mesh(mesh, target_len);
+    pymesh.meshio.save_mesh(out_file, mesh);
 
 if __name__ == "__main__":
+    args = parse_args();
     main();

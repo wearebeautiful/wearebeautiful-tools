@@ -6,16 +6,14 @@ Format version: 1
 File contents
 -------------
 
-In order to import an STL file into the site, the file
+In order to import an model files into the site, the file
 needs to be in a ZIP compressed file containing:
 
-* manifest.json     - A JSON document that defines the metadata for the model. See below
-* model-low-res.stl - An STL file with the model oriented in the way it should be shown on the
-                    site by default. The low resolution model should contain enough detail
-                    to be viewed on a mobile phone.
-* model-medium-res.stl - An STL file in correct orientation, viewable on a larger screen such as 
-                       a desktop.
-* model-high-res.stl   - An STL file in correct orientation, suitable for download for printing.
+* manifest.json                - A JSON document that defines the metadata for the model. See below
+* model-surface-low-res.obj    - A surface in correct orientation, viewable on a mobile phone or tablet.
+* model-surface-medium-res.obj - A surface in correct orientation, viewable on a larger screen such as a desktop.
+* model-surface-high-res.obj   - original resolution surface, for archival purposes.
+* model-solid-print-res.obj    - print solid in resolution suited for printing.
 
 manifest.json
 -------------

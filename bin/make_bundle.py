@@ -4,6 +4,11 @@ import json
 import click
 import sys
 import datetime
+import os
+import shutil
+from zipfile import ZipFile
+from tempfile import mkdtemp
+from scale_mesh import scale_mesh
 
 FORMAT_VERSION = 1 
 ALLOWED_KEYS = [ "version", "id", "created", "gender", "gender_comment", "country", "age", "body_type", 
@@ -97,32 +102,70 @@ def validate_manifest(manifest):
         sys.exit(-1)
 
     if len(manifest['ethnicity']) < MIN_ETHNICITY_LEN:
-        print("ethnicify field too short. Must be at least %s characters. " % MIN_ETHNICITY_LEN)
+        print("ethnicity field too short. Must be at least %s characters. " % MIN_ETHNICITY_LEN)
         sys.exit(-1)
 
     if manifest['modification'] not in MODIFICATIONS:
         print("modification must be one of: ", MODIFICATIONS)
         sys.exit(-1)
 
+    return id
 
 
 
 @click.command()
-@click.argument('hires', type=click.Path(exists=True))
-@click.argument('surface', type=click.Path(exists=True))
-@click.argument('manifest', type=click.Path(exists=True))
-@click.argument('resolution')
-@click.argument('dest', type=click.Path(exists=True))
-def main(hires, surface, manifest, resolution, dest):
+@click.argument('printq')
+@click.argument('surface')
+@click.argument('mresolution')
+@click.argument('lresolution')
+@click.argument('manifest')
+@click.argument('dest')
+def main(printq, surface, mresolution, lresolution, manifest, dest):
+
+    manifest = os.path.join("/models", manifest)
+    surface = os.path.join("/models", surface)
+    printq = os.path.join("/models", printq)
 
     try:
-        with open(manifest, "rb") as m:
-            manifest = json.loads(m.read())
+        with open(os.path.join("/models", manifest), "rb") as m:
+            jmanifest = json.loads(m.read())
+    except json.decoder.JSONDecodeError as err:
+        print("Cannot parse manifest file. ", err)
+        sys.exit(-1)
     except IOError as err:
         print("Cannot read manifest file. IO error.", err)
         sys.exit(-1)
 
-    validate_manifest(manifest)
+    id = validate_manifest(jmanifest)
+
+    tmp_dir = mkdtemp()
+    low_res = os.path.join(tmp_dir, "model-surface-low-res.obj")
+    medium_res = os.path.join(tmp_dir, "model-surface-medium-res.obj")
+
+    try:
+        scale_mesh(surface, low_res, float(lresolution))
+        scale_mesh(surface, medium_res, float(mresolution))
+    except IOError as err:
+        print("Cannot down-scale mesh files. Error: ", err)
+        sys.exit(-1)
+
+    try:
+        shutil.copy(manifest, tmp_dir)
+        shutil.copy(printq, tmp_dir)
+        shutil.copy(surface, tmp_dir)
+    except IOError as err:
+        print("Cannot copy files. Error: ", err)
+        sys.exit(-1)
+
+    dest = os.path.join("/out", "%04d-bundle.zip" % id)
+    with ZipFile(dest, 'w') as zip:
+        zip.write(manifest, arcname="manifest.json")
+        zip.write(low_res, arcname="model-surface-low-res.obj")
+        zip.write(medium_res, arcname="model-surface-medium-res.obj")
+        zip.write(printq, arcname="model-solid-print-res.obj")
+        zip.write(surface, arcname="model-surface-high-res.obj")
+
+    shutil.rmtree(tmp_dir)
 
 
 if __name__ == "__main__":
