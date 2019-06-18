@@ -1,3 +1,29 @@
+.logo {
+    vertical-align: middle;
+    font-family: "gill sans", sans-serif;
+    font-spacing: letter-spacing: 2px;
+}    
+    
+.logo-chevron {
+    font-size: 25pt;
+}
+
+.logo-curly {
+    font-size: 22pt;
+}
+
+.logo-paren {
+    font-size: 23pt;
+}
+
+.logo-bracket {
+    font-size: 23pt;
+}
+
+.logo-bang {
+    font-size: 23pt;
+}
+
 .text-column {
     padding: 20px;
     margin: 5px;
