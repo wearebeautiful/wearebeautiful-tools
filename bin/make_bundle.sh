@@ -1,15 +1,19 @@
 #!/bin/bash
 
-PRINT=$1
-SURFACE=$2
-LRES=$3
-MRES=$4
-MANIFEST=$5
-cd $6
+cd $1
+SRC=`pwd`
+cd -
+LRES=$2
+MRES=$3
+cd $4
 DEST=`pwd`
 cd -
-echo "$DEST"
 
+echo "src $SRC"
+echo "lres $LRES"
+echo "mres $MRES"
+echo "dest $DEST"
+
+mkdir -p $DEST
 docker rm -f mesh 
-docker build -t wearebeautiful:mesh .
-docker run -it --name mesh -v `pwd`:/models -v $DEST:/out wearebeautiful:mesh /code/make_bundle.py $PRINT $SURFACE $LRES $MRES $MANIFEST $DEST
+docker run -it --name mesh -v `pwd`:/models -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/make_bundle.py $LRES $MRES

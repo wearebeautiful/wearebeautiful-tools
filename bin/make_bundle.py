@@ -10,6 +10,11 @@ from zipfile import ZipFile
 from tempfile import mkdtemp
 from scale_mesh import scale_mesh
 
+PRINT_FILE = "solid.obj"
+SURFACE_FILE = "surface.obj"
+SCREENSHOT_FILE = "screenshot.jpg"
+MANIFEST_FILE = "manifest.json"
+
 FORMAT_VERSION = 1 
 ALLOWED_KEYS = [ "version", "id", "created", "gender", "gender_comment", "country", "age", "body_type", 
     "mother", "ethnicity", "modification", "comment", "other"]
@@ -114,20 +119,17 @@ def validate_manifest(manifest):
 
 
 @click.command()
-@click.argument('printq')
-@click.argument('surface')
-@click.argument('mresolution')
 @click.argument('lresolution')
-@click.argument('manifest')
-@click.argument('dest')
-def main(printq, surface, mresolution, lresolution, manifest, dest):
+@click.argument('mresolution')
+def main(lresolution, mresolution):
 
-    manifest = os.path.join("/models", manifest)
-    surface = os.path.join("/models", surface)
-    printq = os.path.join("/models", printq)
+    manifest = os.path.join("/src", MANIFEST_FILE)
+    surface = os.path.join("/src", SURFACE_FILE)
+    solid = os.path.join("/src", PRINT_FILE)
+    screenshot = os.path.join("/src", SCREENSHOT_FILE)
 
     try:
-        with open(os.path.join("/models", manifest), "rb") as m:
+        with open(os.path.join("/src", manifest), "rb") as m:
             jmanifest = json.loads(m.read())
     except json.decoder.JSONDecodeError as err:
         print("Cannot parse manifest file. ", err)
@@ -139,8 +141,24 @@ def main(printq, surface, mresolution, lresolution, manifest, dest):
     id = validate_manifest(jmanifest)
 
     tmp_dir = mkdtemp()
-    low_res = os.path.join(tmp_dir, "model-surface-low-res.obj")
-    medium_res = os.path.join(tmp_dir, "model-surface-medium-res.obj")
+    low_res = os.path.join(tmp_dir, "surface-low.obj")
+    medium_res = os.path.join(tmp_dir, "surface-medium.obj")
+
+    if not os.path.exists(solid):
+        solid = os.path.splitext(os.path.basename(solid))[0] + ".stl"
+        solid = os.path.join("/src", solid)
+        print("Could not find solid.obj, trying %s" % solid)
+        if not os.path.exists(solid):
+            print("Cannot find solid.obj or solid.stl");
+            sys.exit(-1)
+
+    if not os.path.exists(surface):
+        surface = os.path.splitext(os.path.basename(surface))[0] + ".stl"
+        surface = os.path.join("/src", surface)
+        print("Could not find surface.obj, trying %s" % surface)
+        if not os.path.exists(surface):
+            print("Cannot find surface.obj or surface.stl");
+            sys.exit(-1)
 
     try:
         scale_mesh(surface, low_res, float(lresolution))
@@ -150,20 +168,21 @@ def main(printq, surface, mresolution, lresolution, manifest, dest):
         sys.exit(-1)
 
     try:
-        shutil.copy(manifest, tmp_dir)
-        shutil.copy(printq, tmp_dir)
+        shutil.copy(solid, tmp_dir)
         shutil.copy(surface, tmp_dir)
+        shutil.copy(screenshot, tmp_dir)
     except IOError as err:
         print("Cannot copy files. Error: ", err)
         sys.exit(-1)
 
-    dest = os.path.join("/out", "%04d-bundle.zip" % id)
+    dest = os.path.join("/dest", "%04d-bundle.zip" % id)
     with ZipFile(dest, 'w') as zip:
         zip.write(manifest, arcname="manifest.json")
-        zip.write(low_res, arcname="model-surface-low-res.obj")
-        zip.write(medium_res, arcname="model-surface-medium-res.obj")
-        zip.write(printq, arcname="model-solid-print-res.obj")
-        zip.write(surface, arcname="model-surface-high-res.obj")
+        zip.write(low_res, arcname="surface-low.obj")
+        zip.write(medium_res, arcname="surface-medium.obj")
+        zip.write(solid, arcname="solid.obj")
+        zip.write(surface, arcname="surface-orig.obj")
+        zip.write(screenshot, arcname="screenshot.jpg")
 
     shutil.rmtree(tmp_dir)
 
