@@ -9,7 +9,7 @@
       </p>
 
       <ul>
-      {% for bundle in bundles %}
+      {% for bundle in bundles|sort %}
         <li><a href="/view/{{ bundles[bundle].id }}">{{ bundles[bundle].id }}</a></li>
       {% endfor %}
       </ul>
