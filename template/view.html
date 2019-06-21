@@ -2,7 +2,6 @@
 {%- block content -%}
   <div class="row" id="info-row">
       <div id="progress" class="col-6">
-          loading ...
       </div>
       <div id="info" class="col-6 text-right">
          {{ model_info }}
@@ -23,34 +22,27 @@
 <script>
 
 var default_color = "#FF6000";
-var id = -1;
 
-var viewer=new StlViewer(document.getElementById("stl_div"), 
-    { 
-      models: [ {
-                 id:0, 
-                 filename:"/static/models/{{ model }}",
-                } ],
-      load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
-      model_loaded_callback : on_model_loaded,
-      all_loaded_callback : on_all_loaded,
-      loading_progress_callback : load_progress,
-    }
-);
-viewer.set_drag_and_drop(true);
-
-function on_model_loaded(id_arg)
+var options =
+{ 
+  load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
+  model_loaded_callback : on_model_loaded,
+  all_loaded_callback : on_all_loaded,
+  loading_progress_callback : load_progress,
+};
+if ("{{ model }}" != "-")
 {
-    id = id_arg;
-    console.log("new id:" + id);
-    viewer.set_color(id, default_color);
+    options['models'] = [ { id:0, filename:"/static/models/{{ model }}"} ];
+    $("#progress").text("loading ...");
+}
 
-    console.log(viewer.models);
-    if (id > 0)
-    {
-        console.log("remove model " + (id - 1))
-        viewer.remove_model(id - 1)
-    }
+var viewer=new StlViewer(document.getElementById("stl_div"), options);
+if ("{{ model }}" == "-")
+    viewer.set_drag_and_drop(true);
+
+function on_model_loaded(id)
+{
+    viewer.set_color(id, default_color);
 }
 
 function on_all_loaded() 
