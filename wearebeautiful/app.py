@@ -2,10 +2,12 @@ import os
 from flask import Flask, render_template, flash, url_for
 from flask_bootstrap import Bootstrap
 import config
+import json
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "../static"
 TEMPLATE_FOLDER = "../template"
+BUNDLE_FOLDER = "bundle"
 
 app = Flask(__name__,
             static_url_path = STATIC_PATH,
@@ -14,13 +16,27 @@ app = Flask(__name__,
 app.secret_key = config.SECRET_KEY
 Bootstrap(app)
 
+try: 
+    with open(os.path.join(BUNDLE_FOLDER, "bundles.json"), "r") as f:
+        bundles = json.loads(f.read())
+except IOError as err:
+    print("ERROR: Cannot read bundles.json.", err)
+except ValueError as err:
+    print("ERROR: Cannot read bundles.json.", err)
+
+app.bundles = {}
+for bundle in bundles:
+    app.bundles[bundle['id']] = bundle
+
+print("read %d bundles." % len(app.bundles))
+
 @app.route('/')
 def index():
     return render_template("index.html")
 
 @app.route('/browse')
 def browse():
-    return render_template("browse.html")
+    return render_template("browse.html", bundles = app.bundles)
 
 @app.route('/team')
 def team():
@@ -38,12 +54,9 @@ def view_root():
 @app.route('/view/<model>')
 def view(model):
     if model == '-':
-        return render_template("view.html", model="-", model_info="", name="")
+        return render_template("view.html", manifest = {'id':''})
 
-    return render_template("view.html", 
-        model=model, 
-        model_info = "28 year old white female from switzerland with a thin body",
-        name=os.path.splitext(model)[0])
+    return render_template("view.html", manifest = app.bundles[model])
 
 
 @app.route('/company')

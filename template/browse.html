@@ -9,14 +9,9 @@
       </p>
 
       <ul>
-        <li><a href="/view/0001-high.obj">0001-high</a></li>
-        <li><a href="/view/0001-normal.obj">0001-normal</a></li>
-        <li><a href="/view/0003-high.obj">0003-high</a></li>
-        <li><a href="/view/0003-normal.obj">0003-normal</a></li>
-        <li><a href="/view/0004-high.obj">0004-high</a></li>
-        <li><a href="/view/0004-normal.obj">0004-normal</a></li>
-        <li><a href="/view/0004s-high.obj">0004s-high</a></li>
-        <li><a href="/view/0004s-normal.obj">0004s-normal</a></li>
+      {% for bundle in bundles %}
+        <li><a href="/view/{{ bundles[bundle].id }}">{{ bundles[bundle].id }}</a></li>
+      {% endfor %}
       </ul>
 
     </div>

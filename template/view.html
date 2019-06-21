@@ -4,7 +4,9 @@
       <div id="progress" class="col-6">
       </div>
       <div id="info" class="col-6 text-right">
-         {{ model_info }}
+      {% if manifest.id %}
+         {{ manifest.age }} year old {{ manifest.gender }} with a {{ manifest.body_type }} body from {{ manifest.country }}. 
+      {% endif %}
       </div>
   </div>
 
@@ -30,14 +32,14 @@ var options =
   all_loaded_callback : on_all_loaded,
   loading_progress_callback : load_progress,
 };
-if ("{{ model }}" != "-")
+if ("{{ manifest.id }}")
 {
-    options['models'] = [ { id:0, filename:"/static/models/{{ model }}", rotationz : -3.1412} ];
+    options['models'] = [ { id:0, filename:"/static/bundle/{{ manifest.id }}/surface-medium.obj"} ];
     $("#progress").text("loading ...");
 }
 
 var viewer=new StlViewer(document.getElementById("stl_div"), options);
-if ("{{ model }}" == "-")
+if (!"{{ manifest.id }}")
     viewer.set_drag_and_drop(true);
 
 function on_model_loaded(id)
@@ -47,7 +49,7 @@ function on_model_loaded(id)
 
 function on_all_loaded() 
 {
-    $("#progress").text("{{ name }}");
+    $("#progress").text("{{ manifest.id }}");
 }
 
 function load_progress(load_status, load_session)
