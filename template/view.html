@@ -23,43 +23,56 @@
 <script>
 
 var default_color = "#FF6000";
-
+var id = -1;
 
 var viewer=new StlViewer(document.getElementById("stl_div"), 
     { 
-      models: [ {id:0, 
+      models: [ {
+                 id:0, 
                  filename:"/static/models/{{ model }}",
-                 rotationx: 0, 
-                 rotationy: 0,
-                 rotationz: 0, //-3.141,
                 } ],
       load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
-      all_loaded_callback : on_loaded,
+      model_loaded_callback : on_model_loaded,
+      all_loaded_callback : on_all_loaded,
       loading_progress_callback : load_progress,
-      on_model_drop : on_drop,
     }
 );
 viewer.set_drag_and_drop(true);
 
-function on_drop(filename)
+function on_model_loaded(id_arg)
 {
-    viewer.clean();
-    viewer.add_model({id:0, filename:filename });
+    id = id_arg;
+    console.log("new id:" + id);
+    viewer.set_color(id, default_color);
+
+    console.log(viewer.models);
+    if (id > 0)
+    {
+        console.log("remove model " + (id - 1))
+        viewer.remove_model(id - 1)
+    }
 }
-function on_loaded() 
+
+function on_all_loaded() 
 {
-    viewer.set_color(0, default_color);
     $("#progress").text("{{ name }}");
 }
-function load_progress(status, session)
+
+function load_progress(load_status, load_session)
 {
-    if (status[0].loaded == status[0].total)
-       $("#progress").html('rendering<span class="one">.</span><span class="two">.</span><span class="three">.</span>');
-    else
+    Object.keys(load_status).forEach(function(model_id)
     {
-        percent = Math.trunc((status[0].loaded * 100) / status[0].total);
-        $("#progress").html("loading " + percent + '%');
-    }
+        if (load_status[model_id].load_session==load_session)
+        {
+            if (load_status[model_id].loaded == load_status[model_id].total)
+               $("#progress").html('rendering<span class="one">.</span><span class="two">.</span><span class="three">.</span>');
+            else
+            {
+                percent = Math.trunc(load_status[model_id].loaded * 100.0 / load_status[model_id].total)
+                $("#progress").html("loading " + percent + '%');
+            }
+        }
+    });
 }
 </script>
 {% endblock %}
