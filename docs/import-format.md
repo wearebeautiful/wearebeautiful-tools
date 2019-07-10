@@ -19,13 +19,14 @@ manifest.json
 -------------
 
 The manifest.json file should be a valid JSON document that contains the 
-folowing keys:
+following keys:
 
 ```json
 {
     "version":        1,
     "id":             "<model ID>",
     "created":        "2019-05",
+    "released":       "2019-07-09",
     "gender":         "female",
     "gender_comment": "",
     "country":        "ES",
@@ -48,6 +49,12 @@ created
 -------
 
 A partial ISO 8601 timestamp of when model was created: YYYY-MM
+
+
+released
+--------
+
+An ISO 8601 date of when model was released to on the we are beautiful site: YYYY-MM-DD
 
 
 gender
@@ -102,9 +109,10 @@ General comment about the model not captured in other metadata.
 modification
 ------------
 
-Indicates modifciation of the model. Accepted values:
+Indicates modifciation of the model. Accepted values, an array of one or more of the following:
 
-   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male","male-to-female"
+   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant"
+
 
 other
 -----

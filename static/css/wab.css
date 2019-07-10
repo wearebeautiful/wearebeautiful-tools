@@ -1,15 +1,6 @@
-.text-column {
-    padding: 20px;
-    margin: 5px;
-    background-color: #eee;
-    max-width: 750px;
-}
-
-.index-text-column {
-    padding: 20px;
-    margin: 5px;
-    background-color: #eee;
-    max-width: 500px;
+body {
+    overflow-y: hidden;
+    overflow-y: hidden;
 }
 
 .team-name {
@@ -28,10 +19,6 @@
     margin-left: 25px;
 }
 
-.img-index {
-    padding: 5px;
-}
-
 .scale {
     transform: scaleY(1.05);
     padding-top: 5px; 
@@ -39,6 +26,18 @@
 
 .model-link {
     text-decoration: none;
+}
+
+.screenshot {
+    max-width: 500px;
+    max-height: 500px;
+}
+
+.index-cell {
+}
+
+.txt-cell {
+    background: #EEE; 
 }
 
 #info-row {

@@ -1,45 +1,56 @@
 {%- extends 'base.html' -%}
 {%- block content -%}
-  <div class="d-flex flex-row flex-wrap justify-content-center">
-    <div class="d-flex flex-column index-text-column">
-      <p>
-         We are Beautiful ... is a project designed to lift the mystery
-         that surrounds human genitalia. In many cultures and through a 
-         lot of human history it has been taboo to look at other human
-         genitalia. 
-      </p>
-      <p>
-         We aim to change this by presenting educational, respectul
-         and representative models of average humans. You may <a 
-         a href="{{ url_for("browse") }}">browse the collection of 3D models</a> 
-         and you can even download and print these models on your own 
-         3D printer.
-      </p>
-      <p>
-         Our goal is to provide educational models that sex educators
-         everywhere can download, print and use in their classes. Also,
-         if you have questions about your own genitalia, have a look
-         at other humans -- we come in many different shapes and
-         sizes.
-      </p>
-      <p>
-         Click on any model to view the 3D version of it or to download
-         the model. We encourage you to find out more <a href="{{ url_for("about") }}">about
-         this project</a> and <a href="{{ url_for("team") }}">our team</a>. Also, please
-         consider making a small <a href="{{ url_for("donate") }}">donation</> to help
-         cover our operating costs.
-      </p>
-      <a class="model-link" href="/view/0003_LT_LOW.stl">
-        <img src="/static/img/dubstep-pendulum.png" class="img-fluid img-index">
-      </a>
-    </div>
-    <div class="d-flex flex-column">
-      <a class="model-link" href="/view/0004_VST_SURF_L.obj">
-        <img src="/static/img/clitoris.png" class="img-fluid img-index">
-      </a>
-      <a class="model-link" href="/view/0001_B01_print.stl">
-        <img src="/static/img/mayhem-logo.png" class="img-fluid img-index">
-      </a>
-    </div>
+<div class="row justify-content-center">
+
+  <div class="col-6 index-cell txt-cell">
+    <p>
+       We are Beautiful ... is a project designed to lift the mystery
+       that surrounds human genitalia. In many cultures and through a 
+       lot of human history it has been taboo to look at other human
+       genitalia. 
+    </p>
+    <p>
+       We aim to change this by presenting educational, respectul
+       and representative models of average humans. You may <a 
+       a href="{{ url_for("browse") }}">browse the collection of 3D models</a> 
+       and you can even download and print these models on your own 
+       3D printer.
+    </p>
+    <p>
+       Our goal is to provide educational models that sex educators
+       everywhere can download, print and use in their classes. Also,
+       if you have questions about your own genitalia, have a look
+       at other humans -- we come in many different shapes and
+       sizes.
+    </p>
+    <p>
+       Click on any model to view the 3D version of it or to download
+       the model. We encourage you to find out more <a href="{{ url_for("about") }}">about
+       this project</a> and <a href="{{ url_for("team") }}">our team</a>. Also, please
+       consider making a small <a href="{{ url_for("donate") }}">donation</a> to help
+       cover our operating costs.
+    </p>
   </div>
+
+  <div class="col-6 index-cell text-center">
+    <a class="model-link" href="/view/0003">
+      <img src="/static/bundle/0003/screenshot.jpg" class="screenshot">
+    </a>
+  </div>
+
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-6 index-cell text-center">
+    <a class="model-link" href="/view/0001">
+      <img src="/static/bundle/0001/screenshot.jpg" class="screenshot">
+    </a>
+  </div>
+  <div class="col-6 index-cell text-center">
+    <a class="model-link" href="/view/0004">
+      <img src="/static/bundle/0004/screenshot.jpg" class="screenshot">
+    </a>
+  </div>
+</div>
+
 {% endblock%}
