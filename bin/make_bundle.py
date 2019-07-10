@@ -17,7 +17,7 @@ MANIFEST_FILE = "manifest.json"
 
 FORMAT_VERSION = 1 
 ALLOWED_KEYS = [ "version", "id", "created", "gender", "gender_comment", "country", "age", "body_type", 
-    "mother", "ethnicity", "modification", "comment", "other"]
+    "mother", "ethnicity", "modification", "comment", "other", "released"]
 GENDERS = ["female", "male", "trans-mtf", "trans-ftm", "other"]
 COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS", "BH", "BD", "BB", "BY",
 "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR", "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA",
@@ -34,7 +34,31 @@ COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", 
 "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" ]
 BODY_TYPES = ["thin", "fit", "full", "overweight"]
 MIN_ETHNICITY_LEN = 5
-MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male","male-to-female"]
+MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant"]
+MOTHER = ["no", "natural", "caesarean"]
+
+def validate_date(date, partial=False):
+
+    if partial:
+        try:
+            date_obj = datetime.datetime.strptime(date, '%Y-%m')
+        except ValueError as err:
+            print("Invalid date format. Must be YYYY-MM. (%s)" % err)
+            return False
+
+    else:
+        try:
+            date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+        except ValueError as err:
+            print("Invalid date format. Must be YYYY-MM-DD. (%s)" % err)
+            return False
+
+    if date_obj.year < 2019 or date_obj.year > datetime.datetime.now().year:
+        print("Invalid year.")
+        return False
+
+    return True
+
 
 def validate_manifest(manifest):
     
@@ -43,11 +67,20 @@ def validate_manifest(manifest):
         sys.exit(-1)
 
     if sorted(manifest.keys()) != sorted(ALLOWED_KEYS):
-        print("incorrect top level fields. Got\n%s\n\Allowed:\n%s" % (sorted(manifest.keys), sorted(ALLOWED_KEYS)))
+        print("incorrect top level fields. Got:\n  %s\n" % ",".join(sorted(manifest.keys())))
+        print("Allowed:\n  %s\n" % ",".join(sorted(ALLOWED_KEYS)))
         sys.exit(-1)
 
     if len(manifest['id']) != 4:
         print("Incorrect ID length")
+        sys.exit(-1)
+
+    if not validate_date(manifest['created'], partial=True):
+        print("Incorrect created date. Must be in YYYY-MM format and minimally specify year and month.")
+        sys.exit(-1)
+
+    if not validate_date(manifest['released']):
+        print("Incorrect released date. Must be in YYYY-MM-DD format")
         sys.exit(-1)
 
     try:
@@ -56,25 +89,6 @@ def validate_manifest(manifest):
         print("Incorrect ID format. Must be a 4 digit number.")
         sys.exit(-1)
 
-    year, month = manifest['created'].split('-')
-    if len(year) != 4 and len(month) != 2:
-        print("Created field should be of format YYYY-MM")
-        sys.exit(-1)
-
-    try:
-        year = int(year)
-        month = int(month)
-    except ValueError:
-        print("Cannot parse created field.")
-        sys.exit(-1)
-        
-    if year < 2019 or year > datetime.datetime.now().year:
-        print("Invalid year.")
-        sys.exit(-1)
-
-    if month < 1 or month > 12:
-        print("Invalid month.")
-        sys.exit(-1)
 
     if manifest['gender'] not in GENDERS:
         print("Invalid gender. Must be one of: ", GENDERS)
@@ -102,15 +116,19 @@ def validate_manifest(manifest):
         print("Invalid body type. Must be one of ", BODY_TYPES)
         sys.exit(-1)
 
-    if manifest['mother'] not in ['true', 'false']:
-        print("Invalid body type. Must be true or false.")
+    if manifest['mother'] not in MOTHER:
+        print("Invalid value for the field mother. Must be one of ", MOTHER)
         sys.exit(-1)
 
     if len(manifest['ethnicity']) < MIN_ETHNICITY_LEN:
         print("ethnicity field too short. Must be at least %s characters. " % MIN_ETHNICITY_LEN)
         sys.exit(-1)
 
-    if manifest['modification'] not in MODIFICATIONS:
+    if type(manifest['modification']) != list:
+        print("modification must be a list.")
+        sys.exit(-1)
+
+    if len(manifest['modification']) > 0 and manifest['modification'] not in MODIFICATIONS:
         print("modification must be one of: ", MODIFICATIONS)
         sys.exit(-1)
 
