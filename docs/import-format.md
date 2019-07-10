@@ -31,7 +31,7 @@ folowing keys:
     "country":        "ES",
     "age":            34,
     "body_type":      "thin",
-    "mother":         "false",
+    "mother":         "no",
     "ethnicity":      "of carribean descent",
     "modification":   "none",
     "comment":        "",       
@@ -88,7 +88,9 @@ Allowable values:
 mother
 ------
 
-Is the model a mother? Boolean.
+Is the model a mother? 
+
+`"no", "natural", "caesarean"`
 
 
 comment
