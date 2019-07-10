@@ -1,21 +1,19 @@
 {%- extends 'base.html' -%}
 {%- block content -%}
-  <div class="row" id="info-row">
-      <div id="progress" class="col-6">
-      </div>
-      <div id="info" class="col-6 text-right">
-      {% if manifest.id %}
-         {{ manifest.age }} year old {{ manifest.gender }} with a {{ manifest.body_type }} body from {{ manifest.country }}. 
-      {% endif %}
-      </div>
-  </div>
-
   <div class="row h-100">
     <div class="col-12">
        <div id="stl_div" class="h-100"></div>
     </div>
+    <div class="row" id="info-row">
+        <div id="progress" class="col-6">
+        </div>
+        <div id="info" class="col-6 text-right">
+        {% if manifest.id %}
+           {{ manifest.age }} year old {{ manifest.gender }} with a {{ manifest.body_type }} body from {{ manifest.country }}. 
+        {% endif %}
+        </div>
+    </div>
   </div>
-
 {% endblock%}
 
 {% block scripts %}
@@ -24,6 +22,8 @@
 <script>
 
 var default_color = "#FF6000";
+
+$("body").css("overflow-y", "hidden")
 
 var options =
 { 
@@ -41,6 +41,7 @@ if ("{{ manifest.id }}")
 var viewer=new StlViewer(document.getElementById("stl_div"), options);
 if (!"{{ manifest.id }}")
     viewer.set_drag_and_drop(true);
+
 
 function on_model_loaded(id)
 {

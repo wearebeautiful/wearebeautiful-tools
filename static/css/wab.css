@@ -44,6 +44,15 @@
 #info-row {
     font-size: 18pt;
     color: #BBB;
+    position: absolute;
+    width: 100%;
+    right: 25px;
+    top: 75px;
+    z-index: 2;
+}
+
+.navbar {
+  z-index: 3;
 }
 
 .one {
