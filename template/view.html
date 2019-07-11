@@ -23,6 +23,9 @@
 
 var default_color = "#FF6000";
 
+$("body").css("overflow-y", "hidden");
+$("#top-container").toggleClass("h-100");
+
 var options =
 { 
   load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,

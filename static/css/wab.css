@@ -1,6 +1,4 @@
 body {
-    overflow-y: hidden;
-    overflow-y: hidden;
 }
 
 .team-name {
@@ -29,11 +27,13 @@ body {
 }
 
 .screenshot {
+    width: 90%;
+    object-fit: cover;
     max-width: 500px;
-    max-height: 500px;
 }
 
 .index-cell {
+    padding: 10px;
 }
 
 .txt-cell {
