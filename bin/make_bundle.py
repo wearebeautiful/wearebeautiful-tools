@@ -34,8 +34,8 @@ COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", 
 "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" ]
 BODY_TYPES = ["thin", "fit", "full", "overweight"]
 MIN_ETHNICITY_LEN = 5
-MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant"]
-MOTHER = ["no", "natural", "caesarean"]
+MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant", "episiotomy"]
+MOTHER = ["no", "vaginal", "caesarean"]
 
 def validate_date(date, partial=False):
 
