@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$#" -ne 4 ]; then
+    echo "usage: make_bundle.sh <src dir> <low res len> <med res len> <output dir>"
+    exit
+fi
+
 cd $1
 SRC=`pwd`
 cd -
