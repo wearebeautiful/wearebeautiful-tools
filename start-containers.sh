@@ -3,7 +3,7 @@
 docker run -d \
     --expose 3031 \
     --name wearebeautiful.info-beta \
-    -v /home/website/wearebeautiful.info:/code/wearebeautiful.info\
+    -v wab-bundles:/code/wearebeautiful.info/static/bundle \
     --env "VIRTUAL_HOST=wearebeautiful.info" \
     --env "LETSENCRYPT_HOST=wearebeautiful.info" \
     --env "LETSENCRYPT_EMAIL=mayhem@gmail.com" \
