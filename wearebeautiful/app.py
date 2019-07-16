@@ -8,7 +8,7 @@ import json
 STATIC_PATH = "/static"
 STATIC_FOLDER = "../static"
 TEMPLATE_FOLDER = "../template"
-BUNDLE_FOLDER = "bundle"
+BUNDLE_FOLDER = "../static/bundle"
 
 app = Flask(__name__,
             static_url_path = STATIC_PATH,
@@ -21,6 +21,7 @@ app.config['BASIC_AUTH_USERNAME'] = config.AUTH_USERNAME
 app.config['BASIC_AUTH_PASSWORD'] = config.AUTH_PASSWORD
 basic_auth = BasicAuth(app)
 
+bundles = []
 try: 
     with open(os.path.join(BUNDLE_FOLDER, "bundles.json"), "r") as f:
         bundles = json.loads(f.read())
@@ -31,6 +32,7 @@ except ValueError as err:
 
 app.bundles = {}
 for bundle in bundles:
+    print("Add bundle ", bundle['id'])
     app.bundles[bundle['id']] = bundle
 
 print("read %d bundles." % len(app.bundles))
