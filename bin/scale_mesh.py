@@ -59,5 +59,8 @@ def scale_mesh(in_file, out_file, target_len):
     pymesh.meshio.save_mesh(out_file, mesh);
 
 if __name__ == "__main__":
-    args = parse_args();
-    main();
+    if len(sys.argv) < 4:
+        print("Usage: scale_mesh.py <input file> <output_file> <len>")
+        sys.exit(-1)
+
+    scale_mesh(sys.argv[1], sys.argv[2], float(sys.argv[3]))
