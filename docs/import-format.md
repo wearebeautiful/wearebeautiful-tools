@@ -111,7 +111,7 @@ modification
 
 Indicates modifciation of the model. Accepted values, an array of one or more of the following:
 
-   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant", "episiotomy"
+   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "nursing", "pregnant", "episiotomy"
 
 
 other
