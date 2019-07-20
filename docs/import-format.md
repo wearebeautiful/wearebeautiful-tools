@@ -32,6 +32,8 @@ following keys:
     "country":        "ES",
     "age":            34,
     "body_type":      "thin",
+    "bodypart":       "bust",
+    "pose":           "normal",
     "mother":         "no",
     "ethnicity":      "of carribean descent",
     "modification":   "none",
@@ -83,6 +85,26 @@ ethnicity
 
 This is a free form text field that the model should self declare. There is no existing taxonomy that handles
 this well on a glabal scale. 
+
+
+
+bodypart
+--------
+
+Allowable values:
+
+"body", "bust", "breast "nipple", "vulva", "buttocks", "penis"
+
+
+pose & pose_variant
+-------------------
+
+Allowable values:
+
+"normal", "aroused", "variant"
+
+If a variant is specified, "pose_variant" must be at least 5 characters long.
+
 
 
 body_type

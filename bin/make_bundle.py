@@ -16,8 +16,9 @@ SCREENSHOT_FILE = "screenshot.jpg"
 MANIFEST_FILE = "manifest.json"
 
 FORMAT_VERSION = 1 
-ALLOWED_KEYS = [ "version", "id", "created", "gender", "gender_comment", "country", "age", "body_type", 
-    "mother", "ethnicity", "modification", "comment", "other", "released"]
+REQUIRED_KEYS = [ "version", "id", "created", "gender", "country", "age", "body_type", 
+                  "mother", "ethnicity", "released", "bodypart", "pose"]
+OPTIONAL_KEYS = [ "pose_variant", "gender_comment", "comment", "other", "modification" ]
 GENDERS = ["female", "male", "trans-mtf", "trans-ftm", "other"]
 COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS", "BH", "BD", "BB", "BY",
 "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR", "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA",
@@ -33,9 +34,13 @@ COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", 
 "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "UM", "US", "UY", "UZ", "VU", "VE",
 "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" ]
 BODY_TYPES = ["thin", "fit", "full", "overweight"]
-MIN_ETHNICITY_LEN = 5
+MIN_FREETEXT_FIELD = 5
 MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant", "episiotomy"]
 MOTHER = ["no", "vaginal", "caesarean"]
+BODYPART = [ "body", "bust", "breast", "nipple", "vulva", "buttocks", "penis" ]
+POSE = ["normal", "aroused", "variant"]
+
+
 
 def validate_date(date, partial=False):
 
@@ -66,12 +71,12 @@ def validate_manifest(manifest):
         print("Incorrect format version. This script can only accept version %s" % FORMAT_VERSION)
         sys.exit(-1)
 
-    if sorted(manifest.keys()) != sorted(ALLOWED_KEYS):
-        print("incorrect top level fields. Got:\n  %s\n" % ",".join(sorted(manifest.keys())))
-        print("Allowed:\n  %s\n" % ",".join(sorted(ALLOWED_KEYS)))
+    if manifest.keys() in REQUIRED_KEYS:
+        missing = list(set(REQUIRED_KEYS) - set(manifest.keys()))
+        print("Some top level fields are missing. %s\n" % ",".join(missing))
         sys.exit(-1)
 
-    if len(manifest['id']) != 4:
+    if len(manifest['id']) != 6:
         print("Incorrect ID length")
         sys.exit(-1)
 
@@ -93,6 +98,24 @@ def validate_manifest(manifest):
     if manifest['gender'] not in GENDERS:
         print("Invalid gender. Must be one of: ", GENDERS)
         sys.exit(-1)
+
+    if manifest['bodypart'] not in BODYPART:
+        print("Invalid bodypart. Must be one of: ", BODYPART)
+        sys.exit(-1)
+
+    if manifest['pose'] not in POSE:
+        print("Invalid pose. Must be one of: ", POSE)
+        sys.exit(-1)
+
+    if manifest['pose'] == 'variant':
+        if len(manifest['pose_variant']) < MIN_FREETEXT_FIELD:
+            print("pose_variant field too short. Must be at least %d characters. " % MIN_FREETEXT_FIELD)
+            sys.exit(-1)
+        
+    if manifest['pose'] != 'variant':
+        if 'pose_variant' in manifest:
+            print("pose_variant field must be blank when post not variant.")
+            sys.exit(-1)
         
     if len(manifest['country']) != 2:
         print("Incorrect ID length")
@@ -120,17 +143,18 @@ def validate_manifest(manifest):
         print("Invalid value for the field mother. Must be one of ", MOTHER)
         sys.exit(-1)
 
-    if len(manifest['ethnicity']) < MIN_ETHNICITY_LEN:
-        print("ethnicity field too short. Must be at least %s characters. " % MIN_ETHNICITY_LEN)
+    if len(manifest['ethnicity']) < MIN_FREETEXT_FIELD:
+        print("ethnicity field too short. Must be at least %d characters. " % MIN_FREETEXT_FIELD)
         sys.exit(-1)
 
-    if type(manifest['modification']) != list:
-        print("modification must be a list.")
-        sys.exit(-1)
+    if 'modification' in manifest:
+        if type(manifest['modification']) != list:
+            print("modification must be a list.")
+            sys.exit(-1)
 
-    if len(manifest['modification']) > 0 and manifest['modification'] not in MODIFICATIONS:
-        print("modification must be one of: ", MODIFICATIONS)
-        sys.exit(-1)
+        if len(manifest['modification']) > 0 and manifest['modification'] not in MODIFICATIONS:
+            print("modification must be one of: ", MODIFICATIONS)
+            sys.exit(-1)
 
     return id
 
