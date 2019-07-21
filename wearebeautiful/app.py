@@ -1,7 +1,9 @@
 import os
-from flask import Flask, render_template, flash, url_for
-from flask_basicauth import BasicAuth
+from flask import Flask, render_template, flash, url_for, current_app
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bootstrap import Bootstrap
+from random import uniform
 import config
 import json
 
@@ -17,9 +19,11 @@ app = Flask(__name__,
 app.secret_key = config.SECRET_KEY
 Bootstrap(app)
 
-app.config['BASIC_AUTH_USERNAME'] = config.AUTH_USERNAME
-app.config['BASIC_AUTH_PASSWORD'] = config.AUTH_PASSWORD
-basic_auth = BasicAuth(app)
+auth = HTTPBasicAuth()
+users = {
+    config.SITE_USERNAME :  generate_password_hash(config.SITE_PASSWORD),
+}
+
 
 bundles = []
 try: 
@@ -31,53 +35,82 @@ except ValueError as err:
     print("ERROR: Cannot read bundles.json.", err)
 
 app.bundles = {}
+app.bundle_ids = []
 for bundle in bundles:
     print("Add bundle ", bundle['id'])
     app.bundles[bundle['id']] = bundle
+    app.bundle_ids.append(bundle['id'])
 
 print("read %d bundles." % len(app.bundles))
 
+@auth.verify_password
+def verify_password(username, password):
+    if username in users:
+        return check_password_hash(users.get(username), password)
+    return False
+
 @app.route('/')
-@basic_auth.required
+@auth.login_required
 def index():
     return render_template("index.html")
 
 @app.route('/browse')
-@basic_auth.required
+@auth.login_required
 def browse():
     return render_template("browse.html", bundles = app.bundles)
 
 @app.route('/team')
-@basic_auth.required
+@auth.login_required
 def team():
     return render_template("team.html")
 
 @app.route('/about')
-@basic_auth.required
+@auth.login_required
 def about():
     return render_template("about.html")
 
 @app.route('/view/')
-@basic_auth.required
+@auth.login_required
 def view_root():
     flash('You need to provide a model id to view.')
     return render_template("error.html")
 
 @app.route('/view/<model>')
-@basic_auth.required
+@auth.login_required
 def view(model):
     if model == '-':
         return render_template("view.html", manifest = {'id':''})
 
     return render_template("view.html", manifest = app.bundles[model])
 
-
 @app.route('/company')
-@basic_auth.required
+@auth.login_required
 def company():
     return render_template("company.html")
 
+
 @app.route('/donate')
-@basic_auth.required
+@auth.login_required
 def donate():
     return render_template("donate.html")
+
+
+@app.route('/admin')
+@auth.login_required
+def admin():
+    return render_template("admin/index.html")
+
+
+@app.route('/admin/new')
+@auth.login_required
+def admin_new():
+    while True:
+        new_id = int(uniform(100000, 999999))
+        if new_id not in current_app.bundle_ids:
+            return render_template("admin/new.html", new_id = new_id)
+
+
+@app.route('/admin/upload')
+@auth.login_required
+def admin_upload():
+    return render_template("admin/upload.html")

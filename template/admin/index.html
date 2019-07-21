@@ -1,0 +1,15 @@
+{%- extends 'base.html' -%}
+{%- block content -%}
+<div class="row">
+  <div class="col-12">
+      <p>
+         Admin functions available:
+      </p>
+      <ul>
+         <li><a href="{{ url_for(".admin_new") }}">get a new model id number</a></li>
+         <li><a href="{{ url_for(".admin_upload") }}">upload a new model</a></li>
+      </ul>
+  </div>
+</div>
+
+{% endblock%}
