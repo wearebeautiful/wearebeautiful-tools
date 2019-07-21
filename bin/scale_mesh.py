@@ -3,7 +3,8 @@
 """
 Remesh the input mesh to remove degeneracies and improve triangle quality.
 """
-
+import sys
+import os
 import argparse
 import numpy as np
 from numpy.linalg import norm
@@ -60,7 +61,18 @@ def scale_mesh(in_file, out_file, target_len):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: scale_mesh.py <input file> <output_file> <len>")
+        print("Usage: scale_mesh.py <len> <src dir> <dest dir>")
         sys.exit(-1)
 
-    scale_mesh(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    len = float(sys.argv[1])
+    src_dir = sys.argv[2]
+    dest_dir = sys.argv[3]
+
+    print("=== process files to %.2f..." % len)
+    for filename in os.listdir(src_dir):
+        if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
+            print("%s..." % filename)
+            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, filename), len)
+            print("done with file.")
+
+    print("\ndone with all files.")
