@@ -76,8 +76,8 @@ def validate_manifest(manifest):
         print("Some top level fields are missing. %s\n" % ",".join(missing))
         sys.exit(-1)
 
-    if len(manifest['id']) != 6:
-        print("Incorrect ID length")
+    if len(manifest['id']) != 6 or manifest['id'].isdigit():
+        print("Incorrect ID length or non digits in ID.")
         sys.exit(-1)
 
     if not validate_date(manifest['created'], partial=True):

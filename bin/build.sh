@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t wearebeautiful:mesh .
+docker build -f ../Dockerfile.mesh -t wearebeautiful:mesh ..
