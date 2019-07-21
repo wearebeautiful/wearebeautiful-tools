@@ -15,30 +15,42 @@ import pymesh
 def fix_mesh(mesh, target_len):
     bbox_min, bbox_max = mesh.bbox;
     diag_len = norm(bbox_max - bbox_min);
-    print("Target resolution: {} mm".format(target_len));
 
     count = 0;
+    print("  remove degenerated triangles")
     mesh, __ = pymesh.remove_degenerated_triangles(mesh, 100);
+    print("  split long edges")
     mesh, __ = pymesh.split_long_edges(mesh, target_len);
     num_vertices = mesh.num_vertices;
     while True:
+        print("  pass %d" % count)
+        print("    collapse short edges #1")
         mesh, __ = pymesh.collapse_short_edges(mesh, 1e-6);
+        print("    collapse short edges #2")
         mesh, __ = pymesh.collapse_short_edges(mesh, target_len,
                 preserve_feature=True);
+        print("    remove obtuse triangles")
         mesh, __ = pymesh.remove_obtuse_triangles(mesh, 150.0, 100);
         if mesh.num_vertices == num_vertices:
             break;
 
+        print("  %d of %s vertices." % (num_vertices, mesh.num_vertices))
+
         num_vertices = mesh.num_vertices;
-        print("#v: {}".format(num_vertices));
         count += 1;
         if count > 10: break;
 
+    print("  resolve self intersection")
     mesh = pymesh.resolve_self_intersection(mesh);
+    print("  remove duplicated faces")
     mesh, __ = pymesh.remove_duplicated_faces(mesh);
+    print("  computer outer hull")
     mesh = pymesh.compute_outer_hull(mesh);
+    print("  remove duplicated faces")
     mesh, __ = pymesh.remove_duplicated_faces(mesh);
+    print("  remove obtuse triangles")
     mesh, __ = pymesh.remove_obtuse_triangles(mesh, 179.0, 5);
+    print("  remove isolated vertices")
     mesh, __ = pymesh.remove_isolated_vertices(mesh);
 
     return mesh;
@@ -69,12 +81,11 @@ if __name__ == "__main__":
     src_dir = sys.argv[2]
     dest_dir = sys.argv[3]
 
-    print("=== process files to %.2f..." % len)
     for filename in os.listdir(src_dir):
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
-            print("%s..." % filename)
+            print("%s -> %.2f" % (filename, len))
             t0 = time()
             scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, filename), len)
-            print("done with file. %d seconds elapsed." % (time() - t0))
+            print("  done with file. %d seconds elapsed.\n" % (time() - t0))
 
     print("\ndone with all files.")
