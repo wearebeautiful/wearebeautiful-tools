@@ -1,3 +1,6 @@
-input
-output
-wearebeautiful/static/models
+static/models/*
+static/bundle/*
+bin/models
+bin/bundles
+.ve
+.git

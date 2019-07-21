@@ -34,7 +34,7 @@ COUNTRIES = [ "AF", "AL", "DZ", "Sa", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", 
 "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "UM", "US", "UY", "UZ", "VU", "VE",
 "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" ]
 BODY_TYPES = ["thin", "fit", "full", "overweight"]
-MIN_FREETEXT_FIELD = 5
+MIN_FREETEXT_FIELD_LEN = 5
 MODIFICATIONS = ["none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "breastfeeding", "pregnant", "episiotomy"]
 MOTHER = ["no", "vaginal", "caesarean"]
 BODYPART = [ "body", "bust", "breast", "nipple", "vulva", "buttocks", "penis" ]

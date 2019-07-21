@@ -15,4 +15,4 @@ LEN=$1
 echo "target len: $LEN"
 
 docker rm -f mesh 
-docker run -it --name mesh -v $SRC_DIR:/code/src -v $DEST_DIR:/code/dest wearebeautiful:mesh /code/scale_mesh.py $LEN /code/src /code/dest
+docker run -it --name mesh -v $SRC_DIR:/src -v $DEST_DIR:/dest wearebeautiful:mesh /code/wearebeautiful/bin/scale_mesh.py $LEN /src /dest

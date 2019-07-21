@@ -4,6 +4,8 @@ import os
 import sys
 import json
 import zipfile
+import datetime
+from wearebeautiful import model_params as param
 
 
 def read_bundle(bundles, bundle_file):
@@ -68,7 +70,7 @@ def validate_manifest(manifest):
         print("Some top level fields are missing. %s\n" % ",".join(missing))
         sys.exit(-1)
 
-    if len(manifest['id']) != 6 or manifest['id'].isdigit():
+    if len(manifest['id']) != 6 or not manifest['id'].isdigit():
         print("Incorrect ID length or non digits in ID.")
         sys.exit(-1)
 
