@@ -5,6 +5,7 @@ Remesh the input mesh to remove degeneracies and improve triangle quality.
 """
 import sys
 import os
+from time import time
 import argparse
 import numpy as np
 from numpy.linalg import norm
@@ -72,7 +73,8 @@ if __name__ == "__main__":
     for filename in os.listdir(src_dir):
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
             print("%s..." % filename)
+            t0 = time()
             scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, filename), len)
-            print("done with file.")
+            print("done with file. %d seconds elapsed." % (time() - t0))
 
     print("\ndone with all files.")
