@@ -17,5 +17,4 @@ echo "dest $DEST"
 
 mkdir -p $DEST
 docker rm -f mesh 
-docker build -f Dockerfile.mesh -t wearebeautiful:mesh .
 docker run -it --name mesh -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/wearebeautiful/bin/make_bundle.py $LRES $MRES
