@@ -63,4 +63,7 @@ if __name__ == "__main__":
         print("Usage: scale_mesh.py <input file> <output_file> <len>")
         sys.exit(-1)
 
-    scale_mesh(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    try:
+        scale_mesh(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    except Exception as err:
+        print("Error scaling mesh: ", err)
