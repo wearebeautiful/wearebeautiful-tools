@@ -31,10 +31,10 @@ def fix_mesh(mesh, target_len):
                 preserve_feature=True);
         print("    remove obtuse triangles")
         mesh, __ = pymesh.remove_obtuse_triangles(mesh, 150.0, 100);
+        print("    %d of %s vertices." % (num_vertices, mesh.num_vertices))
+
         if mesh.num_vertices == num_vertices:
             break;
-
-        print("  %d of %s vertices." % (num_vertices, mesh.num_vertices))
 
         num_vertices = mesh.num_vertices;
         count += 1;
