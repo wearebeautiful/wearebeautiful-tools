@@ -3,7 +3,7 @@
 """
 Remesh the input mesh to remove degeneracies and improve triangle quality.
 """
-
+import sys
 import argparse
 import numpy as np
 from numpy.linalg import norm
