@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, flash, url_for, current_app
+from flask import Flask, render_template, flash, url_for, current_app, redirect
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bootstrap import Bootstrap
@@ -110,7 +110,12 @@ def admin_new():
             return render_template("admin/new.html", new_id = new_id)
 
 
-@app.route('/admin/upload')
+@app.route('/admin/upload', methods=['GET'])
 @auth.login_required
-def admin_upload():
+def admin_upload_get():
     return render_template("admin/upload.html")
+
+@app.route('/admin/upload', methods=['POST'])
+@auth.login_required
+def admin_upload_post():
+    return ""
