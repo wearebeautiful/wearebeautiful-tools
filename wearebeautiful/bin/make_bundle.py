@@ -26,9 +26,12 @@ def main(lresolution, mresolution):
 
     try:
         with open(os.path.join("/src", manifest), "rb") as m:
-            jmanifest = json.loads(m.read())
+            j = m.read()
+            jmanifest = json.loads(j)
     except json.decoder.JSONDecodeError as err:
         print("Cannot parse manifest file. ", err)
+        print("This was the content that was read:")
+        print("%s\n" % j) 
         sys.exit(-1)
     except IOError as err:
         print("Cannot read manifest file. IO error.", err)
