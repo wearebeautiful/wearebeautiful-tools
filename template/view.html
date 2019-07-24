@@ -18,7 +18,7 @@
 
 {% block scripts %}
 {{ bootstrap.load_js() }}
-<script src="{{url_for('.static', filename='js/stl_viewer/stl_viewer.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/stl_viewer/stl_viewer.min.js')}}"></script>
 <script>
 
 var default_color = "#FF6000";
@@ -28,7 +28,7 @@ $("#top-container").toggleClass("h-100");
 
 var options =
 { 
-  load_three_files : '{{url_for('.static', filename='js/stl_viewer/')}}' ,
+  load_three_files : '{{url_for('static', filename='js/stl_viewer/')}}' ,
   model_loaded_callback : on_model_loaded,
   all_loaded_callback : on_all_loaded,
   loading_progress_callback : load_progress,
