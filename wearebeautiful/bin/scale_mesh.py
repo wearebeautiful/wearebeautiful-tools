@@ -83,6 +83,9 @@ if __name__ == "__main__":
 
     for filename in os.listdir(src_dir):
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
+            if filename.lower().endswith(".obj"):
+                filename = os.path.splitext(filename)[0] + ".stl"
+
             print("%s -> %.2f" % (filename, len))
             t0 = time()
             scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, filename), len)
