@@ -21,7 +21,7 @@
 
 {% block scripts %}
 {{ bootstrap.load_js() }}
-<script src="{{url_for('.static', filename='js/simple-upload-1.1.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/simple-upload-1.1.min.js')}}"></script>
 <script>
 
 $('input[type=file]').change(function()
