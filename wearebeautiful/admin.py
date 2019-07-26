@@ -7,7 +7,7 @@ import config
 import json
 from io import StringIO
 from wearebeautiful.auth import _auth as auth
-from wearebeautiful.bundles import import_bundle
+from wearebeautiful.bundles import create_bundle_index, load_bundle_data_into_redis, import_bundle
 
 bp = Blueprint('admin', __name__)
 
@@ -59,5 +59,8 @@ def admin_upload_post():
         filename.close()
     except Exception:
         pass
+
+    create_bundle_index()
+    load_bundle_data_into_redis(current_app)
 
     return ""

@@ -39,7 +39,7 @@ def main(lresolution, mresolution):
 
     err = validate_manifest(jmanifest)
     if err:
-        print("err)
+        print(err)
         sys.exit(-1)
 
     id = jmanifest['id']
@@ -79,7 +79,7 @@ def main(lresolution, mresolution):
         print("Cannot copy files. Error: ", err)
         sys.exit(-1)
 
-    dest = os.path.join("/dest", "%06d-%s-%s-bundle.zip" % (id, jmanifest['bodypart'], jmanifest['pose']))
+    dest = os.path.join("/dest", "%s-%s-%s-bundle.zip" % (id, jmanifest['bodypart'], jmanifest['pose']))
     with ZipFile(dest, 'w') as zip:
         zip.write(manifest, arcname="manifest.json")
         zip.write(low_res, arcname="surface-low.obj")

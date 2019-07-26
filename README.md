@@ -9,6 +9,7 @@ virtualenv -p python3 .ve
 source .ve/bin/activate
 pip3 install -r requirements.txt
 
+docker run --name wab-redis -p 6379:6379 -d redis
 export FLASK_APP=wearebeautiful/app.py
 export FLAK_ENV=development
 export FLASK_DEBUG=1

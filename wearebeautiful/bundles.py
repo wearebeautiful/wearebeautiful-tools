@@ -6,77 +6,81 @@ import json
 import zipfile
 import datetime
 import shutil
-import config
 from wearebeautiful import model_params as param
 
-bundle_dir = config.BUNDLE_DIR
+bundles_json_file = "bundles.json"
 
-def bundle_setup():
+def bundle_setup(bundle_dir_arg):
     ''' Make the bundle dir, in case it doesn't exist '''
+
+    global bundle_dir
+    bundle_dir = bundle_dir_arg
     try:
         os.makedirs(bundle_dir)
     except FileExistsError:
         pass
 
 
-def read_bundle_index():
-    ''' Read the bundles '''
+def create_bundle_index():
+    ''' Iterate the bundles directory and read the manifest files '''
+
     bundles = []
-    bundle_ids = []
+    for path in os.listdir(bundle_dir):
+        if path.isdigit() and len(path) == 6:
+            with open(os.path.join(bundle_dir, path, "manifest.json"), "r") as f:
+                manifest = json.loads(f.read())
+                bundles.append(manifest)
+
+    with open(os.path.join(bundle_dir, bundles_json_file), "w") as out:
+        out.write(json.dumps(bundles))
+
+    return bundles
+
+
+def load_bundle_data_into_redis(app):
+    ''' Read the bundles.json file and load into ram '''
+
+    redis = app.redis
+    bundles = []
     try: 
-        with open(os.path.join(bundle_dir, "bundles.json"), "r") as f:
+        with open(os.path.join(bundle_dir, bundles_json_file), "r") as f:
             bundles = json.loads(f.read())
     except IOError as err:
         print("ERROR: Cannot read bundles.json.", err)
     except ValueError as err:
         print("ERROR: Cannot read bundles.json.", err)
 
-    return bundles
-    return bundles, bundle_ids
+    # Clean up old redis keys 
+    for k in redis.scan_iter("m:*"):
+        redis.delete(k)
+    redis.delete("b:ids")
+
+    # Now add new redis keys
+    ids = []
+    for bundle in bundles:
+        redis.set("m:%s" % bundle['id'], json.dumps(bundle))
+        ids.append(bundle['id'])
+
+    redis.set("b:ids", json.dumps(ids))
+
+    return len(ids)
 
 
-def read_bundle(bundles, bundle_file):
-    try:
-        with zipfile.ZipFile(bundle_file) as z:
-            manifest_raw = z.read("manifest.json")
-    except KeyError:
-        print("Cannot read manifest from %s." % bundle_file)
-        return
-
-    manifest = json.loads(manifest_raw) 
-    bundles.append(manifest)
+def get_bundle_id_list(redis):
+    """ Get the list of current ids """
+    bundles = redis.get("b:ids") or ""
+    return json.loads(bundles)
 
 
-def parse_bundles():
-    bundles = []
-
-    for f in os.listdir(bundle_dir):
-        if f.endswith(".zip"):
-            read_bundle(bundles, os.path.join(bundle_dir, f))
-
-    return bundles
-
-
-def create_bundle_index(bundle_file):
-    bundles = parse_bundles(bundle_dir)
-    with open(bundle_file, "w") as out:
-        out.write(json.dumps(bundles))
-
-
-def read_bundle_index():
-    bundles = {}
-    bundle_ids = []
-    for bundle in read_bundles():
-        print("Add bundle ", bundle['id'])
-        bundles[bundle['id']] = bundle
-        bundle_ids.append(bundle['id'])
-
+def get_bundle(redis, id):
+    """ Get the manifest of the given bundle """
+    manifest = redis.get("m:%s" % id)
+    return json.loads(manifest)
 
 
 def import_bundle(bundle_file):
     """ unzip and read bundle file """
 
-    print("Check files")
     allowed_files = ['manifest.json', 'surface-low.obj', 'surface-medium.obj', 'solid.obj', 'surface-orig.obj', 'screenshot.jpg']
     try:
         zipf = zipfile.ZipFile(bundle_file)
@@ -87,7 +91,6 @@ def import_bundle(bundle_file):
     if allowed_files != files:
         return "Incorrect files in the bundle."
 
-    print("read and verify manifest")
     try:
         rmanifest = zipf.read("manifest.json")
     except IOError:
@@ -121,7 +124,7 @@ def import_bundle(bundle_file):
     try:
         for member in allowed_files:
             print(os.path.join(dest_dir, member))
-            zipf.extract(member, os.path.join(dest_dir, member))
+            zipf.extract(member, dest_dir)
     except IOError as err:
         print("IO error: ", err)
         return err
