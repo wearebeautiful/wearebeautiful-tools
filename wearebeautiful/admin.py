@@ -7,7 +7,7 @@ import config
 import json
 from io import StringIO
 from wearebeautiful.auth import _auth as auth
-#from wearebeautiful.bundle import sanity_check_bundle
+from wearebeautiful.bundles import import_bundle
 
 bp = Blueprint('admin', __name__)
 
@@ -35,9 +35,6 @@ def admin_upload_get():
 @bp.route('/upload', methods=['POST'])
 @auth.login_required
 def admin_upload_post():
-
-    allowed_files = ['manifest.json', 'surface-low.obj', 'surface-medium.obj', 'solid.obj', 'surface-orig.obj', 'screenshot.jpg']
-
     if 'file' not in request.files:
         raise BadRequest("Request is missing file part.")
 
@@ -53,17 +50,13 @@ def admin_upload_post():
                 pass
         raise InternalServerError("Cannot save bundle to disk: ", err)
 
+    err = import_bundle(filename.name)
+    if err:
+        print(err)
+        raise BadRequest(err)
+        
     try:
-        zipf = zipfile.ZipFile(filename.name)
-    except zipfile.BadZipFile:
-        raise BadRequest("Invalid zip file.")
-
-    files = zipf.namelist()
-    if allowed_files != files:
-        raise BadRequest("Incorrect files in the bundle.")
-
-    try:
-        os.unlink(filename.name)
+        filename.close()
     except Exception:
         pass
 

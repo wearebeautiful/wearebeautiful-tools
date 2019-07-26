@@ -37,7 +37,12 @@ def main(lresolution, mresolution):
         print("Cannot read manifest file. IO error.", err)
         sys.exit(-1)
 
-    id = validate_manifest(jmanifest)
+    err = validate_manifest(jmanifest)
+    if err:
+        print("err)
+        sys.exit(-1)
+
+    id = jmanifest['id']
 
     tmp_dir = mkdtemp()
     low_res = os.path.join(tmp_dir, "surface-low.obj")

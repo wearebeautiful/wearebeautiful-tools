@@ -14,7 +14,6 @@ def init_auth():
 
     @_auth.verify_password
     def verify_password(username, password):
-        print("verify passed")
         if username in users:
             return check_password_hash(users.get(username), password)
         return False

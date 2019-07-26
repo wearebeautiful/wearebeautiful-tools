@@ -7,12 +7,12 @@ from random import uniform
 import config
 import json
 from wearebeautiful.auth import init_auth
+from wearebeautiful.bundles import bundle_setup, read_bundle_index
 
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "../static"
 TEMPLATE_FOLDER = "../template"
-BUNDLE_FOLDER = "../static/bundle"
 
 auth = init_auth()
 
@@ -26,25 +26,9 @@ Bootstrap(app)
 
 from wearebeautiful.views import bp as index_bp
 from wearebeautiful.admin import bp as admin_bp
-
 app.register_blueprint(index_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin')
 
-
-bundles = []
-try: 
-    with open(os.path.join(BUNDLE_FOLDER, "bundles.json"), "r") as f:
-        bundles = json.loads(f.read())
-except IOError as err:
-    print("ERROR: Cannot read bundles.json.", err)
-except ValueError as err:
-    print("ERROR: Cannot read bundles.json.", err)
-
-app.bundles = {}
-app.bundle_ids = []
-for bundle in bundles:
-    print("Add bundle ", bundle['id'])
-    app.bundles[bundle['id']] = bundle
-    app.bundle_ids.append(bundle['id'])
-
+bundle_setup()
+app.bundles, app.bundle_ids = read_bundle_index()
 print("read %d bundles." % len(app.bundles))

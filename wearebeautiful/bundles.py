@@ -5,7 +5,34 @@ import sys
 import json
 import zipfile
 import datetime
+import shutil
+import config
 from wearebeautiful import model_params as param
+
+bundle_dir = config.BUNDLE_DIR
+
+def bundle_setup():
+    ''' Make the bundle dir, in case it doesn't exist '''
+    try:
+        os.makedirs(bundle_dir)
+    except FileExistsError:
+        pass
+
+
+def read_bundle_index():
+    ''' Read the bundles '''
+    bundles = []
+    bundle_ids = []
+    try: 
+        with open(os.path.join(bundle_dir, "bundles.json"), "r") as f:
+            bundles = json.loads(f.read())
+    except IOError as err:
+        print("ERROR: Cannot read bundles.json.", err)
+    except ValueError as err:
+        print("ERROR: Cannot read bundles.json.", err)
+
+    return bundles
+    return bundles, bundle_ids
 
 
 def read_bundle(bundles, bundle_file):
@@ -20,7 +47,7 @@ def read_bundle(bundles, bundle_file):
     bundles.append(manifest)
 
 
-def parse_bundles(bundle_dir):
+def parse_bundles():
     bundles = []
 
     for f in os.listdir(bundle_dir):
@@ -30,10 +57,78 @@ def parse_bundles(bundle_dir):
     return bundles
 
 
-def create_bundle_index(bundle_dir, bundle_file):
+def create_bundle_index(bundle_file):
     bundles = parse_bundles(bundle_dir)
     with open(bundle_file, "w") as out:
         out.write(json.dumps(bundles))
+
+
+def read_bundle_index():
+    bundles = {}
+    bundle_ids = []
+    for bundle in read_bundles():
+        print("Add bundle ", bundle['id'])
+        bundles[bundle['id']] = bundle
+        bundle_ids.append(bundle['id'])
+
+
+
+def import_bundle(bundle_file):
+    """ unzip and read bundle file """
+
+    print("Check files")
+    allowed_files = ['manifest.json', 'surface-low.obj', 'surface-medium.obj', 'solid.obj', 'surface-orig.obj', 'screenshot.jpg']
+    try:
+        zipf = zipfile.ZipFile(bundle_file)
+    except zipfile.BadZipFile:
+        return "Invalid zip file."
+
+    files = zipf.namelist()
+    if allowed_files != files:
+        return "Incorrect files in the bundle."
+
+    print("read and verify manifest")
+    try:
+        rmanifest = zipf.read("manifest.json")
+    except IOError:
+        return "Cannot read manifest.json"
+
+    try:
+        manifest = json.loads(rmanifest)
+    except json.decoder.JSONDecodeError as err:
+        return err
+
+    err = validate_manifest(manifest)
+    if err:
+        return err
+
+    # The bundle looks ok, copy it into place
+    dest_dir = os.path.join(bundle_dir, manifest['id'])
+
+    print("create bundle dir", dest_dir)
+    while True:
+        try:
+            os.mkdir(dest_dir)
+            break
+        except FileExistsError:
+            try:
+                shutil.rmtree(dest_dir)
+            except IOError as err:
+                print("Failed to erase old bundle.", err)
+                return err
+
+    print("copy files")
+    try:
+        for member in allowed_files:
+            print(os.path.join(dest_dir, member))
+            zipf.extract(member, os.path.join(dest_dir, member))
+    except IOError as err:
+        print("IO error: ", err)
+        return err
+
+    print("done import bundle")
+
+    return ""
 
 
 def validate_date(date, partial=False):
@@ -62,93 +157,72 @@ def validate_date(date, partial=False):
 def validate_manifest(manifest):
     
     if manifest['version'] != param.FORMAT_VERSION:
-        print("Incorrect format version. This script can only accept version %s" % param.FORMAT_VERSION)
-        sys.exit(-1)
+        return "Incorrect format version. This script can only accept version %s" % param.FORMAT_VERSION
 
     if manifest.keys() in param.REQUIRED_KEYS:
         missing = list(set(param.REQUIRED_KEYS) - set(manifest.keys()))
-        print("Some top level fields are missing. %s\n" % ",".join(missing))
-        sys.exit(-1)
+        return "Some top level fields are missing. %s\n" % ",".join(missing)
 
     if len(manifest['id']) != 6 or not manifest['id'].isdigit():
-        print("Incorrect ID length or non digits in ID.")
-        sys.exit(-1)
+        return "Incorrect ID length or non digits in ID."
 
     if not validate_date(manifest['created'], partial=True):
-        print("Incorrect created date. Must be in YYYY-MM format and minimally specify year and month.")
-        sys.exit(-1)
+        return "Incorrect created date. Must be in YYYY-MM format and minimally specify year and month."
 
     if not validate_date(manifest['released']):
-        print("Incorrect released date. Must be in YYYY-MM-DD format")
-        sys.exit(-1)
+        return "Incorrect released date. Must be in YYYY-MM-DD format"
 
     try:
         id = int(manifest['id'])
     except ValueError:
-        print("Incorrect ID format. Must be a 4 digit number.")
-        sys.exit(-1)
+        return "Incorrect ID format. Must be a 4 digit number."
 
 
     if manifest['gender'] not in param.GENDERS:
-        print("Invalid gender. Must be one of: ", param.GENDERS)
-        sys.exit(-1)
+        return "Invalid gender. Must be one of: ", param.GENDERS
 
     if manifest['bodypart'] not in param.BODYPART:
-        print("Invalid bodypart. Must be one of: ", param.BODYPART)
-        sys.exit(-1)
+        return "Invalid bodypart. Must be one of: ", param.BODYPART
 
     if manifest['pose'] not in param.POSE:
-        print("Invalid pose. Must be one of: ", param.POSE)
-        sys.exit(-1)
+        return "Invalid pose. Must be one of: ", param.POSE
 
     if manifest['pose'] == 'variant':
         if len(manifest['pose_variant']) < param.MIN_FREETEXT_FIELD_LEN:
-            print("pose_variant field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN)
-            sys.exit(-1)
+            return "pose_variant field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN
         
     if manifest['pose'] != 'variant':
         if 'pose_variant' in manifest:
-            print("pose_variant field must be blank when post not variant.")
-            sys.exit(-1)
+            return "pose_variant field must be blank when post not variant."
         
     if len(manifest['country']) != 2:
-        print("Incorrect ID length")
-        sys.exit(-1)
+        return "Incorrect ID length"
 
     if manifest['country'] not in param.COUNTRIES:
-        print("Invalid country. Must be one of ", param.COUNTRIES)
-        sys.exit(-1)
+        return "Invalid country. Must be one of ", param.COUNTRIES
 
     try:
         age = int(manifest['age'])
     except ValueError:
-        print("Cannot parse age.")
-        sys.exit(-1)
+        return "Cannot parse age."
         
     if age < 18 or age > 200:
-        print("Invalid age. Must be 18-200")
-        sys.exit(-1)
+        return "Invalid age. Must be 18-200"
 
     if manifest['body_type'] not in param.BODY_TYPES:
-        print("Invalid body type. Must be one of ", param.BODY_TYPES)
-        sys.exit(-1)
+        return "Invalid body type. Must be one of ", param.BODY_TYPES
 
     if manifest['mother'] not in param.MOTHER:
-        print("Invalid value for the field mother. Must be one of ", param.MOTHER)
-        sys.exit(-1)
+        return "Invalid value for the field mother. Must be one of ", param.MOTHER
 
     if len(manifest['ethnicity']) < param.MIN_FREETEXT_FIELD_LEN:
-        print("ethnicity field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN)
-        sys.exit(-1)
+        return "ethnicity field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN
 
     if 'modification' in manifest:
         if type(manifest['modification']) != list:
-            print("modification must be a list.")
-            sys.exit(-1)
+            return "modification must be a list."
 
         if len(manifest['modification']) > 0 and manifest['modification'] not in param.MODIFICATIONS:
-            print("modification must be one of: ", param.MODIFICATIONS)
-            sys.exit(-1)
+            return "modification must be one of: ", param.MODIFICATIONS
 
-    return id
-
+    return ""
