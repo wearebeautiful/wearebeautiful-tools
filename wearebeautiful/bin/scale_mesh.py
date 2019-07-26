@@ -84,11 +84,13 @@ if __name__ == "__main__":
     for filename in os.listdir(src_dir):
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
             if filename.lower().endswith(".obj"):
-                filename = os.path.splitext(filename)[0] + ".stl"
+                dest_filename = os.path.splitext(filename)[0] + ".stl"
+            else:
+                dest_filename = filename
 
-            print("%s -> %.2f" % (filename, len))
+            print("%s -> %.2f" % (dest_filename, len))
             t0 = time()
-            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, filename), len)
+            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename), len)
             print("  done with file. %d seconds elapsed.\n" % (time() - t0))
 
     print("\ndone with all files.")
