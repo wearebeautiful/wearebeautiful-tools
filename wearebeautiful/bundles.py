@@ -106,7 +106,7 @@ def import_bundle(bundle_file):
         return err
 
     # The bundle looks ok, copy it into place
-    dest_dir = os.path.join(bundle_dir, manifest['id'])
+    dest_dir = os.path.join(bundle_dir, "%s-%s-%s" % (manifest['id'], manifest['bodypart'], manifest['pose'])
 
     print("create bundle dir", dest_dir)
     while True:
