@@ -43,7 +43,8 @@ def view(model):
     if model == '-':
         return render_template("view.html", manifest = {'id':''})
 
-    bundle = get_bundle(current_app.redis, model)
+    id, bodypart, pose = model.split("-")
+    bundle = get_bundle(current_app.redis, id, bodypart, pose)
     if not bundle:
         raise NotFound("Model %s not found." % model)
 

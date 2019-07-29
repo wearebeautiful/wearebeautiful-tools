@@ -26,7 +26,7 @@ def create_bundle_index():
 
     bundles = []
     for path in os.listdir(bundle_dir):
-        if path.isdigit() and len(path) == 6:
+        if path[0:6].isdigit() and path[6] == '-':
             with open(os.path.join(bundle_dir, path, "manifest.json"), "r") as f:
                 manifest = json.loads(f.read())
                 bundles.append(manifest)
@@ -58,10 +58,11 @@ def load_bundle_data_into_redis(app):
     # Now add new redis keys
     ids = []
     for bundle in bundles:
-        redis.set("m:%s" % bundle['id'], json.dumps(bundle))
-        ids.append(bundle['id'])
+        redis.set("m:%s:%s:%s" % (bundle['id'], bundle['bodypart'], bundle['pose']), json.dumps(bundle))
+        ids.append({ 'id' : bundle['id'], 'bodypart' : bundle['bodypart'], 'pose' : bundle['pose'] })
 
     redis.set("b:ids", json.dumps(ids))
+    print(json.dumps(ids))
 
     return len(ids)
 
@@ -72,9 +73,9 @@ def get_bundle_id_list(redis):
     return json.loads(bundles)
 
 
-def get_bundle(redis, id):
+def get_bundle(redis, id, bodypart, pose):
     """ Get the manifest of the given bundle """
-    manifest = redis.get("m:%s" % id)
+    manifest = redis.get("m:%s:%s:%s" % (id, bodypart, pose))
     return json.loads(manifest)
 
 
@@ -106,7 +107,7 @@ def import_bundle(bundle_file):
         return err
 
     # The bundle looks ok, copy it into place
-    dest_dir = os.path.join(bundle_dir, "%s-%s-%s" % (manifest['id'], manifest['bodypart'], manifest['pose'])
+    dest_dir = os.path.join(bundle_dir, "%s-%s-%s" % (manifest['id'], manifest['bodypart'], manifest['pose']))
 
     print("create bundle dir", dest_dir)
     while True:

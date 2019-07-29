@@ -1,1 +1,6 @@
+BUNDLE_DIR="/Users/robert/wearebeautiful.info/static/bundle"
 SECRET_KEY = "add your key here"
+SITE_USERNAME="wab"
+SITE_PASSWORD="eternal"
+REDIS_HOST="localhost"
+REDIS_PORT=6379
