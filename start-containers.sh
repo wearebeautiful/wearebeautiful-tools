@@ -1,5 +1,9 @@
 #!/bin/bash
 
+docker run \
+    --name wab-redis \
+    --network=website-network \
+    -d redis
 docker run -d \
     --expose 3031 \
     --name wearebeautiful.info-beta \
