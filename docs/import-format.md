@@ -93,7 +93,7 @@ bodypart
 
 Allowable values:
 
-"body", "bust", "breast "nipple", "vulva", "buttocks", "penis"
+"body", "bust", "breast", "nipple", "vulva", "buttocks", "penis"
 
 
 pose & pose_variant
