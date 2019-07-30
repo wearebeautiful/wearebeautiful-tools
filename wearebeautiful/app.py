@@ -34,3 +34,7 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 bundle_setup(config.BUNDLE_DIR)
 num = load_bundle_data_into_redis(app)
 print("read %d bundles." % num)
+
+@app.errorhandler(404)
+def page_not_found(message):
+    return render_template('errors/404.html', message=message), 404

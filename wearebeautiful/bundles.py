@@ -44,7 +44,7 @@ def load_bundle_data_into_redis(app):
     bundles = []
     try: 
         with open(os.path.join(bundle_dir, bundles_json_file), "r") as f:
-            bundles = json.loads(f.read())
+            loaded_bundles = json.loads(f.read())
     except IOError as err:
         print("ERROR: Cannot read bundles.json.", err)
     except ValueError as err:
@@ -53,24 +53,36 @@ def load_bundle_data_into_redis(app):
     # Clean up old redis keys 
     for k in redis.scan_iter("m:*"):
         redis.delete(k)
-    redis.delete("b:ids")
+    redis.delete("m:ids")
+    redis.delete("b:index")
 
     # Now add new redis keys
-    ids = []
-    for bundle in bundles:
+    bundles = []
+    ids = {}
+    for bundle in loaded_bundles:
         redis.set("m:%s:%s:%s" % (bundle['id'], bundle['bodypart'], bundle['pose']), json.dumps(bundle))
-        ids.append({ 'id' : bundle['id'], 'bodypart' : bundle['bodypart'], 'pose' : bundle['pose'] })
+        data = { 'id' : bundle['id'], 'bodypart' : bundle['bodypart'], 'pose' : bundle['pose'] }
+        bundles.append(data)
+        if not bundle['id'] in ids:
+            ids[bundle['id']] = []
+        ids[bundle['id']].append(data)
 
-    redis.set("b:ids", json.dumps(ids))
-    print(json.dumps(ids))
+    redis.set("b:index", json.dumps(bundles))
+    redis.set("m:ids", json.dumps(ids))
 
-    return len(ids)
+    return len(bundles)
 
 
 def get_bundle_id_list(redis):
     """ Get the list of current ids """
-    bundles = redis.get("b:ids") or ""
+    bundles = redis.get("b:index") or "[]"
     return json.loads(bundles)
+
+
+def get_model_id_list(redis):
+    """ Get the list of model ids """
+    ids = redis.get("m:ids") or "{}"
+    return json.loads(ids)
 
 
 def get_bundle(redis, id, bodypart, pose):
@@ -109,7 +121,6 @@ def import_bundle(bundle_file):
     # The bundle looks ok, copy it into place
     dest_dir = os.path.join(bundle_dir, "%s-%s-%s" % (manifest['id'], manifest['bodypart'], manifest['pose']))
 
-    print("create bundle dir", dest_dir)
     while True:
         try:
             os.mkdir(dest_dir)
@@ -121,7 +132,6 @@ def import_bundle(bundle_file):
                 print("Failed to erase old bundle.", err)
                 return err
 
-    print("copy files")
     try:
         for member in allowed_files:
             print(os.path.join(dest_dir, member))
@@ -129,8 +139,6 @@ def import_bundle(bundle_file):
     except IOError as err:
         print("IO error: ", err)
         return err
-
-    print("done import bundle")
 
     return ""
 
@@ -192,6 +200,9 @@ def validate_manifest(manifest):
         return "Invalid pose. Must be one of: ", param.POSE
 
     if manifest['pose'] == 'variant':
+        if 'pose_variant' not in manifest:
+            return "pose_variant field required for variant poses."
+
         if len(manifest['pose_variant']) < param.MIN_FREETEXT_FIELD_LEN:
             return "pose_variant field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN
         
