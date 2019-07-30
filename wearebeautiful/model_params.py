@@ -1,5 +1,5 @@
-PRINT_FILE = "solid.obj"
-SURFACE_FILE = "surface.obj"
+PRINT_FILE = "solid.stl"
+SURFACE_FILE = "surface.stl"
 SCREENSHOT_FILE = "screenshot.jpg"
 MANIFEST_FILE = "manifest.json"
 

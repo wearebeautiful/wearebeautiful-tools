@@ -45,24 +45,16 @@ def main(lresolution, mresolution):
     id = jmanifest['id']
 
     tmp_dir = mkdtemp()
-    low_res = os.path.join(tmp_dir, "surface-low.obj")
-    medium_res = os.path.join(tmp_dir, "surface-medium.obj")
+    low_res = os.path.join(tmp_dir, "surface-low.stl")
+    medium_res = os.path.join(tmp_dir, "surface-medium.stl")
 
     if not os.path.exists(solid):
-        solid = os.path.splitext(os.path.basename(solid))[0] + ".stl"
-        solid = os.path.join("/src", solid)
-        print("Could not find solid.obj, trying %s" % solid)
-        if not os.path.exists(solid):
-            print("Cannot find solid.obj or solid.stl");
-            sys.exit(-1)
+        print("Cannot find solid.stl");
+        sys.exit(-1)
 
     if not os.path.exists(surface):
-        surface = os.path.splitext(os.path.basename(surface))[0] + ".stl"
-        surface = os.path.join("/src", surface)
-        print("Could not find surface.obj, trying %s" % surface)
-        if not os.path.exists(surface):
-            print("Cannot find surface.obj or surface.stl");
-            sys.exit(-1)
+        print("Cannot find surface.stl");
+        sys.exit(-1)
 
     try:
         scale_mesh(surface, low_res, float(lresolution))
@@ -82,10 +74,10 @@ def main(lresolution, mresolution):
     dest = os.path.join("/dest", "%s-%s-%s-bundle.zip" % (id, jmanifest['bodypart'], jmanifest['pose']))
     with ZipFile(dest, 'w') as zip:
         zip.write(manifest, arcname="manifest.json")
-        zip.write(low_res, arcname="surface-low.obj")
-        zip.write(medium_res, arcname="surface-medium.obj")
-        zip.write(solid, arcname="solid.obj")
-        zip.write(surface, arcname="surface-orig.obj")
+        zip.write(low_res, arcname="surface-low.stl")
+        zip.write(medium_res, arcname="surface-medium.stl")
+        zip.write(solid, arcname="solid.stl")
+        zip.write(surface, arcname="surface-orig.stl")
         zip.write(screenshot, arcname="screenshot.jpg")
 
     shutil.rmtree(tmp_dir)
