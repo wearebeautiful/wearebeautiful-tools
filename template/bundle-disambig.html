@@ -1,0 +1,16 @@
+{%- extends 'base.html' -%}
+{%- block content -%}
+<div class="row">
+  <div class="col-12">
+    <h1>Model disambiguation page</h1>
+    <p>
+        We have more than one model for the ID {{ model }}. Please select one below:
+    </p>
+    <ul>
+      {% for model in model_list %}
+        <li><a href="{{ url_for('index.view', model=model['model-str']) }}">{{ model['bodypart'] }}, {{ model['pose'] }}</a></li>
+      {% endfor %}
+    </ul>
+</div>
+
+{% endblock%}
