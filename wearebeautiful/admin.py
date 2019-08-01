@@ -8,7 +8,8 @@ import config
 import json
 from io import StringIO
 from wearebeautiful.auth import _auth as auth
-from wearebeautiful.bundles import create_bundle_index, load_bundle_data_into_redis, import_bundle
+from wearebeautiful.bundles import create_bundle_index, load_bundle_data_into_redis, import_bundle, \
+                            get_model_id_list
 
 bp = Blueprint('admin', __name__)
 
@@ -21,9 +22,10 @@ def admin():
 @bp.route('/new')
 @auth.login_required
 def admin_new():
+    models = get_model_id_list(current_app.redis)
     while True:
         new_id = int(uniform(100000, 999999))
-        if new_id not in current_app.bundle_ids:
+        if new_id not in models:
             return render_template("admin/new.html", new_id = new_id)
 
 
