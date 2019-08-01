@@ -3,7 +3,6 @@ from flask import Flask, render_template, flash, url_for, current_app, redirect
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bootstrap import Bootstrap
-from random import uniform
 import config
 import json
 from wearebeautiful.auth import init_auth
