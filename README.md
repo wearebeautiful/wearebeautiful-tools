@@ -2,6 +2,8 @@
 
 The code that powers our main website.
 
+[![Build Status](https://travis-ci.com/wearebeautiful/wearebeutiful.info.svg?branch=master)](https://travis-ci.com/wearebeautiful/wearebeautiful.info)
+
 
 ## To setup a sandbox:
 
