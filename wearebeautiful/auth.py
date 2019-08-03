@@ -14,6 +14,10 @@ def init_auth():
 
     @_auth.verify_password
     def verify_password(username, password):
+
+        if not config.USE_SITE_AUTH:
+            return True
+
         if username in users:
             return check_password_hash(users.get(username), password)
         return False
