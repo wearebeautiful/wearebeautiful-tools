@@ -1,6 +1,6 @@
-BUNDLE_DIR="/Users/robert/wearebeautiful.info/static/bundle"
+BUNDLE_DIR="[bundle dir location]"
 SECRET_KEY = "add your key here"
-SITE_USERNAME="wab"
-SITE_PASSWORD="eternal"
+SITE_USERNAME="test"
+SITE_PASSWORD="test"
 REDIS_HOST="localhost"
 REDIS_PORT=6379

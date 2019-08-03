@@ -7,3 +7,5 @@ script:
 branches:
   only:
     - master
+install:
+  - cp config.py.sample config.py
