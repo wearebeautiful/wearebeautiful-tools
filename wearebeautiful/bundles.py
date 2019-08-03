@@ -42,6 +42,7 @@ def load_bundle_data_into_redis(app):
 
     redis = app.redis
     bundles = []
+    loaded_bundles = []
     try: 
         with open(os.path.join(bundle_dir, bundles_json_file), "r") as f:
             loaded_bundles = json.loads(f.read())
