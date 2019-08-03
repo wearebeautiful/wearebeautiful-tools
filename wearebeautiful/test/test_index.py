@@ -4,13 +4,7 @@ from flask import url_for
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 
 from wearebeautiful.app import app
-
-class ServerTestCase(flask_testing.TestCase):
-
-    def create_app(self):
-        app.config['TESTING'] = True
-        return app
-
+from utils import ServerTestCase
 
 class IndexViewsTestCase(ServerTestCase):
 
@@ -52,3 +46,5 @@ class IndexViewsTestCase(ServerTestCase):
     def test_view(self):
         resp = self.client.get(url_for('index.view', model="-"))
         self.assert200(resp)
+
+    # TODO Add more browse and view testing
