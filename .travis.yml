@@ -1,11 +1,11 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
-script: 
-  - nosetests
+  - "3.7"
 branches:
   only:
     - master
 install:
   - cp config.py.sample config.py
+  - pip install -r requirements.txt
+script:
+  - ./tests.sh
