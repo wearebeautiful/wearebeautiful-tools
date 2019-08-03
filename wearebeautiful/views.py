@@ -37,6 +37,11 @@ def view_root():
     return render_template("error.html")
 
 
+@bp.route('/view')
+@auth.login_required
+def view_simple():
+    return redirect(url_for("index.browse"))
+
 @bp.route('/view/<model>')
 @auth.login_required
 def view(model):
