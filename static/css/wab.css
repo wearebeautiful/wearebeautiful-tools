@@ -9,6 +9,7 @@ body {
 .team-name {
     font-size: 14pt;
     font-weight: bold;
+    margin-top: .5em;
 }
 
 .team-title {
