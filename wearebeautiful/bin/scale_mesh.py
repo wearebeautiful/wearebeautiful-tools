@@ -73,6 +73,9 @@ def scale_mesh(in_file, out_file, target_len):
     pymesh.meshio.save_mesh(out_file, mesh);
 
 if __name__ == "__main__":
+
+
+    print("THIS IS SCALE MESH FOR FUCK SAKE!!!")
     if len(sys.argv) < 4:
         print("Usage: scale_mesh.py <len> <src dir> <dest dir>")
         sys.exit(-1)
@@ -84,8 +87,8 @@ if __name__ == "__main__":
     for filename in os.listdir(src_dir):
         print("examine '%s'" % filename)
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
-            if filename.lower().endswith(".obj"):
-                dest_filename = os.path.splitext(filename)[0] + ".stl"
+            if filename.lower().endswith(".stl"):
+                dest_filename = os.path.splitext(filename)[0] + ".obj"
             else:
                 dest_filename = filename
 
