@@ -74,17 +74,17 @@ def scale_mesh(in_file, out_file, target_len):
 
 if __name__ == "__main__":
 
+    print("scale_mesh.py running. <3\n")
 
-    print("THIS IS SCALE MESH FOR FUCK SAKE!!!")
     if len(sys.argv) < 4:
         print("Usage: scale_mesh.py <len> <src dir> <dest dir>")
         sys.exit(-1)
 
-    len = float(sys.argv[1])
+    seg_len = float(sys.argv[1])
     src_dir = sys.argv[2]
     dest_dir = sys.argv[3]
 
-    filenames = os.listdir(src_dir):
+    filenames = os.listdir(src_dir)
     if not filenames:
         print("The src directory is empty, numbnutz.")
         sys.exit(-1)
@@ -97,9 +97,9 @@ if __name__ == "__main__":
             else:
                 dest_filename = filename
 
-            print("%s -> %.2f" % (dest_filename, len))
+            print("%s -> %.2f" % (dest_filename, seg_len))
             t0 = time()
-            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename), len)
+            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename), seg_len)
             print("  done with file. %d seconds elapsed.\n" % (time() - t0))
         else:
             print("Igorning file '%s', is not STL nor OBJ." % filename)
