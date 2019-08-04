@@ -84,7 +84,12 @@ if __name__ == "__main__":
     src_dir = sys.argv[2]
     dest_dir = sys.argv[3]
 
-    for filename in os.listdir(src_dir):
+    filenames = os.listdir(src_dir):
+    if not filenames:
+        print("The src directory is empty, numbnutz.")
+        sys.exit(-1)
+
+    for filename in filenames:
         print("examine '%s'" % filename)
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
             if filename.lower().endswith(".stl"):
