@@ -82,6 +82,7 @@ if __name__ == "__main__":
     dest_dir = sys.argv[3]
 
     for filename in os.listdir(src_dir):
+        print("examine '%s'" % filename)
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
             if filename.lower().endswith(".obj"):
                 dest_filename = os.path.splitext(filename)[0] + ".stl"
@@ -92,5 +93,7 @@ if __name__ == "__main__":
             t0 = time()
             scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename), len)
             print("  done with file. %d seconds elapsed.\n" % (time() - t0))
+        else:
+            print("Igorning file '%s', is not STL nor OBJ." % filename)
 
     print("\ndone with all files.")

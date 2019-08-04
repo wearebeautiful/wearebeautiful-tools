@@ -1,13 +1,19 @@
 body {
 }
 
+h2 { 
+    font-size: 17pt; 
+    margin-top: .5em;
+    margin-bottom: .5em;
+}
+ 
 .text-div {
     max-width: 700px;
     margin-top: 1em;
 }
 
 .team-name {
-    font-size: 14pt;
+    font-size: 13pt;
     font-weight: bold;
     margin-top: .5em;
 }
@@ -21,6 +27,11 @@ body {
 .quote {
     font-style: italic;
     margin-left: 25px;
+}
+
+#index-img-div {
+    overflow-y: scroll;
+height: 550%;
 }
 
 .scale {

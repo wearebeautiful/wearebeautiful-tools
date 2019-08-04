@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="h-100">
+<html lang="en">
   <head>
     {% block head %}
     <meta charset="utf-8">
@@ -13,10 +13,10 @@
     <title>{% block title %}We are beautiful!{% endblock %}</title>
     {% endblock %}
   </head>
-  <body class="h-100">
+  <body>
 
   {%- include 'navbar.html' -%}
-  <div class="container" id="top-container">
+  <div class="container h-100">
     {% block content %}
     {% endblock%}
   </div>
