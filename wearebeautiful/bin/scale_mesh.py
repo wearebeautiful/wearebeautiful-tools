@@ -74,7 +74,7 @@ def scale_mesh(in_file, out_file, target_len):
 
 if __name__ == "__main__":
 
-    print("scale_mesh.py running. <3\n")
+    print("scale_mesh.py running, making STL files. <3\n")
 
     if len(sys.argv) < 4:
         print("Usage: scale_mesh.py <len> <src dir> <dest dir>")
@@ -92,8 +92,8 @@ if __name__ == "__main__":
     for filename in filenames:
         print("examine '%s'" % filename)
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
-            if filename.lower().endswith(".stl"):
-                dest_filename = os.path.splitext(filename)[0] + ".obj"
+            if filename.lower().endswith(".obj"):
+                dest_filename = os.path.splitext(filename)[0] + ".stl"
             else:
                 dest_filename = filename
 
