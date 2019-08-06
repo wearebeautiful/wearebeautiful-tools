@@ -85,3 +85,4 @@ def main(lresolution, mresolution):
 
 if __name__ == "__main__":
     main();
+    sys.exit(-1)

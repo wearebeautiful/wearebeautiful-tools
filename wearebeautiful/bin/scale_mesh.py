@@ -117,3 +117,4 @@ def usage(command):
 if __name__ == "__main__":
     print("scale_mesh.py running, making STL files. <3\n")
     scale()
+    sys.exit(0)
