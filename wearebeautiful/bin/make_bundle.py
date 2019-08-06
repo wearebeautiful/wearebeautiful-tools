@@ -57,8 +57,8 @@ def main(lresolution, mresolution):
         sys.exit(-1)
 
     try:
-        scale_mesh(surface, low_res, float(lresolution))
-        scale_mesh(surface, medium_res, float(mresolution))
+        scale_mesh(False, float(lresolution), surface, low_res)
+        scale_mesh(False, float(mresolution), surface, medium_res)
     except IOError as err:
         print("Cannot down-scale mesh files. Error: ", err)
         sys.exit(-1)
