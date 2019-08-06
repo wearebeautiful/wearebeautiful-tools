@@ -15,9 +15,10 @@ from wearebeautiful.bundles import validate_manifest
 from wearebeautiful import model_params as param
 
 @click.command()
-@click.argument('lresolution')
-@click.argument('mresolution')
-def main(lresolution, mresolution):
+@click.option('--invert/--no-invert', default=False, help='Flip the normals on the STL file')
+@click.argument('lresolution', type=float)
+@click.argument('mresolution', type=float)
+def main(invert, lresolution, mresolution):
 
     manifest = os.path.join("/src", param.MANIFEST_FILE)
     surface = os.path.join("/src", param.SURFACE_FILE)
@@ -57,8 +58,8 @@ def main(lresolution, mresolution):
         sys.exit(-1)
 
     try:
-        scale_mesh(False, float(lresolution), surface, low_res)
-        scale_mesh(False, float(mresolution), surface, medium_res)
+        scale_mesh(invert, lresolution, surface, low_res)
+        scale_mesh(invert, mresolution, surface, medium_res)
     except IOError as err:
         print("Cannot down-scale mesh files. Error: ", err)
         sys.exit(-1)

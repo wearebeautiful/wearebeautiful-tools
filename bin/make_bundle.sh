@@ -1,8 +1,17 @@
 #!/bin/bash
 
-if [ "$#" -ne 4 ]; then
-    echo "usage: make_bundle.sh <low res len> <med res len> <src dir> <output dir>"
+if [ "$#" -lt 4 ]; then
+    echo "usage: make_bundle.sh [--invert] <low res len> <med res len> <src dir> <output dir>"
     exit
+fi
+
+if [ "$1" == "--invert" ]; then
+    echo "invert yes"
+    INVERT="--invert"
+    shift
+else
+    echo "invert no"
+    INVERT=""
 fi
 
 LRES=$1
@@ -17,4 +26,4 @@ echo "dest $DEST"
 
 mkdir -p $DEST
 docker rm -f mesh 
-docker run -it --name mesh -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/wearebeautiful/bin/make_bundle.py $LRES $MRES
+docker run -it --name mesh -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/wearebeautiful/bin/make_bundle.py $INVERT $LRES $MRES
