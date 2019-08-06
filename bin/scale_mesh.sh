@@ -1,18 +1,26 @@
 #!/bin/bash
 
+docker rm -f mesh 
 if [ "$#" -lt 3 ]; then
-    echo "usage: scale_mesh.sh <len> <src dir> <dest dir>"
+    docker run -it --name mesh wearebeautiful:mesh /code/wearebeautiful/bin/scale_mesh.py
     exit
 fi
 
-SRC_DIR=`perl -e 'use Cwd "abs_path";print abs_path(shift)' $2`
-echo "source dir: $SRC_DIR"
-
-DEST_DIR=`perl -e 'use Cwd "abs_path";print abs_path(shift)' $3`
-echo "  dest dir: $DEST_DIR"
+if [ "$1" == "--invert" ]; then
+    echo "invert yes"
+    INVERT="--invert"
+    shift
+else
+    echo "invert no"
+    INVERT=""
+fi
 
 LEN=$1
+SRC_DIR=`perl -e 'use Cwd "abs_path";print abs_path(shift)' $2`
+DEST_DIR=`perl -e 'use Cwd "abs_path";print abs_path(shift)' $3`
+
+echo "source dir: $SRC_DIR"
+echo "  dest dir: $DEST_DIR"
 echo "target len: $LEN"
 
-docker rm -f mesh 
-docker run -it --name mesh -v $SRC_DIR:/src -v $DEST_DIR:/dest wearebeautiful:mesh /code/wearebeautiful/bin/scale_mesh.py $LEN /src /dest
+docker run -it --name mesh -v $SRC_DIR:/src -v $DEST_DIR:/dest wearebeautiful:mesh /code/wearebeautiful/bin/scale_mesh.py $INVERT $LEN /src /dest

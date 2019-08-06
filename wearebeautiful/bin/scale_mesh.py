@@ -6,15 +6,14 @@ Remesh the input mesh to remove degeneracies and improve triangle quality.
 import sys
 import os
 from time import time
-import argparse
 import numpy as np
-from numpy.linalg import norm
 
 import pymesh
+import click
 
 def fix_mesh(mesh, target_len):
     bbox_min, bbox_max = mesh.bbox;
-    diag_len = norm(bbox_max - bbox_min);
+    diag_len = np.linalg.norm(bbox_max - bbox_min);
 
     count = 0;
     print("  remove degenerated triangles")
@@ -56,33 +55,37 @@ def fix_mesh(mesh, target_len):
     return mesh;
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-            description=__doc__);
-    parser.add_argument("--timing", help="print timing info",
-            action="store_true");
-    parser.add_argument("--len", help="target lenght of segments to preserve", type=float)
-    parser.add_argument("in_mesh", help="input mesh");
-    parser.add_argument("out_mesh", help="output mesh");
-    return parser.parse_args();
+def flip_mesh(mesh):
+    new_faces = []
+    for face in mesh.faces:
+        new_face = list(face)
+        new_face.reverse()
+        new_faces.append(new_face)
+
+    return pymesh.form_mesh(mesh.vertices, np.array(new_faces))
 
 
-def scale_mesh(in_file, out_file, target_len):
+def scale_mesh(invert, target_len, in_file, out_file):
+
     mesh = pymesh.meshio.load_mesh(in_file);
+
+    print("start: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
     mesh = fix_mesh(mesh, target_len);
+    print("  fix: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
+
+    if invert:
+        mesh = flip_mesh(mesh)
+        print(" flip: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
+
     pymesh.meshio.save_mesh(out_file, mesh);
 
-if __name__ == "__main__":
 
-    print("scale_mesh.py running, making STL files. <3\n")
-
-    if len(sys.argv) < 4:
-        print("Usage: scale_mesh.py <len> <src dir> <dest dir>")
-        sys.exit(-1)
-
-    seg_len = float(sys.argv[1])
-    src_dir = sys.argv[2]
-    dest_dir = sys.argv[3]
+@click.command()
+@click.option('--invert/--no-invert', default=False, help='Flip the normals on the STL file')
+@click.argument("len", nargs=1, type=float)
+@click.argument("src_dir", nargs=1)
+@click.argument("dest_dir", nargs=1)
+def scale(invert, len, src_dir, dest_dir):
 
     filenames = os.listdir(src_dir)
     if not filenames:
@@ -90,18 +93,27 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     for filename in filenames:
-        print("examine '%s'" % filename)
         if filename.lower().endswith(".stl") or filename.lower().endswith(".obj"):
             if filename.lower().endswith(".obj"):
                 dest_filename = os.path.splitext(filename)[0] + ".stl"
             else:
                 dest_filename = filename
 
-            print("%s -> %.2f" % (dest_filename, seg_len))
+            print("%s -> %.2f" % (dest_filename, len))
             t0 = time()
-            scale_mesh(os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename), seg_len)
+            scale_mesh(invert, len, os.path.join(src_dir, filename), os.path.join(dest_dir, dest_filename))
             print("  done with file. %d seconds elapsed.\n" % (time() - t0))
         else:
             print("Igorning file '%s', is not STL nor OBJ." % filename)
 
     print("\ndone with all files.")
+
+
+def usage(command):
+    with click.Context(command) as ctx:
+        click.echo(command.get_help(ctx))
+
+
+if __name__ == "__main__":
+    print("scale_mesh.py running, making STL files. <3\n")
+    scale()
