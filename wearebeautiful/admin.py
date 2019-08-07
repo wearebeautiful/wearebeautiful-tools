@@ -56,7 +56,7 @@ def admin_upload_post():
     err = import_bundle(filename.name)
     if err:
         print(err)
-        raise BadRequest(err)
+        raise BadRequest(description=err)
         
     try:
         filename.close()

@@ -95,7 +95,7 @@ def get_bundle(redis, id, bodypart, pose):
 def import_bundle(bundle_file):
     """ unzip and read bundle file """
 
-    allowed_files = ['manifest.json', 'surface-low.obj', 'surface-medium.obj', 'solid.obj', 'surface-orig.obj', 'screenshot.jpg']
+    allowed_files = ['manifest.json', 'surface-low.stl', 'surface-medium.stl', 'solid.stl', 'surface-orig.stl', 'screenshot.jpg']
     try:
         zipf = zipfile.ZipFile(bundle_file)
     except zipfile.BadZipFile:

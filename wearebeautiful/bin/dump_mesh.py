@@ -15,9 +15,9 @@ def invert(src_file):
     src_file = os.path.join("/src", src_file)
     mesh = pymesh.meshio.load_mesh(src_file);
 
-#    print("vertices")
-#    for vertex in mesh.vertices:
-#        print(vertex)
+    print("vertices")
+    for vertex in mesh.vertices:
+        print(vertex)
 
     print("faces")
     for face in mesh.faces:

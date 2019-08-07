@@ -58,6 +58,7 @@ def main(invert, lresolution, mresolution):
         sys.exit(-1)
 
     try:
+        print("invert mesh", invert)
         scale_mesh(invert, lresolution, surface, low_res)
         scale_mesh(invert, mresolution, surface, medium_res)
     except IOError as err:
