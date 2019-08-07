@@ -1,7 +1,7 @@
 import os
 import zipfile
 from random import uniform
-from flask import render_template, current_app, redirect, Blueprint, request
+from flask import render_template, current_app, redirect, Blueprint, request, Response
 from werkzeug.exceptions import BadRequest
 import tempfile
 import config
@@ -39,7 +39,7 @@ def admin_upload_get():
 @auth.login_required
 def admin_upload_post():
     if 'file' not in request.files:
-        raise BadRequest("Request is missing file part.")
+        raise BadRequest(response=Response(response="Request is missing file part.", status=400))
 
     try: 
         f = request.files['file']
@@ -51,12 +51,12 @@ def admin_upload_post():
                 os.unlink(filename.name)
             except Exception:
                 pass
-        raise InternalServerError("Cannot save bundle to disk: ", err)
+        raise InternalServerError(response=Response(response="Cannot save bundle to disk: %s" % str(err), status=400))
 
     err = import_bundle(filename.name)
     if err:
         print(err)
-        raise BadRequest(description=err)
+        raise BadRequest(response=Response(response=err, status=400))
         
     try:
         filename.close()

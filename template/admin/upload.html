@@ -39,7 +39,7 @@ $('input[type=file]').change(function()
             },
             error: function(error){
                  console.log(error);
-                 $("#upload-status").text(error.message + ": " + error.xhr.status)
+                 $("#upload-status").text(error.message + ": " + error.xhr.status + " - " + error.xhr.responseText)
             }
 
     });
