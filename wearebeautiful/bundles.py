@@ -97,15 +97,16 @@ def get_bundle(redis, id, bodypart, pose):
 def import_bundle(bundle_file):
     """ unzip and read bundle file """
 
-    allowed_files = sorted(['manifest.json', 'surface-low.stl', 'surface-medium.stl', 'solid.stl', 'surface-orig.stl', 'screenshot.jpg'])
+    allowed_files = ['manifest.json', 'surface-low.stl', 'surface-medium.stl', 'solid.stl', 'surface-orig.stl', 'screenshot.jpg']
     try:
         zipf = zipfile.ZipFile(bundle_file)
     except zipfile.BadZipFile:
         return "Invalid zip file."
 
-    files = sorted(zipf.namelist())
-    if allowed_files != files:
-        return "Incorrect files in the bundle."
+    files = zipf.namelist()
+    for f in files:
+        if not f in allowed_files:
+            return "file %s is not part of a normal bundle. don't fuck it up, ok?" % f
 
     try:
         rmanifest = zipf.read("manifest.json")
