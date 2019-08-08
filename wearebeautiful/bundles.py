@@ -8,6 +8,8 @@ import datetime
 import shutil
 from wearebeautiful import model_params as param
 
+MAX_SCREENSHOT_SIZE = 256000 # 256Kb is enough!
+
 bundles_json_file = "bundles.json"
 
 def bundle_setup(bundle_dir_arg):
@@ -114,6 +116,13 @@ def import_bundle(bundle_file):
         manifest = json.loads(rmanifest)
     except json.decoder.JSONDecodeError as err:
         return err
+
+    try:
+        screenshot_info = zipf.getinfo("screenshot.jpg")
+        if screenshot_info.file_size >= MAX_SCREENSHOT_SIZE:
+            return "screenshot size is a bit porky. OINK! Max size 250KiB."
+    except IOError:
+        return "Cannot read screenshot file."
 
     err = validate_manifest(manifest)
     if err:
