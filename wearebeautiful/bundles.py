@@ -97,13 +97,13 @@ def get_bundle(redis, id, bodypart, pose):
 def import_bundle(bundle_file):
     """ unzip and read bundle file """
 
-    allowed_files = ['manifest.json', 'surface-low.stl', 'surface-medium.stl', 'solid.stl', 'surface-orig.stl', 'screenshot.jpg']
+    allowed_files = sorted(['manifest.json', 'surface-low.stl', 'surface-medium.stl', 'solid.stl', 'surface-orig.stl', 'screenshot.jpg'])
     try:
         zipf = zipfile.ZipFile(bundle_file)
     except zipfile.BadZipFile:
         return "Invalid zip file."
 
-    files = zipf.namelist()
+    files = sorted(zipf.namelist())
     if allowed_files != files:
         return "Incorrect files in the bundle."
 
@@ -116,13 +116,6 @@ def import_bundle(bundle_file):
         manifest = json.loads(rmanifest)
     except json.decoder.JSONDecodeError as err:
         return err
-
-    try:
-        screenshot_info = zipf.getinfo("screenshot.jpg")
-        if screenshot_info.file_size >= MAX_SCREENSHOT_SIZE:
-            return "screenshot size is a bit porky. OINK! Max size 250KiB."
-    except IOError:
-        return "Cannot read screenshot file."
 
     err = validate_manifest(manifest)
     if err:

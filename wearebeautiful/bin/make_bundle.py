@@ -11,7 +11,7 @@ import shutil
 from zipfile import ZipFile
 from tempfile import mkdtemp
 from scale_mesh import scale_mesh
-from wearebeautiful.bundles import validate_manifest
+from wearebeautiful.bundles import validate_manifest, MAX_SCREENSHOT_SIZE
 from wearebeautiful import model_params as param
 
 @click.command()
@@ -44,6 +44,11 @@ def main(invert, lresolution, mresolution):
         sys.exit(-1)
 
     id = jmanifest['id']
+
+    screenshot_size = os.path.getsize(screenshot)
+    if screenshot_size > MAX_SCREENSHOT_SIZE:
+        print("Maximum screenshot size is %d kbytes." % (MAX_SCREENSHOT_SIZE / 1024))
+        sys.exit(-1)
 
     tmp_dir = mkdtemp()
     low_res = os.path.join(tmp_dir, "surface-low.stl")
