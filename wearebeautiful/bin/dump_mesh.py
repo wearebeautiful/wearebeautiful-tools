@@ -17,8 +17,8 @@ def invert(src_file):
     mesh = pymesh.compute_outer_hull(mesh);
 
     print("model %s" % src_file)
-    print(" vertices: %6d" % mesh.num_vertices)
-    print("    faces: %3d" % mesh.num_faces)
+    print(" vertices: %8s" % ("{:,}".format(mesh.num_vertices)))
+    print("    faces: %8s" % ("{:,}".format(mesh.num_faces)))
     print("dimension: (%-.5f %-.5f %-.5f)" % (mesh.bbox[1][0] - mesh.bbox[0][0],
                                   mesh.bbox[1][1] - mesh.bbox[0][1], 
                                   mesh.bbox[1][2] - mesh.bbox[0][2]))
