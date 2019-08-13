@@ -12,16 +12,16 @@ import click
 @click.argument("src_file", nargs=1)
 def invert(src_file):
 
-    src_file = os.path.join("/src", src_file)
-    mesh = pymesh.meshio.load_mesh(src_file);
+    src_path = os.path.join("/src", src_file)
+    mesh = pymesh.meshio.load_mesh(src_path);
+    mesh = pymesh.compute_outer_hull(mesh);
 
-    print("vertices")
-    for vertex in mesh.vertices:
-        print(vertex)
-
-    print("faces")
-    for face in mesh.faces:
-        print(face)
+    print("model %s" % src_file)
+    print(" vertices: %6d" % mesh.num_vertices)
+    print("    faces: %3d" % mesh.num_faces)
+    print("dimension: (%-.5f %-.5f %-.5f)" % (mesh.bbox[1][0] - mesh.bbox[0][0],
+                                  mesh.bbox[1][1] - mesh.bbox[0][1], 
+                                  mesh.bbox[1][2] - mesh.bbox[0][2]))
 
 
 def usage(command):
