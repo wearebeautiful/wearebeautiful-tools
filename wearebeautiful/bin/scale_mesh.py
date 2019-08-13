@@ -73,6 +73,10 @@ def scale_mesh(invert, target_len, in_file, out_file):
     mesh = fix_mesh(mesh, target_len);
     print("  fix: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
 
+    if mesh.num_vertices == 0 or mesh.num_faces == 0:
+        printf("ERROR: segment len is too small, no vertices/faces are left.")
+        return
+
     if invert:
         mesh = flip_mesh(mesh)
         print(" flip: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
