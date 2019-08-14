@@ -174,7 +174,7 @@ Is the model a mother? If so, how was/were the child/children delivered?
 modification
 ------------
 
-Indicates modifciation of the model. Accepted values, an array of one or more of the following:
+Indicates modifciation of the model. One of more of the following may be allowed:
 
 | Allowable values |
 | --------- |
