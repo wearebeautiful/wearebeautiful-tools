@@ -35,7 +35,7 @@ var options =
 };
 if ("{{ manifest.id }}")
 {
-    options['models'] = [ { id:0, filename:"/static/bundle/{{ manifest.id }}-{{ manifest.bodypart }}-{{ manifest.pose }}/surface-medium.stl"} ];
+    options['models'] = [ { id:0, filename:"/static/bundle/{{ code }}/surface-medium.stl"} ];
     $("#progress").text("loading ...");
 }
 

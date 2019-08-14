@@ -11,7 +11,7 @@ import shutil
 from zipfile import ZipFile
 from tempfile import mkdtemp
 from scale_mesh import scale_mesh
-from wearebeautiful.bundles import validate_manifest, MAX_SCREENSHOT_SIZE
+from wearebeautiful.bundles import validate_manifest, MAX_SCREENSHOT_SIZE, bundle_code
 from wearebeautiful import model_params as param
 
 @click.command()
@@ -78,7 +78,9 @@ def main(invert, lresolution, mresolution):
         print("Cannot copy files. Error: ", err)
         sys.exit(-1)
 
-    dest = os.path.join("/dest", "%s-%s-%s-bundle.zip" % (id, jmanifest['bodypart'], jmanifest['pose']))
+    print(jmanifest)
+    code = bundle_code(manifest=jmanifest)
+    dest = os.path.join("/dest", "%s-bundle.zip" % code)
     with ZipFile(dest, 'w') as zip:
         zip.write(manifest, arcname="manifest.json")
         zip.write(low_res, arcname="surface-low.stl")

@@ -38,6 +38,7 @@ def admin_upload_get():
 @bp.route('/upload', methods=['POST'])
 @auth.login_required
 def admin_upload_post():
+
     if 'file' not in request.files:
         raise BadRequest(response=Response(response="Request is missing file part.", status=400))
 

@@ -39,6 +39,47 @@ def create_bundle_index():
     return bundles
 
 
+def bundle_code(id="", part="", pose="", arrangement="", excited="", manifest=None):
+
+    if manifest:
+        return "%s-%c%c%c%c" % (manifest['id'], 
+                                param.BODY_PART[manifest['body_part']],
+                                param.POSE[manifest['pose']],
+                                param.ARRANGEMENT[manifest['arrangement']],
+                                param.EXCITED[manifest['excited']])
+    else:
+        return "%0s-%c%c%c%c" % (id,  part, pose, arrangement, excited)
+
+
+def parse_code(code):
+    try:
+        id, codes = code.split("-")
+        if not id.isdigit() and len(id) == 6:
+            raise ValueError
+
+        if not len(codes) == 4:
+            raise ValueError
+
+        part, pose, arrangement, excited = list(codes)
+
+    except ValueError:
+        raise ValueError("Invalid model %s. Must be in format ######-CCCC." % code) 
+
+    if part not in param.BODY_PART.values():
+        raise ValueError("Invalid body part code '%c'" % part)
+
+    if pose not in param.POSE.values():
+        raise ValueError("Invalid pose code '%c'" % pose)
+
+    if arrangement not in param.ARRANGEMENT.values():
+        raise ValueError("Invalid arrangement code '%c'" % arrangement)
+
+    if excited not in param.EXCITED.values():
+        raise ValueError("Invalid excited code '%c'" % excited)
+
+    return (id, part, pose, arrangement, excited)
+
+
 def load_bundle_data_into_redis(app):
     ''' Read the bundles.json file and load into ram '''
 
@@ -63,8 +104,16 @@ def load_bundle_data_into_redis(app):
     bundles = []
     ids = {}
     for bundle in loaded_bundles:
-        redis.set("m:%s:%s:%s" % (bundle['id'], bundle['bodypart'], bundle['pose']), json.dumps(bundle))
-        data = { 'id' : bundle['id'], 'bodypart' : bundle['bodypart'], 'pose' : bundle['pose'] }
+        code = bundle_code(manifest=bundle)
+        redis.set("m:%s" % code, json.dumps(bundle))
+        data = { 
+            'id' : bundle['id'], 
+            'body_part' : bundle['body_part'], 
+            'pose' : bundle['pose'], 
+            'arrangement' : bundle['arrangement'] ,
+            'excited' : bundle['excited'],
+            'code' : code
+        }
         bundles.append(data)
         if not bundle['id'] in ids:
             ids[bundle['id']] = []
@@ -88,9 +137,9 @@ def get_model_id_list(redis):
     return json.loads(ids)
 
 
-def get_bundle(redis, id, bodypart, pose):
+def get_bundle(redis, id, body_part, pose, arrangement, excited):
     """ Get the manifest of the given bundle """
-    manifest = redis.get("m:%s:%s:%s" % (id, bodypart, pose))
+    manifest = redis.get("m:%s" % bundle_code(id, body_part, pose, arrangement, excited))
     return json.loads(manifest)
 
 
@@ -122,8 +171,9 @@ def import_bundle(bundle_file):
     if err:
         return err
 
+    code = bundle_code(manifest=manifest)
     # The bundle looks ok, copy it into place
-    dest_dir = os.path.join(bundle_dir, "%s-%s-%s" % (manifest['id'], manifest['bodypart'], manifest['pose']))
+    dest_dir = os.path.join(bundle_dir, code)
 
     while True:
         try:
@@ -175,9 +225,13 @@ def validate_manifest(manifest):
     if manifest['version'] != param.FORMAT_VERSION:
         return "Incorrect format version. This script can only accept version %s" % param.FORMAT_VERSION
 
-    if manifest.keys() in param.REQUIRED_KEYS:
-        missing = list(set(param.REQUIRED_KEYS) - set(manifest.keys()))
-        return "Some top level fields are missing. %s\n" % ",".join(missing)
+    for k in param.REQUIRED_KEYS:
+        if k not in manifest.keys():
+            return "required field %s is missing from manifest.json" % k
+
+    for k in manifest.keys():
+       if k not in param.REQUIRED_KEYS and k not in param.OPTIONAL_KEYS:
+            return "top level field %s should not appear in manifest.json" % k
 
     if len(manifest['id']) != 6 or not manifest['id'].isdigit():
         return "Incorrect ID length or non digits in ID."
@@ -197,23 +251,18 @@ def validate_manifest(manifest):
     if manifest['gender'] not in param.GENDERS:
         return "Invalid gender. Must be one of: ", param.GENDERS
 
-    if manifest['bodypart'] not in param.BODYPART:
-        return "Invalid bodypart. Must be one of: ", param.BODYPART
+    if manifest['body_part'] not in param.BODY_PART:
+        return "Invalid body_part. Must be one of: ", param.BODY_PART.keys()
 
     if manifest['pose'] not in param.POSE:
-        return "Invalid pose. Must be one of: ", param.POSE
+        return "Invalid pose. Must be one of: ", param.POSE.keys()
 
-    if manifest['pose'] == 'variant':
-        if 'pose_variant' not in manifest:
-            return "pose_variant field required for variant poses."
+    if manifest['arrangement'] not in param.ARRANGEMENT:
+        return "Invalid arrangement. Must be one of: ", param.ARRANGEMENT.keys()
 
-        if len(manifest['pose_variant']) < param.MIN_FREETEXT_FIELD_LEN:
-            return "pose_variant field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN
-        
-    if manifest['pose'] != 'variant':
-        if 'pose_variant' in manifest:
-            return "pose_variant field must be blank when post not variant."
-        
+    if manifest['excited'] not in param.EXCITED:
+        return "Invalid excited. Must be one of: ", param.EXCITED.keys()
+
     if len(manifest['country']) != 2:
         return "Incorrect ID length"
 
@@ -238,6 +287,9 @@ def validate_manifest(manifest):
         return "ethnicity field too short. Must be at least %d characters. " % param.MIN_FREETEXT_FIELD_LEN
 
     if 'modification' in manifest:
+        if manifest['modification'] == "none":
+            return "modification: 'none' is no longer supported. Please remove the modification line."
+
         if type(manifest['modification']) != list:
             return "modification must be a list."
 

@@ -178,7 +178,6 @@ Indicates modifciation of the model. One of more of the following may be allowed
 
 | Allowable values |
 | --------- |
-| female |
 | pregnancy |
 | nursed |
 | circumcised |

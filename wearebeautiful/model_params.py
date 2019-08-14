@@ -1,5 +1,7 @@
 PRINT_FILE = "solid.stl"
 SURFACE_FILE = "surface.stl"
+SURFACE_MED_FILE = "surface-medium.stl"
+SURFACE_LOW_FILE = "surface-low.stl"
 SCREENSHOT_FILE = "screenshot.jpg"
 MANIFEST_FILE = "manifest.json"
 
@@ -18,13 +20,16 @@ REQUIRED_KEYS = [
     "mother", 
     "ethnicity", 
     "released", 
-    "pose"
+    "pose",
+    "arrangement",
+    "excited"
 ]
 
 OPTIONAL_KEYS = [ 
     "gender_comment", 
     "comment", 
     "other", 
+    "tags", 
     "modification" 
 ]
 
@@ -43,35 +48,35 @@ BODY_TYPES = [
     "overweight"
 ]
 
-BODY_PART = [ 
-    { "body" : "Y" }, 
-    { "breast" : "B" }, 
-    { "bust" : "S" }, 
-    { "buttocks" : "U" }, 
-    { "nipple" : "N" }, 
-    { "penis" : "P" }, 
-    { "torso" : "T" }, 
-    { "vulva" : "V" }, 
-]
+BODY_PART = { 
+     "body" : "Y", 
+     "breast" : "B", 
+     "bust" : "S", 
+     "buttocks" : "U", 
+     "nipple" : "N", 
+     "penis" : "P", 
+     "torso" : "T", 
+     "vulva" : "V", 
+}
 
-EXCITED = [
-    "not excited", 
-    "excited", 
-    "partially excited"
-]
+EXCITED = {
+    "not excited" : "N",
+    "excited" : "X",
+    "partially excited" : "P"
+}
 
-ARRANGEMENT = [ 
-    { "spread" : "S" }, 
-    { "retracted" : "R" }, 
-    { "arranged" : "A" }, 
-    { "natural" : "N" }, 
-]
+ARRANGEMENT = { 
+    "spread" : "S", 
+    "retracted" : "R", 
+    "arranged" : "A", 
+    "natural" : "N", 
+}
 
-POSE = [ 
-    { "standing" : "S" }, 
-    { "sitting" : "T" }, 
-    { "lying" : "L" }, 
-]
+POSE = { 
+    "standing" : "S", 
+    "sitting" : "T", 
+    "lying" : "L", 
+}
 
 MODIFICATIONS = [ 
     "pregnancy", 
