@@ -6,14 +6,16 @@ Format version: 1
 File contents
 -------------
 
-In order to import an model files into the site, the file
-needs to be in a ZIP compressed file containing:
+In order to import an model files into the site, the file needs to be in a ZIP compressed file containing:
 
 * manifest.json                - A JSON document that defines the metadata for the model. See below
-* model-surface-low-res.obj    - A surface in correct orientation, viewable on a mobile phone or tablet.
-* model-surface-medium-res.obj - A surface in correct orientation, viewable on a larger screen such as a desktop.
-* model-surface-high-res.obj   - original resolution surface, for archival purposes.
-* model-solid-print-res.obj    - print solid in resolution suited for printing.
+* solid.stl                    - print solid in resolution suited for printing.
+* surface-orig.stl             - original resolution surface, for archival purposes.
+* surface-medium.stl           - A surface in correct orientation, viewable on a larger screen such as a desktop.
+* surface-low.stl              - A surface in correct orientation, viewable on a mobile phone or tablet.
+* screenshot.jpg               - A screenshot of the model as shown on the site, suitable for previewing the model
+                               
+
 
 manifest.json
 -------------
@@ -32,12 +34,13 @@ following keys:
     "country":        "ES",
     "age":            34,
     "body_type":      "thin",
-    "bodypart":       "bust",
+    "body_part":      "bust",
     "pose":           "normal",
-    "mother":         "no",
+    "mother":         "vaginal",
     "ethnicity":      "of carribean descent",
-    "modification":   "none",
-    "comment":        "",       
+    "tags":           ["#post-pregnancy"],
+    "modification":   ["pregnancy", "breastfed"]
+    "comment":        "Model was breastfeeding at the time.",       
     "other":          {}
 }
 ```
@@ -64,7 +67,11 @@ gender
 
 Allowable values: 
  
-`"female", "male", "trans-mtf", "trans-ftm", "other"`
+`female
+male
+trans-mtf
+trans-ftm
+other
 
 If other is given for gender, a command giving more information must be present in
 the "gender_comment" field.
@@ -87,45 +94,76 @@ This is a free form text field that the model should self declare. There is no e
 this well on a glabal scale. 
 
 
+body_type
+---------
+
+Allowable values:
+
+`
+thin
+fit
+full
+overweight
+`
 
 bodypart
 --------
 
 Allowable values:
 
-"body", "bust", "breast", "nipple", "vulva", "buttocks", "penis"
+short full text
+Y     body 
+B     breast 
+S     bust
+U     buttocks
+N     nipple
+P     penis
+T     torso
+V     vulva
 
 
-pose & pose_variant
--------------------
+excited 
+-------
 
-Allowable values:
-
-"normal", "aroused", "variant"
-
-If a variant is specified, "pose_variant" must be at least 5 characters long.
-
+short full text
+N     not-excited
+X     excited
+P     partially excited
 
 
-body_type
----------
+arrangement
+-----------
 
-Allowable values:
+short full text
+S     spread (have the vulva lips been spread apart?)
+R     retracted (is the foreskin retracted?)
+A     arranged (arrange in a fashion to illustrate a body feature)
+N     natural (as it appears when becoming unclothed)
 
-`"thin", "fit", "full", "overweight"`
+
+pose
+----
+
+short full text
+S     standing
+T     sitting
+L     lying
+
 
 mother
 ------
 
-Is the model a mother? 
+Is the model a mother? If so, how was the child/children delivered?
 
-`"no", "vaginal", "caesarean"`
+`no` 
+`vaginal`
+`caesarean`
 
 
 comment
 -------
 
-General comment about the model not captured in other metadata.
+General comment about the model not captured in other metadata. Free form text.
 
 
 modification
@@ -133,7 +171,26 @@ modification
 
 Indicates modifciation of the model. Accepted values, an array of one or more of the following:
 
-   "none", "circumcised"," fgm", "labiaplasty", "masectomy", "female-to-male", "male-to-female", "nursing", "pregnant", "episiotomy"
+   "pregnancy" 
+   "nursed" 
+   "circumcised" 
+   "augmentated" 
+   "episiotomy"
+   "masectomy" 
+   "labiaplasty" 
+   "female-to-male" 
+   "male-to-female"
+   "fgm" 
+
+
+tags
+----
+
+An array of tags (without hashes) that may also apply to this model.
+
+"#large-hips #hip-scar" would be expressed in JSON as:
+
+["large-hips", "hip-scar"]
 
 
 other
