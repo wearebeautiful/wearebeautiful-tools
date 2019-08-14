@@ -65,13 +65,13 @@ An ISO 8601 date of when model was released to on the we are beautiful site: YYY
 gender
 ------
 
-Allowable values: 
- 
- `female`  
- `male`  
- `trans-mtf`  
- `trans-ftm`  
- `other`  
+| Allowable values |
+| --------- |
+| female |
+| male |
+| trans-mtf |
+| trans-ftm |
+| other |
 
 If other is given for gender, a command giving more information must be present in
 the "gender_comment" field.
@@ -97,65 +97,78 @@ this well on a glabal scale.
 body_type
 ---------
 
-Allowable values:
-
- `thin`  
- `fit`  
- `full`  
- `overweight`  
+| Allowable values |
+| --------- |
+| thin |
+| fit |
+| full |
+| overweight |
 
 bodypart
 --------
 
-Allowable values:
+Allowable values and their short cut codes:
 
- `short full text`  
- `Y     body`  
- `B     breast`  
- `S     bust`  
- `U     buttocks`  
- `N     nipple`  
- `P     penis`  
- `T     torso`  
- `V     vulva`  
+| short full|text |
+|------|---------|
+| Y    |body |
+| B    |breast |
+| S    |bust |
+| U    |buttocks |
+| N    |nipple |
+| P    |penis |
+| T    |torso |
+| V    |vulva |
 
 
 excited 
 -------
 
- `short full text`  
- `N     not-excited`  
- `X     excited`  
- `P     partially excited`  
+Allowable values and their short cut codes:
+
+| short|full text |
+|------|---------|
+| N    |not-excited |
+| X    |excited |
+| P    |partially excited |
 
 
 arrangement
 -----------
 
- `short full text`  
- `S     spread (have the vulva lips been spread apart?)`  
- `R     retracted (is the foreskin retracted?)`  
- `A     arranged (arrange in a fashion to illustrate a body feature)`  
- `N     natural (as it appears when becoming unclothed)`  
+Allowable values and their short cut codes:
+
+| short|full text |
+|------|---------|
+| S    |spread (have the vulva lips been spread apart?) |
+| R    |retracted (is the foreskin retracted?) |
+| A    |arranged (arrange in a fashion to illustrate a body feature) |
+| N    |natural (as it appears when becoming unclothed) |
 
 
 pose
 ----
 
- `short full text`  
- `S     standing`  
- `T     sitting`  
- `L     lying`  
+Allowable values and their short cut codes:
+
+| short|full text |
+|------|---------|
+| S    |standing |
+| T    |sitting |
+| L    |lying |
 
 
 mother
 ------
 
-Is the model a mother? If so, how was the child/children delivered?
+Is the model a mother? If so, how was/were the child/children delivered?
 
- `no`   
- `vaginal`  
- `caesarean`  
+| Allowable values |
+| --------- |
+| female |
+| no` |
+| vaginal |
+| caesarean |
 
 
 comment
@@ -169,16 +182,19 @@ modification
 
 Indicates modifciation of the model. Accepted values, an array of one or more of the following:
 
- `pregnancy`  
- `nursed`  
- `circumcised`  
- `augmentated`  
- `episiotomy`  
- `masectomy `  
- `labiaplasty`  
- `female-to-male`  
- `male-to-female`  
- `fgm`  
+| Allowable values |
+| --------- |
+| female |
+| pregnancy |
+| nursed |
+| circumcised |
+| augmentated |
+| episiotomy |
+| masectomy  |
+| labiaplasty |
+| female-to-male |
+| male-to-female |
+| fgm |
 
 
 tags
