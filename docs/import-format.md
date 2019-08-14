@@ -39,7 +39,7 @@ following keys:
     "mother":         "vaginal",
     "ethnicity":      "of carribean descent",
     "tags":           ["#post-pregnancy"],
-    "modification":   ["pregnancy", "breastfed"]
+    "modification":   ["pregnancy", "breastfed"],
     "comment":        "Model was breastfeeding at the time.",       
     "other":          {}
 }
@@ -67,11 +67,11 @@ gender
 
 Allowable values: 
  
- `female`
- `male`
- `trans-mtf`
- `trans-ftm`
- `other`
+ `female`  
+ `male`  
+ `trans-mtf`  
+ `trans-ftm`  
+ `other`  
 
 If other is given for gender, a command giving more information must be present in
 the "gender_comment" field.
@@ -99,53 +99,53 @@ body_type
 
 Allowable values:
 
- `thin`
- `fit`
- `full`
- `overweight`
+ `thin`  
+ `fit`  
+ `full`  
+ `overweight`  
 
 bodypart
 --------
 
 Allowable values:
 
- `short full text`
- `Y     body`
- `B     breast`
- `S     bust`
- `U     buttocks`
- `N     nipple`
- `P     penis`
- `T     torso`
- `V     vulva`
+ `short full text`  
+ `Y     body`  
+ `B     breast`  
+ `S     bust`  
+ `U     buttocks`  
+ `N     nipple`  
+ `P     penis`  
+ `T     torso`  
+ `V     vulva`  
 
 
 excited 
 -------
 
- `short full text`
- `N     not-excited`
- `X     excited`
- `P     partially excited`
+ `short full text`  
+ `N     not-excited`  
+ `X     excited`  
+ `P     partially excited`  
 
 
 arrangement
 -----------
 
- `short full text`
- `S     spread (have the vulva lips been spread apart?)`
- `R     retracted (is the foreskin retracted?)`
- `A     arranged (arrange in a fashion to illustrate a body feature)`
- `N     natural (as it appears when becoming unclothed)`
+ `short full text`  
+ `S     spread (have the vulva lips been spread apart?)`  
+ `R     retracted (is the foreskin retracted?)`  
+ `A     arranged (arrange in a fashion to illustrate a body feature)`  
+ `N     natural (as it appears when becoming unclothed)`  
 
 
 pose
 ----
 
- `short full text`
- `S     standing`
- `T     sitting`
- `L     lying`
+ `short full text`  
+ `S     standing`  
+ `T     sitting`  
+ `L     lying`  
 
 
 mother
@@ -153,9 +153,9 @@ mother
 
 Is the model a mother? If so, how was the child/children delivered?
 
- `no` 
- `vaginal`
- `caesarean`
+ `no`   
+ `vaginal`  
+ `caesarean`  
 
 
 comment
@@ -169,16 +169,16 @@ modification
 
 Indicates modifciation of the model. Accepted values, an array of one or more of the following:
 
- `pregnancy`
- `nursed`
- `circumcised`
- `augmentated`
- `episiotomy`
- `masectomy `
- `labiaplasty`
- `female-to-male`
- `male-to-female`
- `fgm`
+ `pregnancy`  
+ `nursed`  
+ `circumcised`  
+ `augmentated`  
+ `episiotomy`  
+ `masectomy `  
+ `labiaplasty`  
+ `female-to-male`  
+ `male-to-female`  
+ `fgm`  
 
 
 tags
@@ -188,7 +188,7 @@ An array of tags (without hashes) that may also apply to this model.
 
 "#large-hips #hip-scar" would be expressed in JSON as:
 
-["large-hips", "hip-scar"]
+ `["large-hips", "hip-scar"]`  
 
 
 other
