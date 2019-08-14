@@ -99,12 +99,10 @@ body_type
 
 Allowable values:
 
-`
-thin
-fit
-full
-overweight
-`
+`thin`
+`fit`
+`full`
+`overweight`
 
 bodypart
 --------
