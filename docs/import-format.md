@@ -166,8 +166,7 @@ Is the model a mother? If so, how was/were the child/children delivered?
 
 | Allowable values |
 | --------- |
-| female |
-| no` |
+| not |
 | vaginal |
 | caesarean |
 
