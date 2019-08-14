@@ -104,12 +104,13 @@ body_type
 | full |
 | overweight |
 
+
 bodypart
 --------
 
 Allowable values and their short cut codes:
 
-| short full|text |
+| short| full text |
 |------|---------|
 | Y    |body |
 | B    |breast |
@@ -171,12 +172,6 @@ Is the model a mother? If so, how was/were the child/children delivered?
 | caesarean |
 
 
-comment
--------
-
-General comment about the model not captured in other metadata. Free form text.
-
-
 modification
 ------------
 
@@ -205,6 +200,12 @@ An array of tags (without hashes) that may also apply to this model.
 "#large-hips #hip-scar" would be expressed in JSON as:
 
  `["large-hips", "hip-scar"]`  
+
+
+comment
+-------
+
+General comment about the model not captured in other metadata. Free form text.
 
 
 other
