@@ -78,7 +78,6 @@ def main(invert, lresolution, mresolution):
         print("Cannot copy files. Error: ", err)
         sys.exit(-1)
 
-    print(jmanifest)
     code = bundle_code(manifest=jmanifest)
     dest = os.path.join("/dest", "%s-bundle.zip" % code)
     with ZipFile(dest, 'w') as zip:
