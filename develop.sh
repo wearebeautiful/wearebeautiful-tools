@@ -9,7 +9,13 @@ else
 fi
 
 # Start the redis container 
-docker rm -f wab-redis ; docker run --name wab-redis -p 6379:6379 -d redis
+CHECK_REDIS=`docker ps | grep wab-redis`
+if [ -z "$CHECK_REDIS" ]; then
+    echo "stop redis, if it happens to be stopped"
+    docker rm -f wab-redis
+    echo "start redis"
+    docker run --name wab-redis -p 6379:6379 -d redis
+fi
 
 # set the env
 export FLASK_APP=wearebeautiful/app.py
