@@ -31,6 +31,15 @@
         </div>
       </div>
 
+      <div>
+         Recently created bundles:
+         <ul>
+          {% for link in links %}
+            <li><a href="{{ link[0] }}">{{ link[1] }}</a></li>  
+          {% endfor %}
+         </ul>
+      </div>
+
   </div>
 </div>
 {% endblock%}

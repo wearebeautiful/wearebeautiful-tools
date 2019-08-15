@@ -37,7 +37,13 @@ def admin_new():
 @bp.route('/upload', methods=['GET'])
 @auth.login_required
 def admin_upload_get():
-    return render_template("admin/upload.html")
+
+    files = os.listdir(NEW_BUNDLE_DIR)
+    links = []
+    for f in files:
+        links.append(("/static/new_bundles/" + f, f))
+
+    return render_template("admin/upload.html", links=links)
 
 
 @bp.route('/upload', methods=['POST'])
