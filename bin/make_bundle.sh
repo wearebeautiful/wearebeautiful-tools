@@ -26,6 +26,4 @@ echo "dest $DEST"
 
 mkdir -p $DEST
 docker rm -f mesh 
-docker run -it --name mesh -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/wearebeautiful/bin/make_bundle.py $INVERT $LRES $MRES
-
-exit 0
+exec docker run -it --name mesh -v $SRC:/src -v $DEST:/dest wearebeautiful:mesh /code/wearebeautiful/bin/make_bundle.py $INVERT $LRES $MRES

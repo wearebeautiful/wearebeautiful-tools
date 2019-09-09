@@ -130,6 +130,8 @@ def admin_upload_raw__post():
 
     cp = subprocess.run(["bin/make_bundle.sh", "%f" % LOW_RES_SEGMENT_LEN, "%f" % MEDIUM_RES_SEGMENT_LEN, tmp_dir, 
         "static/new_bundles"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if cp.returncode == 137:
+        raise BadRequest(response=Response(response=str("OOM: out of memory."), status=500))
     if cp.returncode != 0:
         raise BadRequest(response=Response(response=str(cp.stdout), status=400))
 
