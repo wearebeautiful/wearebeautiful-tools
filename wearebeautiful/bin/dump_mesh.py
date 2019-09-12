@@ -4,6 +4,7 @@ import sys
 import os
 from time import time
 import numpy as np
+from transform import get_fast_bbox
 
 import pymesh
 import click
@@ -14,14 +15,14 @@ def invert(src_file):
 
     src_path = os.path.join("/src", src_file)
     mesh = pymesh.meshio.load_mesh(src_path);
-    mesh = pymesh.compute_outer_hull(mesh);
+    bbox = get_fast_bbox(mesh)
 
     print("model %s" % src_file)
     print(" vertices: %8s" % ("{:,}".format(mesh.num_vertices)))
     print("    faces: %8s" % ("{:,}".format(mesh.num_faces)))
-    print("dimension: (%-.5f %-.5f %-.5f)" % (mesh.bbox[1][0] - mesh.bbox[0][0],
-                                  mesh.bbox[1][1] - mesh.bbox[0][1], 
-                                  mesh.bbox[1][2] - mesh.bbox[0][2]))
+    print("dimension: (%-.5f %-.5f %-.5f)" % (bbox[1][0] - bbox[0][0],
+                                  bbox[1][1] - bbox[0][1], 
+                                  bbox[1][2] - bbox[0][2]))
 
 
 def usage(command):
