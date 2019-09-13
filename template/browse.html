@@ -9,14 +9,9 @@
       We have the following models available:
       </p>
 
-      <div class="browse-section">Vulva</div>
-      {{ list_bundles(bundles, "vulva") }}
-
-      <div class="browse-section">Penis</div>
-      {{ list_bundles(bundles, "penis") }}
-
-      <div class="browse-section">Other</div>
-      {{ list_bundles(bundles, "", anatomical=True) }}
+      {% for section in order %}
+        {{ list_bundles(sections[section].bundles, sections[section].name) }}
+      {% endfor %}
 
       <br/>
       <br/>
@@ -36,9 +31,9 @@
   </div>
 {% endblock%}
 
-{% macro list_bundles(bundles, type, anatomical = False) -%}
+{% macro list_bundles(bundles, name, anatomical = False) -%}
+  <div class="browse-section">{{ name }}</div>
   {% for bundle in bundles %}
-    {% if (bundle['body_part'] == type and bundle['id'] != "000000") or (anatomical and bundle['id'] == "000000") %}
         <div class="browse-model"><a href="/view/{{ bundle['code'] }}">{{ bundle['code'] }}</a>:
         {% if bundle['id'] != "000000" %}
             {{bundle['age'] }} years old from {{ bundle['country'] }} 
@@ -51,6 +46,5 @@
           {{bundle['arrangement'] }} arrangement,
           {{bundle['excited'] }}
         </div>
-    {% endif %}
-  {% endfor %}
+    {% endfor %}
 {%- endmacro %}

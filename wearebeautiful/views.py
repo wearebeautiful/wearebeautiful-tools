@@ -15,7 +15,25 @@ def index():
 @bp.route('/browse')
 @auth.login_required
 def browse():
-    return render_template("browse.html", bundles = get_bundle_id_list(current_app.redis))
+    bundles = get_bundle_id_list(current_app.redis)
+
+    sections = { }
+    order = sorted(list(set([ x['body_part'] for x in bundles])))
+    for section in order:
+        sections[section] = { 
+            'name' : section[0].upper() + section[1:],
+            'bundles' : []
+        }                  
+    sections['other'] =  { 'name' : "Other", 'bundles' : [] }
+    order.append('other')
+
+    for bundle in bundles:
+        if bundle['id'] == '000000':
+            sections['other']['bundles'].append(bundle)
+        else:
+            sections[bundle['body_part']]['bundles'].append(bundle)
+
+    return render_template("browse.html", order = order, sections = sections)
 
 
 @bp.route('/team')
