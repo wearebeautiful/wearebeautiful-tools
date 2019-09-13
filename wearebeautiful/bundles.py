@@ -109,6 +109,8 @@ def load_bundle_data_into_redis(app):
         data = { 
             'id' : bundle['id'], 
             'body_part' : bundle['body_part'], 
+            'age' : bundle['age'], 
+            'country' : bundle['country'], 
             'pose' : bundle['pose'], 
             'arrangement' : bundle['arrangement'] ,
             'excited' : bundle['excited'],

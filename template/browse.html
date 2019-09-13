@@ -6,22 +6,51 @@
     <div class="col-11 text-div">
       <h2>Browse</h2>
       <p>
-      Our most recent models: 
+      We have the following models available:
       </p>
 
-      <ul>
-      {% for bundle in bundles %}
-        <li><a href="/view/{{ bundle['code'] }}">{{ bundle['id'] }}: 
-                 {{bundle['body_part']}}, 
-                 {{bundle['pose'] }}, 
-                 {{bundle['arrangement'] }},
-                 {{bundle['excited'] }}
-                 </a></li>
-      {% endfor %}
-      </ul>
+      <div class="browse-section">Vulva</div>
+      {{ list_bundles(bundles, "vulva") }}
+
+      <div class="browse-section">Penis</div>
+      {{ list_bundles(bundles, "penis") }}
+
+      <div class="browse-section">Other</div>
+      {{ list_bundles(bundles, "", anatomical=True) }}
+
+      <br/>
+      <br/>
+      <p>
+      <b>Important note:</b> We aim to have a balance of models on the site.
+      </p>
+      <p>
+      However, this isn't quite possible yet, since we do not have proper model release contracts in place yet.
+      The models available here are provided on a trust basis in order for us to gather support to launch
+      the site/company. We are eternally grateful to the models who have agreed to participate in this preview
+      version of our site, but this limitation does not allow us to be as balanced as we wish to be. For now!
+      </p>
 
     </div>
     <div class="col">
     </div>
   </div>
 {% endblock%}
+
+{% macro list_bundles(bundles, type, anatomical = False) -%}
+  {% for bundle in bundles %}
+    {% if (bundle['body_part'] == type and bundle['id'] != "000000") or (anatomical and bundle['id'] == "000000") %}
+        <div class="browse-model"><a href="/view/{{ bundle['code'] }}">{{ bundle['code'] }}</a>:
+        {% if bundle['id'] != "000000" %}
+            {{bundle['age'] }} years old from {{ bundle['country'] }} 
+        {% else %}
+            anatomical model
+        {% endif %}
+        </div>
+        <div>
+          {{bundle['pose'] }} in a  
+          {{bundle['arrangement'] }} arrangement,
+          {{bundle['excited'] }}
+        </div>
+    {% endif %}
+  {% endfor %}
+{%- endmacro %}
