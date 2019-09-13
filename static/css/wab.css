@@ -50,6 +50,15 @@ h2 {
     padding: 10px;
 }
 
+.browse-section {
+    font-size: 15pt;
+    margin-top: 1em;
+}
+.browse-model {
+    font-size: 13pt;
+    margin-top: 1em;
+}
+
 .txt-cell {
     background: #EEE; 
 }
@@ -66,6 +75,7 @@ h2 {
 
 .navbar {
   z-index: 3;
+  font-size: 15pt;
 }
 
 .one {
