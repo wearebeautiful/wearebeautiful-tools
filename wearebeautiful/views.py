@@ -60,6 +60,11 @@ def view_root():
 def view_simple():
     return redirect(url_for("index.browse"))
 
+@bp.route('/statistics')
+@auth.login_required
+def statistics():
+    return redirect(url_for("index.statistics"))
+
 @bp.route('/view/<model>')
 @auth.login_required
 def view(model):
