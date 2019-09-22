@@ -6,32 +6,11 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
+from transform import rotate, scale, translate, get_fast_bbox, invert
 
 import pymesh
 import click
 
-
-def get_fast_bbox(mesh):
-
-    bbox= [[100000,100000,10000], [0,0, 0]]
-    for vertex in mesh.vertices:
-
-        if vertex[0] > bbox[1][0]:
-            bbox[1][0] = vertex[0]
-        if vertex[0] < bbox[0][0]:
-            bbox[0][0] = vertex[0]
-
-        if vertex[1] > bbox[1][1]:
-            bbox[1][1] = vertex[1]
-        if vertex[1] < bbox[0][1]:
-            bbox[0][1] = vertex[1]
-
-        if vertex[2] > bbox[1][2]:
-            bbox[1][2] = vertex[2]
-        if vertex[2] < bbox[0][2]:
-            bbox[0][2] = vertex[2]
-
-    return bbox
 
 BBOX_SHRINK_MM = 1
 OUTER_BOX_MM = 15
@@ -63,6 +42,7 @@ def apply_id(mesh):
     bbox[1][0] += OUTER_BOX_MM
     bbox[1][1] += OUTER_BOX_MM
 
+    print("make box")
     outer_box = pymesh.generate_box_mesh(bbox[0], bbox[1])
     outer_box = pymesh.boolean(outer_box, inner_box, operation="difference", engine="igl")
 
@@ -87,10 +67,30 @@ def apply_id(mesh):
                                          hook_center[2] + (HOOK_BOX_DEPTH / 2)))
     outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
 
+    print("make code")
+    code = pymesh.meshio.load_mesh("/src/420215CUNT.stl")
+    cbox = get_fast_bbox(code)
+    cbox[0][0] += (cbox[1][0] - cbox[0][1])
+    print("make box")
+    box = pymesh.generate_box_mesh(cbox[0], cbox[1])
+    print(")
+    code = pymesh.boolean(box, code, operation="intersection", engine="igl")
+    return code
 
-#    return outer_box
 
-    return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
+
+    print("invert")
+    code = invert(code)
+    print("scale")
+    code = scale(code, .5)
+    print("rotate")
+    code = rotate(code, (0,0,0), (1, 0, 0), 90)
+    print("glue")
+    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
+
+    return outer_box
+
+#    return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
 def show_bounding_box(mesh): 
