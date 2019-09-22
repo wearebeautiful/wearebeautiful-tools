@@ -36,7 +36,7 @@
   {% for bundle in bundles %}
         <div class="browse-model"><a href="/view/{{ bundle['code'] }}">{{ bundle['code'] }}</a>:
         {% if bundle['id'] != "000000" %}
-            {{bundle['age'] }} years old from {{ bundle['country'] }} 
+            {{ bundle.gender }} with a {{ bundle.body_type }} body. 
         {% else %}
             anatomical model
         {% endif %}
