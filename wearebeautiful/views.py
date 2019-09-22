@@ -63,7 +63,7 @@ def view_simple():
 @bp.route('/statistics')
 @auth.login_required
 def statistics():
-    return redirect(url_for("index.statistics"))
+    return render_template(url_for("index.statistics"))
 
 @bp.route('/view/<model>')
 @auth.login_required
