@@ -67,30 +67,66 @@ def apply_id(mesh):
                                          hook_center[2] + (HOOK_BOX_DEPTH / 2)))
     outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
 
-    print("make code")
-    code = pymesh.meshio.load_mesh("/src/420215CUNT.stl")
-    cbox = get_fast_bbox(code)
-    cbox[0][0] += (cbox[1][0] - cbox[0][1])
-    print("make box")
-    box = pymesh.generate_box_mesh(cbox[0], cbox[1])
-    print(")
-    code = pymesh.boolean(box, code, operation="intersection", engine="igl")
-    return code
+    if 1:
+        print("make code")
+        code = pymesh.meshio.load_mesh("input/883440VSNN.stl")
+
+        print("rotate")
+        code = rotate(code, (0,0,0), (1, 0, 0), 90)
+        code = rotate(code, (0,0,0), (0, 0, 1), 180)
+
+        print("scale")
+        cbox = get_fast_bbox(code)
+        code_w = cbox[1][0] - cbox[0][0]
+        box_w = inner_box_dims[1][0] - inner_box_dims[0][0]
+        print("box w", box_w)
+        print("code w", code_w)
+        scale_x = (box_w * .7)  / code_w
+        print("scale ", scale_x)
+        code = scale(code, scale_x)
+
+        print("translate")
+        cbox = get_fast_bbox(code)
+        code_w = cbox[1][0] - cbox[0][0]
+        trans_x = (code_w / 2.0) + ((box_w - code_w) / 2.0)
+        trans_z = (cbox[1][2] - cbox[0][2]) * .15
+        code = translate(code, (trans_x,0,-trans_z))
+
+        print("glue")
+        outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
 
+    print("make url")
+    url = pymesh.meshio.load_mesh("input/wearebeautiful.info.stl")
 
-    print("invert")
-    code = invert(code)
-    print("scale")
-    code = scale(code, .5)
     print("rotate")
-    code = rotate(code, (0,0,0), (1, 0, 0), 90)
+    url = rotate(url, (0,0,0), (1, 0, 0), 90)
+#    url = rotate(url, (0,0,0), (0, 0, 1), 180)
+
+    print("scale")
+    ubox = get_fast_bbox(url)
+    url_w = ubox[1][0] - ubox[0][0]
+    box_w = inner_box_dims[1][0] - inner_box_dims[0][0]
+    print("box w", box_w)
+    print("url w", url_w)
+    scale_x = (box_w * .7)  / url_w
+    print("scale ", scale_x)
+    url = scale(url, scale_x)
+
+    print("translate")
+    ubox = get_fast_bbox(url)
+    url_w = ubox[1][0] - ubox[0][0]
+    trans_x = (url_w / 2.0) + ((box_w - url_w) / 2.0)
+    trans_y = inner_box_dims[0][1]
+    trans_z = (ubox[1][2] - ubox[0][2]) * .20
+    url = translate(url, (trans_x,trans_y,-trans_z))
+
     print("glue")
-    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
+    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
+#    return outer_box
 
-    return outer_box
-
-#    return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
+    print("final subtract")
+    return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
 def show_bounding_box(mesh): 
@@ -134,9 +170,6 @@ def show_bounding_box(mesh):
 @click.argument("src_file", nargs=1)
 @click.argument("dest_file", nargs=1)
 def solid(src_file, dest_file):
-
-    src_file = os.path.join("/src", src_file)
-    dest_file = os.path.join("/dest", dest_file)
 
     mesh = pymesh.meshio.load_mesh(src_file);
 

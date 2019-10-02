@@ -65,12 +65,17 @@ def flip_mesh(mesh):
     return pymesh.form_mesh(mesh.vertices, np.array(new_faces))
 
 
-def scale_mesh(invert, target_len, in_file, out_file):
+@click.command()
+@click.option('--invert/--no-invert', default=False, help='Flip the normals on the STL file')
+@click.argument("len", nargs=1, type=float)
+@click.argument("in_file", nargs=1)
+@click.argument("out_file", nargs=1)
+def scale(invert, len, in_file, out_file):
 
     mesh = pymesh.meshio.load_mesh(in_file);
 
     print("start: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
-    mesh = fix_mesh(mesh, target_len);
+    mesh = fix_mesh(mesh, len);
     print("  fix: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
 
     if mesh.num_vertices == 0 or mesh.num_faces == 0:
@@ -84,12 +89,7 @@ def scale_mesh(invert, target_len, in_file, out_file):
     pymesh.meshio.save_mesh(out_file, mesh);
 
 
-@click.command()
-@click.option('--invert/--no-invert', default=False, help='Flip the normals on the STL file')
-@click.argument("len", nargs=1, type=float)
-@click.argument("src_dir", nargs=1)
-@click.argument("dest_dir", nargs=1)
-def scale(invert, len, src_dir, dest_dir):
+def scale_multiple(invert, len, src_dir, dest_dir):
 
     filenames = os.listdir(src_dir)
     if not filenames:

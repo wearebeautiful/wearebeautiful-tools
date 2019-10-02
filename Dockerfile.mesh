@@ -6,4 +6,5 @@ RUN pip3 install click
 RUN mkdir /code /src /dest
 WORKDIR /code/wearebeautiful
 
-COPY wearebeautiful /code/wearebeautiful
+# Do not copy anything into the container, we'll mount the local dir to /code/wearebeautiful
+#COPY wearebeautiful /code/wearebeautiful
