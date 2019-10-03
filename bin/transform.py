@@ -1,6 +1,7 @@
 import pymesh
 import numpy as np
 import math
+from scale_mesh import flip_mesh
 
 def get_fast_bbox(mesh):
 
@@ -35,7 +36,7 @@ def rotate(mesh, offset, rotation_axis, rotation_angle):
        returns rotated mesh
     """
     offset = np.array(offset);
-    axis = np.array(rotation_axis);
+    axis = np.array((rotation_axis[1], rotation_axis[0], rotation_axis[2]));
     angle = math.radians(rotation_angle);
     rot = pymesh.Quaternion.fromAxisAngle(axis, angle);
     rot = rot.to_matrix();
@@ -58,7 +59,7 @@ def scale(mesh, scale_factor):
 
     vertices = []
     for vertex in mesh.vertices:
-        vertices.append((vertex[0] * scale_factor, vertex[1] * scale_factor, vertex[2] * scale_factor))
+        vertices.append((vertex[0] * scale_factor[0], vertex[1] * scale_factor[1], vertex[2] * scale_factor[2]))
 
     return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
 
@@ -71,21 +72,12 @@ def translate(mesh, translation_vector):
        returns rotated mesh
     """
 
-    vertices = []
-    for vertex in mesh.vertices:
-        vertices.append((vertex[0] + translation_vector[0], vertex[1] + translation_vector[1], vertex[2] + translation_vector[2]))
-
-    return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
+    pymesh.form_mesh(mesh.vertices + [translation_vector], mesh.faces)
 
 
-def invert(mesh):
-    """
-       mesh is the mesh to be rotated
-       translation_vector the vectory by which the mesh should be translated by
+def mirror(mesh, mirror_axes):
 
-       returns rotated mesh
-    """
+    mesh = scale(mesh, (-1.0, -1.0, -1.0))
+    mesh = flip_mesh(mesh)
+    return mesh
 
-    bbox = get_fast_bbox(mesh)
-    bbox = pymesh.generate_box_mesh(bbox[0], bbox[1])
-    return pymesh.boolean(bbox, mesh, operation="difference", engine="igl")
