@@ -20,10 +20,18 @@ HOOK_BOX_HEIGHT = 10
 HOOK_BOX_WIDTH = 5
 HOOK_BOX_DEPTH = 10 
 
-def apply_id(mesh):
+def apply_id(mesh, rotate_x, rotate_y, rotate_z):
+
+    if rotate_x:
+        mesh = rotate(mesh, (0,0,0), (1, 0, 0), rotate_x)
+
+    if rotate_y:
+        mesh = rotate(mesh, (0,0,0), (0, 1, 0), rotate_z)
+
+    if rotate_z:
+        mesh = rotate(mesh, (0,0,0), (0, 0, 1), rotate_z)
 
     bbox = get_fast_bbox(mesh)
-    print(bbox)
 
     bbox[0][0] += BBOX_SHRINK_MM
     bbox[0][1] += BBOX_SHRINK_MM
@@ -53,7 +61,7 @@ def apply_id(mesh):
                          inner_box_dims[0][1] + (inner_box_dims[1][1] - inner_box_dims[0][1]) / 2.0,
                          inner_box_dims[0][2] + MAGNET_DEPTH)
     magnet_cup = pymesh.generate_cylinder(magnet_center, magnet_center_top, MAGNET_RADIUS, MAGNET_RADIUS - .5, num_segments=64)
-    outer_box = pymesh.boolean(outer_box, magnet_cup, operation="union", engine="igl")
+#    outer_box = pymesh.boolean(outer_box, magnet_cup, operation="union", engine="igl")
 
     hook_center = (inner_box_dims[1][0] - (inner_box_dims[1][0] - inner_box_dims[0][0]) / 8.0, 
                    inner_box_dims[0][1] + (inner_box_dims[1][1] - inner_box_dims[0][1]) / 2.0,
@@ -65,7 +73,7 @@ def apply_id(mesh):
                                         (hook_center[0] + (HOOK_BOX_WIDTH / 2),
                                          hook_center[1] + (HOOK_BOX_HEIGHT / 2),
                                          hook_center[2] + (HOOK_BOX_DEPTH / 2)))
-    outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
+#    outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
 
     if 1:
         print("make code")
@@ -73,7 +81,7 @@ def apply_id(mesh):
 
         print("rotate")
         code = rotate(code, (0,0,0), (1, 0, 0), 90)
-        code = rotate(code, (0,0,0), (0, 0, 1), 180)
+#        code = rotate(code, (0,0,0), (0, 0, 1), 180)
 
         print("scale")
         cbox = get_fast_bbox(code)
@@ -89,36 +97,35 @@ def apply_id(mesh):
         cbox = get_fast_bbox(code)
         code_w = cbox[1][0] - cbox[0][0]
         trans_x = (code_w / 2.0) + ((box_w - code_w) / 2.0)
-        trans_z = (cbox[1][2] - cbox[0][2]) * .15
-        code = translate(code, (trans_x,0,-trans_z))
+        trans_y = -100
+        trans_z = -5
+        code = translate(code, (trans_x,trans_y,-trans_z))
 
         print("glue")
         outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
+#        return outer_box
 
     print("make url")
     url = pymesh.meshio.load_mesh("input/wearebeautiful.info.stl")
 
     print("rotate")
     url = rotate(url, (0,0,0), (1, 0, 0), 90)
-#    url = rotate(url, (0,0,0), (0, 0, 1), 180)
+    url = rotate(url, (0,0,0), (0, 0, 1), 180)
 
     print("scale")
     ubox = get_fast_bbox(url)
     url_w = ubox[1][0] - ubox[0][0]
     box_w = inner_box_dims[1][0] - inner_box_dims[0][0]
-    print("box w", box_w)
-    print("url w", url_w)
     scale_x = (box_w * .7)  / url_w
-    print("scale ", scale_x)
     url = scale(url, scale_x)
 
     print("translate")
     ubox = get_fast_bbox(url)
     url_w = ubox[1][0] - ubox[0][0]
     trans_x = (url_w / 2.0) + ((box_w - url_w) / 2.0)
-    trans_y = inner_box_dims[0][1]
-    trans_z = (ubox[1][2] - ubox[0][2]) * .20
+    trans_y = 5 # inner_box_dims[0][1]
+    trans_z = -5 # -(ubox[1][2] - ubox[0][2]) 
     url = translate(url, (trans_x,trans_y,-trans_z))
 
     print("glue")
@@ -129,54 +136,17 @@ def apply_id(mesh):
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
-def show_bounding_box(mesh): 
-
-    bbox = get_fast_bbox(mesh)
-
-    new_z = bbox[0][2] + 10
-    print("bbox: ", bbox)
-    print("new z: %.f" % new_z)
-
-    bb_point_mesh_0 = pymesh.generate_icosphere(5.0, (bbox[0][0], bbox[0][1], bbox[0][2])) 
-    bb_point_mesh_1 = pymesh.generate_icosphere(5.0, (bbox[1][0], bbox[0][1], bbox[0][2])) 
-    bb_point_mesh_2 = pymesh.generate_icosphere(5.0, (bbox[0][0], bbox[1][1], bbox[0][2])) 
-    bb_point_mesh_3 = pymesh.generate_icosphere(5.0, (bbox[1][0], bbox[1][1], bbox[0][2])) 
-    bb_point_mesh_4 = pymesh.generate_icosphere(5.0, (bbox[0][0], bbox[0][1], bbox[1][2])) 
-    bb_point_mesh_5 = pymesh.generate_icosphere(5.0, (bbox[1][0], bbox[0][1], bbox[1][2])) 
-    bb_point_mesh_6 = pymesh.generate_icosphere(5.0, (bbox[0][0], bbox[1][1], bbox[1][2])) 
-    bb_point_mesh_7 = pymesh.generate_icosphere(5.0, (bbox[1][0], bbox[1][1], bbox[1][2])) 
-
-    print("union 0")
-    new = pymesh.boolean(bb_point_mesh_0, bb_point_mesh_1, operation="union", engine="igl")
-    print("union 1")
-    new = pymesh.boolean(new, bb_point_mesh_2, operation="union", engine="igl")
-    print("union 2")
-    new = pymesh.boolean(new, bb_point_mesh_3, operation="union", engine="igl")
-    print("union 3")
-    new = pymesh.boolean(new, bb_point_mesh_4, operation="union", engine="igl")
-    print("union 4")
-    new = pymesh.boolean(new, bb_point_mesh_5, operation="union", engine="igl")
-    print("union 5")
-    new = pymesh.boolean(new, bb_point_mesh_6, operation="union", engine="igl")
-    print("union 6")
-    new = pymesh.boolean(new, bb_point_mesh_7, operation="union", engine="igl")
-
-    print("union 7")
-    return pymesh.boolean(mesh, new, operation="union", engine="igl")
-
-
 
 @click.command()
 @click.argument("src_file", nargs=1)
 @click.argument("dest_file", nargs=1)
-def solid(src_file, dest_file):
+@click.option('--rotate-x', '-rx', default=0, type=int)
+@click.option('--rotate-y', '-ry', default=0, type=int)
+@click.option('--rotate-z', '-rz', default=0, type=int)
+def solid(src_file, dest_file, rotate_x, rotate_y, rotate_z):
 
     mesh = pymesh.meshio.load_mesh(src_file);
-
-    print("start: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
-    mesh = apply_id(mesh)
-    print("solid: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
-
+    mesh = apply_id(mesh, rotate_x, rotate_y, rotate_z)
     pymesh.meshio.save_mesh(dest_file, mesh);
 
 

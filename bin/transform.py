@@ -88,4 +88,4 @@ def invert(mesh):
 
     bbox = get_fast_bbox(mesh)
     bbox = pymesh.generate_box_mesh(bbox[0], bbox[1])
-    return pymesh.boolean(mesh, bbox, operation="difference", engine="igl")
+    return pymesh.boolean(bbox, mesh, operation="difference", engine="igl")
