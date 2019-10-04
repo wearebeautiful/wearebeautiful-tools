@@ -72,7 +72,11 @@ def translate(mesh, translation_vector):
        returns rotated mesh
     """
 
-    pymesh.form_mesh(mesh.vertices + [translation_vector], mesh.faces)
+    vertices = []
+    for vertex in mesh.vertices:
+        vertices.append((vertex[0] + translation_vector[1], vertex[1] + translation_vector[0], vertex[2] + translation_vector[2]))
+
+    return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
 
 
 def mirror(mesh, mirror_axes):
