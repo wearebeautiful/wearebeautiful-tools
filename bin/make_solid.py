@@ -28,7 +28,7 @@ HOOK_BOX_DEPTH = 10
 LARGE_TEXT_WIDTH = 540
 SMALL_TEXT_WIDTH = 370
 TEXT_HEIGHT = 70
-FONT_FILE = "d-din.bold.ttf"
+FONT_FILE = "d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
 TEXT_STL_FILE = "/tmp/text.stl"
 
@@ -59,16 +59,17 @@ def make_text_image(text, large=False):
 
 
 def make_stl_from_image(image_file):
-    print(image_file)
+
     A = 256 * imread(image_file)
     A = gaussian_filter(A, 1)
     numpy2stl(A, TEXT_STL_FILE, scale=0.25, mask_val=1, solid=True)
+
     return TEXT_STL_FILE
+
 
 def make_text_mesh(text, large):
 
     image = make_text_image(text, large)
-
 
     stl = make_stl_from_image(image)
     os.unlink(image)
@@ -124,7 +125,7 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     return translate(text, (trans_x,trans_y,trans_z))
 
 
-def make_solid(mesh, opts):
+def make_solid(mesh, code, opts):
 
     print("make solid")
 
@@ -218,7 +219,7 @@ def make_solid(mesh, opts):
     outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
 
     print("make code")
-    code = make_text_mesh("883440VSNN", False)
+    code = make_text_mesh(code, False)
     code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
     outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
@@ -231,6 +232,7 @@ def make_solid(mesh, opts):
 
 
 @click.command()
+@click.argument("code", nargs=1)
 @click.argument("src_file", nargs=1)
 @click.argument("dest_file", nargs=1)
 @click.option('--rotate-x', '-rx', default=0, type=int)
@@ -251,7 +253,7 @@ def make_solid(mesh, opts):
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
 @click.option('--text-depth', '-', default=.7, type=float)
-def solid(src_file, dest_file, **opts):
+def solid(code, src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
         print("Cannot use url_top and url_bottom at the same time. pick one!")
@@ -280,7 +282,7 @@ def solid(src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    mesh = make_solid(mesh, opts)
+    mesh = make_solid(mesh, code, opts)
     pymesh.meshio.save_mesh(dest_file, mesh);
 
 
