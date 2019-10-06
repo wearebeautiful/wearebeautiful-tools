@@ -13,7 +13,6 @@ import pymesh
 import click
 
 
-BBOX_SHRINK_MM = 1
 OUTER_BOX_MM = 15
 TEXT_INSET_DEPTH = 1
 MAGNET_RADIUS = 30 / 2.0
@@ -94,11 +93,11 @@ def make_solid(mesh, opts):
 
     bbox = get_fast_bbox(mesh)
 
-    bbox[0][0] += BBOX_SHRINK_MM
-    bbox[0][1] += BBOX_SHRINK_MM
+    bbox[0][0] += opts['crop']
+    bbox[0][1] += opts['crop']
 
-    bbox[1][0] -= BBOX_SHRINK_MM
-    bbox[1][1] -= BBOX_SHRINK_MM
+    bbox[1][0] -= opts['crop']
+    bbox[1][1] -= opts['crop']
 
     inner_box_dims = copy.deepcopy(bbox)
 
@@ -192,6 +191,7 @@ def make_solid(mesh, opts):
 @click.option('--z-offset', '-z', default=2.0, type=float)
 @click.option('--code-scale', '-cz', default=.7, type=float)
 @click.option('--url-scale', '-uz', default=.7, type=float)
+@click.option('--crop', '-c', default=1, type=float)
 def solid(src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
