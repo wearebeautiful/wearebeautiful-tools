@@ -1,10 +1,8 @@
 FROM pymesh/pymesh
 
 RUN apt-get install -u zip
-RUN pip3 install click
+RUN pip3 install numpy 
+RUN pip3 install click scipy numpy stl_tools
+RUN apt-get install -y imagemagick
 
-RUN mkdir /code /src /dest
-WORKDIR /code/wearebeautiful
-
-# Do not copy anything into the container, we'll mount the local dir to /code/wearebeautiful
-#COPY wearebeautiful /code/wearebeautiful
+WORKDIR /code/wab

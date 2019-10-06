@@ -8,6 +8,10 @@ import numpy as np
 from math import fabs, pow, sqrt
 from transform import rotate, scale, translate, get_fast_bbox, mirror
 from scale_mesh import flip_mesh
+import subprocess
+from pylab import imread
+from scipy.ndimage import gaussian_filter
+from stl_tools import numpy2stl
 
 import pymesh
 import click
@@ -21,7 +25,61 @@ HOOK_BOX_HEIGHT = 10
 HOOK_BOX_WIDTH = 5
 HOOK_BOX_DEPTH = 10 
 
-def move_text_to_surface(text, inner_box_dims, side, z_offset, text_scale):
+LARGE_TEXT_WIDTH = 540
+SMALL_TEXT_WIDTH = 370
+TEXT_HEIGHT = 70
+FONT_FILE = "d-din.bold.ttf"
+IMAGE_FILE = "/tmp/text.png"
+TEXT_STL_FILE = "/tmp/text.stl"
+
+
+def make_text_image(text, large=False):
+
+    if large:
+        size = "%dx%d" % (LARGE_TEXT_WIDTH, TEXT_HEIGHT)
+    else:
+        size = "%dx%d" % (SMALL_TEXT_WIDTH, TEXT_HEIGHT)
+
+    try:
+        subprocess.run(["convert", "-size",  size, "xc:black", "/tmp/black.png"], check=True)
+    except subprocess.CalledProcessError as err:
+        print(str(err))
+        sys.exit(-1)
+
+    try:
+        subprocess.run(["convert", "-pointsize", "64", "-font", FONT_FILE, "-fill", "white", "-draw", 
+            'text 10,60 "%s"' % text, "/tmp/black.png", "/tmp/text.png"], check=True)
+    except subprocess.CalledProcessError as err:
+        print(str(err))
+        sys.exit(-1)
+
+    os.unlink("/tmp/black.png")
+
+    return IMAGE_FILE
+
+
+def make_stl_from_image(image_file):
+    print(image_file)
+    A = 256 * imread(image_file)
+    A = gaussian_filter(A, 1)
+    numpy2stl(A, TEXT_STL_FILE, scale=0.25, mask_val=1, solid=True)
+    return TEXT_STL_FILE
+
+def make_text_mesh(text, large):
+
+    image = make_text_image(text, large)
+
+
+    stl = make_stl_from_image(image)
+    os.unlink(image)
+
+    text = pymesh.meshio.load_mesh(stl)
+    os.unlink(stl)
+
+    return text
+
+
+def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
 
     ubox = get_fast_bbox(text)
     text_w = ubox[1][0] - ubox[0][0]
@@ -53,15 +111,15 @@ def move_text_to_surface(text, inner_box_dims, side, z_offset, text_scale):
     trans_x = trans_y = trans_z = 0.0
 
     if side == 'left':
-        trans_x = inner_box_dims[1][1] + ubox[1][1] - TEXT_INSET_DEPTH
+        trans_x = inner_box_dims[1][1] + ubox[1][1] - opts['text_depth']
     elif side == 'right':
-        trans_x = -inner_box_dims[1][1]  - ubox[1][1] + TEXT_INSET_DEPTH
+        trans_x = -inner_box_dims[1][1]  - ubox[1][1] + opts['text_depth']
     elif side == 'bottom':
-        trans_y = -inner_box_dims[1][0]  - ubox[1][0] + TEXT_INSET_DEPTH
+        trans_y = -inner_box_dims[1][0]  - ubox[1][0] + opts['text_depth']
     elif side == 'top':
-        trans_y = inner_box_dims[1][0]  + ubox[1][0] - TEXT_INSET_DEPTH
+        trans_y = inner_box_dims[1][0]  + ubox[1][0] - opts['text_depth']
 
-    trans_z = (inner_box_dims[0][2] - ubox[0][2]) + z_offset
+    trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset']
 
     return translate(text, (trans_x,trans_y,trans_z))
 
@@ -155,13 +213,13 @@ def make_solid(mesh, opts):
         code_side = 'right';
 
     print("make url")
-    url = pymesh.meshio.load_mesh("input/wearebeautiful.info.stl")
-    url = move_text_to_surface(url, inner_box_dims, url_side, opts['z_offset'], opts['url_scale'])
+    url = make_text_mesh("wearebeautiful.info", True)
+    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
     outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
 
     print("make code")
-    code = pymesh.meshio.load_mesh("input/883440VSNN.stl")
-    code = move_text_to_surface(code, inner_box_dims, code_side, opts['z_offset'], opts['code_scale'])
+    code = make_text_mesh("883440VSNN", False)
+    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
     outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
 #return outer_box
@@ -192,6 +250,7 @@ def make_solid(mesh, opts):
 @click.option('--code-scale', '-cz', default=.7, type=float)
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
+@click.option('--text-depth', '-', default=.7, type=float)
 def solid(src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
