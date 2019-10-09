@@ -1,6 +1,6 @@
 import pymesh
-import numpy as np
 import math
+import numpy as np
 from scale_mesh import flip_mesh
 
 def get_fast_bbox(mesh):

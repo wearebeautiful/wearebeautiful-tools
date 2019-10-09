@@ -7,6 +7,7 @@ from time import time
 import numpy as np
 from math import fabs, pow, sqrt
 from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d
+from edge import find_boundary
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
@@ -249,25 +250,27 @@ def make_solid(mesh, code, opts):
 
 def extrude(mesh):
 
-    mesh = pymesh.generate_icosphere(radius = 10, center = np.array((0,0,0)), refinement_order = 5)
-    mesh = translate(mesh, (0.0, 0.0, 12))
+#    mesh = pymesh.generate_icosphere(radius = 10, center = np.array((0,0,0)), refinement_order = 2)
+#    mesh = translate(mesh, (0.0, 0.0, 12))
     bbox = get_fast_bbox(mesh)
 
 
     vertices = list(mesh.vertices)
-    points = [ (vertex[0], vertex[1]) for vertex in mesh.vertices ]
-    hull = Delaunay(np.array(points))
-    print("hull has %d points" % len(hull.vertices))
+    points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
+    edge = find_boundary(points, 2.0)
+    if not edge:
+        print("Source mesh has not enough points to find edge.")
+        sys.exit(-1)
+    edge = edge[0]
+    print("hull has %d points" % len(edge))
 
     floor_vertices = []
     cross_index = {}
     vertex_offset = len(vertices)
-    for i, vertex in enumerate(hull.vertices):
-        print(vertex)
-        floor_vertices.append((points[vertex][0], points[vertex][1]))
-        cross_index[vertex] = i
-
-        vertices.append((mesh.vertices[vertex][0], mesh.vertices[vertex][1], 0.0))
+    for i, vertex in enumerate(edge):
+        floor_vertices.append((points[vertex[0]][0], points[vertex[0]][1]))
+        cross_index[vertex[0]] = i
+        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], 0.0))
 
 #    for i, v in enumerate(vertices):
 #        if i < vertex_offset:
@@ -276,9 +279,8 @@ def extrude(mesh):
 #            print("n %d" % i, v)
 
     edges = []
-    for i, vertex in enumerate(hull.vertices[:-1]):
-        edges.append((cross_index[vertex], cross_index[hull.vertices[i + 1]]))
-    edges.append((cross_index[hull.vertices[-1]], cross_index[hull.vertices[0]]))
+    for i, vertex in enumerate(edge):
+        edges.append((cross_index[vertex[0]], cross_index[vertex[1]]))
 
     # create the bottom of the extrusion
     tri = pymesh.triangle()
@@ -292,15 +294,14 @@ def extrude(mesh):
 
     # create the walls
     faces = []
-    for simplex in hull.simplices:
+    for simplex in edge:
         p0 = simplex[0]
         p1 = simplex[1]
         p2 = cross_index[simplex[1]] + vertex_offset
         p3 = cross_index[simplex[0]] + vertex_offset
-#        print(p0, p1, p2, p3)
 
-        faces.append((p0, p1, p2))
-        faces.append((p0, p2, p3))
+        faces.append((p0, p2, p1))
+        faces.append((p0, p3, p2))
 
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
 
