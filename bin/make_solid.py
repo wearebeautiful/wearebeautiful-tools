@@ -6,11 +6,12 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from transform import rotate, scale, translate, get_fast_bbox, mirror
+from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
 from scipy.ndimage import gaussian_filter
+from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 
 import pymesh
@@ -150,13 +151,16 @@ def make_solid(mesh, code, opts):
     mesh = translate(mesh, (trans_y, trans_x, trans_z))
     bbox = get_fast_bbox(mesh)
 
-    bbox = get_fast_bbox(mesh)
 
     bbox[0][0] += opts['crop']
     bbox[0][1] += opts['crop']
 
     bbox[1][0] -= opts['crop']
     bbox[1][1] -= opts['crop']
+
+    print("inner: ", bbox)
+    bbox[0][2] -= opts['extrude']
+    print("inner ext: ", bbox)
 
     inner_box_dims = copy.deepcopy(bbox)
 
@@ -165,9 +169,13 @@ def make_solid(mesh, code, opts):
     bbox[0][0] -= OUTER_BOX_MM
     bbox[0][1] -= OUTER_BOX_MM
     bbox[0][2] -= OUTER_BOX_MM
+    # tiny debug fudge to not have two faces intersecting each other
+    bbox[0][2] -= .001
 
     bbox[1][0] += OUTER_BOX_MM
     bbox[1][1] += OUTER_BOX_MM
+    print("outer: ", bbox)
+
 
     print("make modifications")
     outer_box = pymesh.generate_box_mesh(bbox[0], bbox[1])
@@ -214,22 +222,96 @@ def make_solid(mesh, code, opts):
         code_side = 'right';
 
     print("make url")
-    url = make_text_mesh("wearebeautiful.info", True)
-    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
-    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
+#    url = make_text_mesh("wearebeautiful.info", True)
+#    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
+#    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
 
-    print("make code")
-    code = make_text_mesh(code, False)
-    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
-    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
+#    print("make code")
+#    code = make_text_mesh(code, False)
+#    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
+#    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
-#return outer_box
+#    return outer_box
+
+#    if opts['extrude']:
+#        bbox = copy.deepcopy(inner_box_dims)
+#        print(bbox)
+#        bbox[1][2] = bbox[0][2]
+#        bbox[0][2] -= opts['extrude']
+#        print(bbox)
+#        extrude_box = pymesh.generate_box_mesh(bbox[0], bbox[1])
+#        mesh = pymesh.boolean(mesh, extrude_box, operation="union", engine="igl")
+        
 
     print("final subtract")
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
+def extrude(mesh):
 
+    mesh = pymesh.generate_icosphere(radius = 10, center = np.array((0,0,0)), refinement_order = 5)
+    mesh = translate(mesh, (0.0, 0.0, 12))
+    bbox = get_fast_bbox(mesh)
+
+
+    vertices = list(mesh.vertices)
+    points = [ (vertex[0], vertex[1]) for vertex in mesh.vertices ]
+    hull = Delaunay(np.array(points))
+    print("hull has %d points" % len(hull.vertices))
+
+    floor_vertices = []
+    cross_index = {}
+    vertex_offset = len(vertices)
+    for i, vertex in enumerate(hull.vertices):
+        print(vertex)
+        floor_vertices.append((points[vertex][0], points[vertex][1]))
+        cross_index[vertex] = i
+
+        vertices.append((mesh.vertices[vertex][0], mesh.vertices[vertex][1], 0.0))
+
+#    for i, v in enumerate(vertices):
+#        if i < vertex_offset:
+#            print("o %d" % i, v)
+#        else:
+#            print("n %d" % i, v)
+
+    edges = []
+    for i, vertex in enumerate(hull.vertices[:-1]):
+        edges.append((cross_index[vertex], cross_index[hull.vertices[i + 1]]))
+    edges.append((cross_index[hull.vertices[-1]], cross_index[hull.vertices[0]]))
+
+    # create the bottom of the extrusion
+    tri = pymesh.triangle()
+    tri.points = floor_vertices
+    tri.max_area = 0.05
+    tri.split_boundary = False
+    tri.verbosity = 0
+    tri.run()
+
+    floor = make_3d(tri.mesh)
+
+    # create the walls
+    faces = []
+    for simplex in hull.simplices:
+        p0 = simplex[0]
+        p1 = simplex[1]
+        p2 = cross_index[simplex[1]] + vertex_offset
+        p3 = cross_index[simplex[0]] + vertex_offset
+#        print(p0, p1, p2, p3)
+
+        faces.append((p0, p1, p2))
+        faces.append((p0, p2, p3))
+
+    walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
+
+    return pymesh.merge_meshes([mesh, walls, make_3d(floor)])
+
+
+
+# New features
+# - Extrude amount
+# - Label offset on face (as %)
+# - Fix right label depth
 
 @click.command()
 @click.argument("code", nargs=1)
@@ -252,7 +334,9 @@ def make_solid(mesh, code, opts):
 @click.option('--code-scale', '-cz', default=.7, type=float)
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
-@click.option('--text-depth', '-', default=.7, type=float)
+@click.option('--text-depth', '-td', default=.7, type=float)
+@click.option('--extrude', '-e', default=0, type=float)
+@click.option('--label-offset', '-o', default=0, type=float)
 def solid(code, src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
@@ -282,7 +366,8 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    mesh = make_solid(mesh, code, opts)
+    mesh = extrude(mesh)
+#    mesh = make_solid(mesh, code, opts)
     pymesh.meshio.save_mesh(dest_file, mesh);
 
 
