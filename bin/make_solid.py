@@ -7,7 +7,7 @@ from time import time
 import numpy as np
 from math import fabs, pow, sqrt
 from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d
-from edge import find_boundary
+from edge import find_border
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
@@ -28,7 +28,7 @@ HOOK_BOX_WIDTH = 5
 HOOK_BOX_DEPTH = 10 
 
 LARGE_TEXT_WIDTH = 540
-SMALL_TEXT_WIDTH = 370
+SMALL_TEXT_WIDTH = 470
 TEXT_HEIGHT = 70
 FONT_FILE = "d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
@@ -150,19 +150,15 @@ def make_solid(mesh, code, opts):
     trans_y = -((width_y / 2.0) + bbox[0][1])
     trans_z = -((width_z / 2.0) + bbox[0][2])
     mesh = translate(mesh, (trans_y, trans_x, trans_z))
-    mesh = extrude(mesh)
-    bbox = get_fast_bbox(mesh)
+    mesh = extrude(mesh, opts['extrude'])
 
+    bbox = get_fast_bbox(mesh)
 
     bbox[0][0] += opts['crop']
     bbox[0][1] += opts['crop']
 
     bbox[1][0] -= opts['crop']
     bbox[1][1] -= opts['crop']
-
-    print("inner: ", bbox)
-    bbox[0][2] -= opts['extrude']
-    print("inner ext: ", bbox)
 
     inner_box_dims = copy.deepcopy(bbox)
 
@@ -176,7 +172,6 @@ def make_solid(mesh, code, opts):
 
     bbox[1][0] += OUTER_BOX_MM
     bbox[1][1] += OUTER_BOX_MM
-    print("outer: ", bbox)
 
 
     print("make modifications")
@@ -241,64 +236,40 @@ def make_solid(mesh, code, opts):
 
 def extrude(mesh, amount):
 
-#    mesh = pymesh.generate_icosphere(radius = 10, center = np.array((0,0,0)), refinement_order = 2)
-#    mesh = translate(mesh, (0.0, 0.0, 12))
     bbox = get_fast_bbox(mesh)
 
-
     vertices = list(mesh.vertices)
+    floor_center_vertex = len(vertices)
+    vertices.append((0.0, 0.0, bbox[0][2] - amount))
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
-
-    edge = find_boundary(points, 6.0)
-    if not edge:
-        print("Source mesh has not enough points to find edge.")
-        sys.exit(-1)
-    edge = edge[0]
-    print("hull has %d points" % len(edge))
+    edges, edge_points = find_border(mesh)
 
     floor_vertices = []
     cross_index = {}
     vertex_offset = len(vertices)
-    for i, vertex in enumerate(edge):
-        floor_vertices.append((points[vertex[0]][0], points[vertex[0]][1]))
+    for i, vertex in enumerate(edges):
+        floor_vertices.append((mesh.vertices[vertex[1]][0], mesh.vertices[vertex[1]][1]))
         cross_index[vertex[0]] = i
         vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], bbox[0][2] - amount))
 
-#    for i, v in enumerate(vertices):
-#        if i < vertex_offset:
-#            print("o %d" % i, v)
-#        else:
-#            print("n %d" % i, v)
-
-    edges = []
-    for i, vertex in enumerate(edge):
-        edges.append((cross_index[vertex[0]], cross_index[vertex[1]]))
-
-    # create the bottom of the extrusion
-    tri = pymesh.triangle()
-    tri.points = floor_vertices
-    tri.max_area = 0.05
-    tri.split_boundary = False
-    tri.verbosity = 0
-    tri.run()
-
-    floor = make_3d(tri.mesh, bbox[0][2] - amount)
-
     # create the walls
     faces = []
-    for simplex in edge:
-        p0 = simplex[0]
-        p1 = simplex[1]
-        p2 = cross_index[simplex[1]] + vertex_offset
-        p3 = cross_index[simplex[0]] + vertex_offset
+    for p0, p1 in edges:
+        p2 = cross_index[p1] + vertex_offset
+        p3 = cross_index[p0] + vertex_offset
 
-        faces.append((p0, p2, p1))
-        faces.append((p0, p3, p2))
+        # walls
+        faces.append((p0, p1, p2))
+        faces.append((p0, p2, p3))
+
+        # floor
+        faces.append((p2, floor_center_vertex, p3))
 
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
 
-    return pymesh.merge_meshes([mesh, walls, floor])
+    mesh = pymesh.merge_meshes([mesh, walls])
+    return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
 
 
@@ -360,9 +331,7 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-#    mesh = make_solid(mesh, code, opts)
-#    mesh = extrude(mesh, opts['extrude'])
-    mesh = find_border(mesh)
+    mesh = make_solid(mesh, code, opts)
     pymesh.meshio.save_mesh(dest_file, mesh);
 
 
