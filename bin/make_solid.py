@@ -120,7 +120,6 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     elif side == 'right':
         trans_x = -inner_box_dims[1][1] - ubox[1][1] + opts['text_depth']
     elif side == 'bottom':
-        print("bottom")
         trans_y = -inner_box_dims[1][0] - ubox[1][0] + opts['text_depth']
     elif side == 'top':
         trans_y = inner_box_dims[1][0] + ubox[1][0] - opts['text_depth']
@@ -184,6 +183,7 @@ def make_solid(mesh, code, opts):
 
     mesh = center_around_origin(mesh)
     mesh = extrude(mesh, opts['extrude'])
+    mesh = center_around_origin(mesh)
     mesh = flip_mesh(mesh)
 
 #    return mesh
