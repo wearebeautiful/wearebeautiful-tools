@@ -85,6 +85,6 @@ def mirror(mesh, mirror_axes):
     mesh = flip_mesh(mesh)
     return mesh
 
-def make_3d(mesh):
-    vertices = [ (vertex[0], vertex[1], 0.0) for vertex in mesh.vertices]
+def make_3d(mesh, offset):
+    vertices = [ (vertex[0], vertex[1], offset) for vertex in mesh.vertices]
     return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)

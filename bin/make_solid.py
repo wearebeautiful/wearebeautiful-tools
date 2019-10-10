@@ -150,6 +150,7 @@ def make_solid(mesh, code, opts):
     trans_y = -((width_y / 2.0) + bbox[0][1])
     trans_z = -((width_z / 2.0) + bbox[0][2])
     mesh = translate(mesh, (trans_y, trans_x, trans_z))
+    mesh = extrude(mesh)
     bbox = get_fast_bbox(mesh)
 
 
@@ -223,32 +224,22 @@ def make_solid(mesh, code, opts):
         code_side = 'right';
 
     print("make url")
-#    url = make_text_mesh("wearebeautiful.info", True)
-#    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
-#    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
+    url = make_text_mesh("wearebeautiful.info", True)
+    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
+    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
 
-#    print("make code")
-#    code = make_text_mesh(code, False)
-#    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
-#    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
+    print("make code")
+    code = make_text_mesh(code, False)
+    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
+    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
 #    return outer_box
-
-#    if opts['extrude']:
-#        bbox = copy.deepcopy(inner_box_dims)
-#        print(bbox)
-#        bbox[1][2] = bbox[0][2]
-#        bbox[0][2] -= opts['extrude']
-#        print(bbox)
-#        extrude_box = pymesh.generate_box_mesh(bbox[0], bbox[1])
-#        mesh = pymesh.boolean(mesh, extrude_box, operation="union", engine="igl")
-        
 
     print("final subtract")
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
-def extrude(mesh):
+def extrude(mesh, amount):
 
 #    mesh = pymesh.generate_icosphere(radius = 10, center = np.array((0,0,0)), refinement_order = 2)
 #    mesh = translate(mesh, (0.0, 0.0, 12))
@@ -257,7 +248,9 @@ def extrude(mesh):
 
     vertices = list(mesh.vertices)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
-    edge = find_boundary(points, 2.0)
+
+
+    edge = find_boundary(points, 6.0)
     if not edge:
         print("Source mesh has not enough points to find edge.")
         sys.exit(-1)
@@ -270,7 +263,7 @@ def extrude(mesh):
     for i, vertex in enumerate(edge):
         floor_vertices.append((points[vertex[0]][0], points[vertex[0]][1]))
         cross_index[vertex[0]] = i
-        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], 0.0))
+        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], bbox[0][2] - amount))
 
 #    for i, v in enumerate(vertices):
 #        if i < vertex_offset:
@@ -290,7 +283,7 @@ def extrude(mesh):
     tri.verbosity = 0
     tri.run()
 
-    floor = make_3d(tri.mesh)
+    floor = make_3d(tri.mesh, bbox[0][2] - amount)
 
     # create the walls
     faces = []
@@ -305,7 +298,7 @@ def extrude(mesh):
 
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
 
-    return pymesh.merge_meshes([mesh, walls, make_3d(floor)])
+    return pymesh.merge_meshes([mesh, walls, floor])
 
 
 
@@ -336,7 +329,7 @@ def extrude(mesh):
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
 @click.option('--text-depth', '-td', default=.7, type=float)
-@click.option('--extrude', '-e', default=0, type=float)
+@click.option('--extrude', '-e', default=2, type=float)
 @click.option('--label-offset', '-o', default=0, type=float)
 def solid(code, src_file, dest_file, **opts):
 
@@ -367,8 +360,9 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    mesh = extrude(mesh)
 #    mesh = make_solid(mesh, code, opts)
+#    mesh = extrude(mesh, opts['extrude'])
+    mesh = find_border(mesh)
     pymesh.meshio.save_mesh(dest_file, mesh);
 
 
