@@ -25,6 +25,18 @@ def get_fast_bbox(mesh):
 
     return bbox
 
+def center_around_origin(mesh):
+
+    bbox = get_fast_bbox(mesh)
+    width_x = bbox[1][0] - bbox[0][0]
+    width_y = bbox[1][1] - bbox[0][1]
+    width_z = bbox[1][2] - bbox[0][2]
+    trans_x = -((width_x / 2.0) + bbox[0][0])
+    trans_y = -((width_y / 2.0) + bbox[0][1])
+    trans_z = -((width_z / 2.0) + bbox[0][2])
+
+    return translate(mesh, (trans_y, trans_x, trans_z))
+
 
 def rotate(mesh, offset, rotation_axis, rotation_angle):
     """

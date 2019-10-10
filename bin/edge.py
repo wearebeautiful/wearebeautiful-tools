@@ -113,7 +113,6 @@ def find_border(mesh):
 
     edges = stitch_boundaries(edges)[0]
     points = list(points)
-    print("%d points of total %s vertices" % (len(edges), len(mesh.vertices)))
 
     return edges, points
 

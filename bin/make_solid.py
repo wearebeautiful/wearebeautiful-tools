@@ -6,7 +6,7 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d
+from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin
 from edge import find_border
 from scale_mesh import flip_mesh
 import subprocess
@@ -84,6 +84,8 @@ def make_text_mesh(text, large):
 
 def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
 
+    text = center_around_origin(text)
+
     ubox = get_fast_bbox(text)
     text_w = ubox[1][0] - ubox[0][0]
     text_h = ubox[1][1] - ubox[0][1]
@@ -116,15 +118,54 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     if side == 'left':
         trans_x = inner_box_dims[1][1] + ubox[1][1] - opts['text_depth']
     elif side == 'right':
-        trans_x = -inner_box_dims[1][1]  - ubox[1][1] + opts['text_depth']
+        trans_x = -inner_box_dims[1][1] - ubox[1][1] + opts['text_depth']
     elif side == 'bottom':
-        trans_y = -inner_box_dims[1][0]  - ubox[1][0] + opts['text_depth']
+        print("bottom")
+        trans_y = -inner_box_dims[1][0] - ubox[1][0] + opts['text_depth']
     elif side == 'top':
-        trans_y = inner_box_dims[1][0]  + ubox[1][0] - opts['text_depth']
+        trans_y = inner_box_dims[1][0] + ubox[1][0] - opts['text_depth']
 
     trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset']
 
     return translate(text, (trans_x,trans_y,trans_z))
+
+
+def extrude(mesh, amount):
+
+    bbox = get_fast_bbox(mesh)
+
+    vertices = list(mesh.vertices)
+    floor_center_vertex = len(vertices)
+    vertices.append((0.0, 0.0, bbox[0][2] - amount))
+    points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
+
+    edges, edge_points = find_border(mesh)
+
+    floor_vertices = []
+    cross_index = {}
+    vertex_offset = len(vertices)
+    for i, vertex in enumerate(edges):
+        floor_vertices.append((mesh.vertices[vertex[1]][0], mesh.vertices[vertex[1]][1]))
+        cross_index[vertex[0]] = i
+        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], bbox[0][2] - amount))
+
+    # create the walls
+    faces = []
+    for p0, p1 in edges:
+        p2 = cross_index[p1] + vertex_offset
+        p3 = cross_index[p0] + vertex_offset
+
+        # walls
+        faces.append((p0, p1, p2))
+        faces.append((p0, p2, p3))
+
+        # floor
+        faces.append((p2, floor_center_vertex, p3))
+
+    walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
+
+    mesh = pymesh.merge_meshes([mesh, walls])
+    return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
 
 def make_solid(mesh, code, opts):
@@ -141,16 +182,11 @@ def make_solid(mesh, code, opts):
     if opts['rotate_z']:
         mesh = rotate(mesh, (0,0,0), (0, 0, 1), opts['rotate_z'])
 
-    # center the surface on the origin
-    bbox = get_fast_bbox(mesh)
-    width_x = bbox[1][0] - bbox[0][0]
-    width_y = bbox[1][1] - bbox[0][1]
-    width_z = bbox[1][2] - bbox[0][2]
-    trans_x = -((width_x / 2.0) + bbox[0][0])
-    trans_y = -((width_y / 2.0) + bbox[0][1])
-    trans_z = -((width_z / 2.0) + bbox[0][2])
-    mesh = translate(mesh, (trans_y, trans_x, trans_z))
+    mesh = center_around_origin(mesh)
     mesh = extrude(mesh, opts['extrude'])
+    mesh = flip_mesh(mesh)
+
+#    return mesh
 
     bbox = get_fast_bbox(mesh)
 
@@ -234,43 +270,6 @@ def make_solid(mesh, code, opts):
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
-def extrude(mesh, amount):
-
-    bbox = get_fast_bbox(mesh)
-
-    vertices = list(mesh.vertices)
-    floor_center_vertex = len(vertices)
-    vertices.append((0.0, 0.0, bbox[0][2] - amount))
-    points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
-
-    edges, edge_points = find_border(mesh)
-
-    floor_vertices = []
-    cross_index = {}
-    vertex_offset = len(vertices)
-    for i, vertex in enumerate(edges):
-        floor_vertices.append((mesh.vertices[vertex[1]][0], mesh.vertices[vertex[1]][1]))
-        cross_index[vertex[0]] = i
-        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], bbox[0][2] - amount))
-
-    # create the walls
-    faces = []
-    for p0, p1 in edges:
-        p2 = cross_index[p1] + vertex_offset
-        p3 = cross_index[p0] + vertex_offset
-
-        # walls
-        faces.append((p0, p1, p2))
-        faces.append((p0, p2, p3))
-
-        # floor
-        faces.append((p2, floor_center_vertex, p3))
-
-    walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
-
-    mesh = pymesh.merge_meshes([mesh, walls])
-    return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
-
 
 
 # New features
@@ -332,7 +331,10 @@ def solid(code, src_file, dest_file, **opts):
 
     mesh = pymesh.meshio.load_mesh(src_file);
     mesh = make_solid(mesh, code, opts)
+    print("is manifold: ", mesh.is_manifold())
+    print("is closed: ", mesh.is_closed())
     pymesh.meshio.save_mesh(dest_file, mesh);
+    print("done!")
 
 
 def usage(command):
