@@ -34,6 +34,10 @@ FONT_FILE = "d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
 TEXT_STL_FILE = "/tmp/text.stl"
 
+def save_mesh(filename, mesh):
+    print("[debug] wrote %s" % filename)
+    pymesh.meshio.save_mesh(filename, mesh)
+
 
 def make_text_image(text, large=False):
 
@@ -129,13 +133,16 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     return translate(text, (trans_x,trans_y,trans_z))
 
 
-def extrude(mesh, amount):
+def extrude(mesh, opts):
 
+    amount = opts['extrude']
     bbox = get_fast_bbox(mesh)
 
     vertices = list(mesh.vertices)
     floor_center_vertex = len(vertices)
-    vertices.append((0.0, 0.0, bbox[0][2] - amount))
+
+    center = (bbox[0][0] + ((bbox[1][0] - bbox[0][0]) / 2.0), bbox[0][1] + ((bbox[1][1] - bbox[0][1]) / 2.0), bbox[0][2] - amount)
+    vertices.append(center)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
     edges, edge_points = find_border(mesh)
@@ -159,14 +166,26 @@ def extrude(mesh, amount):
         faces.append((p0, p2, p3))
 
         # floor
-        faces.append((p2, floor_center_vertex, p3))
+        if opts['floor']:
+            faces.append((p2, floor_center_vertex, p3))
 
+    # make the walls
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
+    if opts['flip_walls']:
+        walls = flip_mesh(walls)
+    if opts['debug']:
+        save_mesh("debug/walls.stl", walls);
 
     mesh = pymesh.merge_meshes([mesh, walls])
+    if opts['debug']:
+        save_mesh("debug/merged.stl", mesh);
+
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
-
+# TODO: Detect inside out meshes, turn right side in.
+#       Output intermediate models into a debug dir
+#       Do I need the floor vertices?
+#       Make extrude optional
 def make_solid(mesh, code, opts):
 
     print("make solid")
@@ -182,19 +201,25 @@ def make_solid(mesh, code, opts):
         mesh = rotate(mesh, (0,0,0), (0, 0, 1), opts['rotate_z'])
 
     mesh = center_around_origin(mesh)
-    mesh = extrude(mesh, opts['extrude'])
-    mesh = center_around_origin(mesh)
-    mesh = flip_mesh(mesh)
 
-#    return mesh
+    if opts['walls']:
+        mesh = extrude(mesh, opts)
+        mesh = center_around_origin(mesh)
+
+    if opts['flip_after_extrude']:
+        mesh = flip_mesh(mesh)
+
+    if opts['debug']:
+        save_mesh("debug/extruded.stl", mesh);
 
     bbox = get_fast_bbox(mesh)
 
-    bbox[0][0] += opts['crop']
-    bbox[0][1] += opts['crop']
+    if opts['crop']:
+        bbox[0][0] += opts['crop']
+        bbox[0][1] += opts['crop']
 
-    bbox[1][0] -= opts['crop']
-    bbox[1][1] -= opts['crop']
+        bbox[1][0] -= opts['crop']
+        bbox[1][1] -= opts['crop']
 
     inner_box_dims = copy.deepcopy(bbox)
 
@@ -234,7 +259,8 @@ def make_solid(mesh, code, opts):
                                          hook_center[1] + (HOOK_BOX_HEIGHT / 2),
                                          hook_center[2] + (HOOK_BOX_DEPTH / 2)))
 #    outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
-
+#    if opts['debug']:
+#        save_mesh("debug/modified.stl", outer_box);
 
     if opts['url_top']:
         url_side = 'top';
@@ -264,7 +290,8 @@ def make_solid(mesh, code, opts):
     code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
     outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
-#    return outer_box
+    if opts['debug']:
+        save_mesh("debug/before-subtract.stl", outer_box);
 
     print("final subtract")
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
@@ -301,6 +328,11 @@ def make_solid(mesh, code, opts):
 @click.option('--text-depth', '-td', default=.7, type=float)
 @click.option('--extrude', '-e', default=2, type=float)
 @click.option('--label-offset', '-o', default=0, type=float)
+@click.option('--walls', '-w', is_flag=True, default=True)
+@click.option('--floor', '-f', is_flag=True, default=True)
+@click.option('--flip-after-extrude', '-fl', is_flag=True, default=False)
+@click.option('--flip-walls', '-fw', is_flag=True, default=False)
+@click.option('--debug', '-d', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
