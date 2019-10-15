@@ -11,7 +11,7 @@ import numpy as np
 import pymesh
 import click
 
-def asplode_mesh(mesh, scale):
+def resize_mesh(mesh, scale):
     new_faces = []
     for face in mesh.faces:
         new_face = []
@@ -27,10 +27,10 @@ def asplode_mesh(mesh, scale):
 @click.argument("scale", nargs=1, type=float)
 @click.argument("in_file", nargs=1)
 @click.argument("out_file", nargs=1)
-def asplode(scale, in_file, out_file):
+def resize(scale, in_file, out_file):
 
     mesh = pymesh.meshio.load_mesh(in_file)
-    mesh = asplode_mesh(mesh, scale)
+    mesh = resize_mesh(mesh, scale)
     pymesh.meshio.save_mesh(out_file, mesh)
 
 
@@ -40,6 +40,6 @@ def usage(command):
 
 
 if __name__ == "__main__":
-    print("asplode_mesh.py running, silliness im dorf. <3\n")
-    asplode()
+    print("resize_mesh.py running, silliness im dorf. <3\n")
+    resize()
     sys.exit(0)
