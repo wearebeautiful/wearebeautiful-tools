@@ -34,9 +34,14 @@ FONT_FILE = "d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
 TEXT_STL_FILE = "/tmp/text.stl"
 
+file_index = 0
 def save_mesh(filename, mesh):
-    print("[debug] wrote %s" % filename)
+    global file_index
+
+    filename = os.path.join("debug", "%02d-%s.stl" % (file_index, filename))
+    file_index += 1
     pymesh.meshio.save_mesh(filename, mesh)
+    print("wrote %s" % filename)
 
 
 def make_text_image(text, large=False):
@@ -174,11 +179,11 @@ def extrude(mesh, opts):
     if opts['flip_walls']:
         walls = flip_mesh(walls)
     if opts['debug']:
-        save_mesh("debug/walls.stl", walls);
+        save_mesh("walls", walls);
 
     mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
-        save_mesh("debug/merged.stl", mesh);
+        save_mesh("merged.stl", mesh);
 
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
@@ -200,9 +205,13 @@ def make_solid(mesh, code, opts):
     if opts['rotate_z']:
         mesh = rotate(mesh, (0,0,0), (0, 0, 1), opts['rotate_z'])
 
+    if opts['debug']:
+        save_mesh("after-orient", mesh);
+
     mesh = center_around_origin(mesh)
 
     if opts['walls']:
+        print("extrude ...")
         mesh = extrude(mesh, opts)
         mesh = center_around_origin(mesh)
 
@@ -210,7 +219,7 @@ def make_solid(mesh, code, opts):
         mesh = flip_mesh(mesh)
 
     if opts['debug']:
-        save_mesh("debug/extruded.stl", mesh);
+        save_mesh("after-extruded", mesh);
 
     bbox = get_fast_bbox(mesh)
 
@@ -260,7 +269,7 @@ def make_solid(mesh, code, opts):
                                          hook_center[2] + (HOOK_BOX_DEPTH / 2)))
 #    outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
 #    if opts['debug']:
-#        save_mesh("debug/modified.stl", outer_box);
+#        save_mesh("modified", outer_box);
 
     if opts['url_top']:
         url_side = 'top';
@@ -291,7 +300,7 @@ def make_solid(mesh, code, opts):
     outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
     if opts['debug']:
-        save_mesh("debug/before-subtract.stl", outer_box);
+        save_mesh("before-subtract", outer_box);
 
     print("final subtract")
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
@@ -362,6 +371,7 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
+    save_mesh("after-load", mesh);
     mesh = make_solid(mesh, code, opts)
     print("is manifold: ", mesh.is_manifold())
     print("is closed: ", mesh.is_closed())

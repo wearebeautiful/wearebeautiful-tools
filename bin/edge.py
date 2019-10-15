@@ -1,4 +1,5 @@
 import math
+import sys
 import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
@@ -110,6 +111,10 @@ def find_border(mesh):
             edges.add((int(p0), int(p1)))
             points.add(int(p0))
             points.add(int(p1))
+    
+    if len(edges) == 0:
+        print("Could not find edge of the surface. Is this a solid??")
+        sys.exit(-1)
 
     edges = stitch_boundaries(edges)[0]
     points = list(points)
