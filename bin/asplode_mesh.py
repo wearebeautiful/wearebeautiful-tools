@@ -25,12 +25,13 @@ def asplode_mesh(mesh, scale):
 
 @click.command()
 @click.argument("scale", nargs=1, type=float)
-@click.argument("src_file", nargs=1)
-def asplode(scale, src_file):
+@click.argument("in_file", nargs=1)
+@click.argument("out_file", nargs=1)
+def asplode(scale, in_file, out_file):
 
-    stl_file = os.path.join("/src", src_file)
-    mesh = pymesh.meshio.load_mesh(stl_file);
-    pymesh.meshio.save_mesh(stl_file, asplode_mesh(mesh, scale));
+    mesh = pymesh.meshio.load_mesh(in_file)
+    mesh = asplode_mesh(mesh, scale)
+    pymesh.meshio.save_mesh(out_file, mesh)
 
 
 def usage(command):
