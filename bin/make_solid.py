@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import sys
 import os
@@ -167,8 +166,9 @@ def extrude(mesh, opts):
         p3 = cross_index[p0] + vertex_offset
 
         # walls
-        faces.append((p0, p1, p2))
-        faces.append((p0, p2, p3))
+        if opts['walls']:
+            faces.append((p0, p1, p2))
+            faces.append((p0, p2, p3))
 
         # floor
         if opts['floor']:
@@ -183,7 +183,7 @@ def extrude(mesh, opts):
 
     mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
-        save_mesh("merged.stl", mesh);
+        save_mesh("merged", mesh);
 
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
@@ -210,7 +210,7 @@ def make_solid(mesh, code, opts):
 
     mesh = center_around_origin(mesh)
 
-    if opts['walls']:
+    if not opts['no_extrude']:
         print("extrude ...")
         mesh = extrude(mesh, opts)
         mesh = center_around_origin(mesh)
@@ -342,6 +342,7 @@ def make_solid(mesh, code, opts):
 @click.option('--flip-after-extrude', '-fl', is_flag=True, default=False)
 @click.option('--flip-walls', '-fw', is_flag=True, default=False)
 @click.option('--debug', '-d', is_flag=True, default=False)
+@click.option('--no-extrude', '-n', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):
 
     if opts['url_top'] and opts['url_bottom']:
@@ -371,7 +372,6 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    save_mesh("after-load", mesh);
     mesh = make_solid(mesh, code, opts)
     print("is manifold: ", mesh.is_manifold())
     print("is closed: ", mesh.is_closed())
