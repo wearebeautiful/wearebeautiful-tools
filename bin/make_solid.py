@@ -5,7 +5,7 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin
+from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
 from edge import find_border
 from scale_mesh import flip_mesh
 import subprocess
@@ -32,15 +32,6 @@ TEXT_HEIGHT = 70
 FONT_FILE = "d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
 TEXT_STL_FILE = "/tmp/text.stl"
-
-file_index = 0
-def save_mesh(filename, mesh):
-    global file_index
-
-    filename = os.path.join("debug", "%02d-%s.stl" % (file_index, filename))
-    file_index += 1
-    pymesh.meshio.save_mesh(filename, mesh)
-    print("wrote %s" % filename)
 
 
 def make_text_image(text, large=False):

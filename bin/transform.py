@@ -1,5 +1,6 @@
 import pymesh
 import math
+import os
 import numpy as np
 from scale_mesh import flip_mesh
 
@@ -100,3 +101,13 @@ def mirror(mesh, mirror_axes):
 def make_3d(mesh, offset):
     vertices = [ (vertex[0], vertex[1], offset) for vertex in mesh.vertices]
     return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
+
+
+file_index = 0
+def save_mesh(filename, mesh):
+    global file_index
+
+    filename = os.path.join("debug", "%02d-%s.stl" % (file_index, filename))
+    file_index += 1
+    pymesh.meshio.save_mesh(filename, mesh)
+    print("wrote %s" % filename)

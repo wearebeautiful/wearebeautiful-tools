@@ -4,6 +4,7 @@ import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
 import alphashape
+from transform import save_mesh
 
 
 def find_edges_with(i, edge_set):
@@ -124,13 +125,13 @@ def find_border(mesh, opts):
 
     edges = stitch_boundaries(edges)[0]
 
+    if opts['debug']:
+        border = []
+        for pt in points:
+            border.append(pymesh.generate_icosphere(radius = 1, center = mesh.vertices[pt], refinement_order=1))
 
-#    border = []
-#    for pt in points:
-#        border.append(pymesh.generate_icosphere(radius = 1, center = mesh.vertices[pt], refinement_order=1))
-#
-#    border.append(mesh)
-#    return pymesh.merge_meshes(border)
+        border.append(mesh)
+        save_mesh("border", pymesh.merge_meshes(border))
 
 
     return edges, points
