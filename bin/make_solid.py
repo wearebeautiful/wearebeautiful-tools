@@ -149,7 +149,7 @@ def extrude(mesh, opts):
     vertices.append(center)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
-    edges, edge_points = find_border(mesh)
+    edges, edge_points = find_border(mesh, opts)
 
     floor_vertices = []
     cross_index = {}

@@ -1,16 +1,6 @@
 FROM pymesh/pymesh
 
-RUN apt-get update
-RUN apt-get install -y zip
-RUN pip3 install numpy 
-RUN pip3 install click scipy numpy stl_tools
-RUN apt-get install -y imagemagick build-essential cmake
-RUN git clone https://github.com/riaqn/meshfix-cmake.git && \
-    cd meshfix-cmake && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make && \
-    install src/MeshFix/meshfix /usr/bin
+RUN apt-get update && apt-get install -y zip imagemagick 
+RUN pip3 install numpy && pip3 install click scipy numpy stl_tools alphashape
 
 WORKDIR /code/wab

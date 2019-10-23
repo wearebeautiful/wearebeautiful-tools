@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
+import alphashape
 
 
 def find_edges_with(i, edge_set):
@@ -80,7 +81,7 @@ def find_boundary(points, alpha, only_outer=True):
 
 
 
-def find_border(mesh):
+def find_border(mesh, opts):
 
     def inc(index, key):
         try:
@@ -116,10 +117,13 @@ def find_border(mesh):
         print("Could not find edge of the surface. Is this a solid??")
         sys.exit(-1)
 
-    edges = stitch_boundaries(edges)[0]
     points = list(points)
+    points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
+    alpha_shape = alphashape.alphashape(points_xy, 2.0)
+    print(alpha_shape)
 
-    return edges, points
+    edges = stitch_boundaries(edges)[0]
+
 
 #    border = []
 #    for pt in points:
@@ -127,3 +131,6 @@ def find_border(mesh):
 #
 #    border.append(mesh)
 #    return pymesh.merge_meshes(border)
+
+
+    return edges, points
