@@ -122,21 +122,19 @@ def find_border(mesh, opts):
     points = list(points)
     points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
     alpha_shape = alphashape.alphashape(points_xy, 2.0)
-    print(alpha_shape)
 
     edges = stitch_boundaries(edges)[0]
-    print(edges)
 
     if opts['debug']:
         x_points = [ x for x, y in points_xy ]
         y_points = [ y for x, y in points_xy ]
         plt.scatter(x_points, y_points, s = .1)
-        plt.savefig('edge_points.png')
+        plt.savefig('debug/points-edge.png')
         plt.clf()
 
         x_points = [ mesh.vertices[p0][0] for p0, p1 in edges ]
         y_points = [ mesh.vertices[p0][1] for p0, p1 in edges ]
         plt.plot(x_points, y_points, linewidth=1)
-        plt.savefig('edge.png')
+        plt.savefig('debug/edge.png')
 
     return edges, points

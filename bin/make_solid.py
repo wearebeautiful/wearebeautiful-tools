@@ -1,4 +1,3 @@
-
 import sys
 import os
 import copy
@@ -130,13 +129,12 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
 
 def extrude(mesh, opts):
 
-    amount = opts['extrude']
     bbox = get_fast_bbox(mesh)
+    extrude_mm = bbox[0][2] - opts['extrude']
 
     vertices = list(mesh.vertices)
-    floor_center_vertex = len(vertices)
 
-    center = (bbox[0][0] + ((bbox[1][0] - bbox[0][0]) / 2.0), bbox[0][1] + ((bbox[1][1] - bbox[0][1]) / 2.0), bbox[0][2] - amount)
+    center = (bbox[0][0] + ((bbox[1][0] - bbox[0][0]) / 2.0), bbox[0][1] + ((bbox[1][1] - bbox[0][1]) / 2.0), extrude_mm)
     vertices.append(center)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
@@ -148,7 +146,7 @@ def extrude(mesh, opts):
     for i, vertex in enumerate(edges):
         floor_vertices.append((mesh.vertices[vertex[1]][0], mesh.vertices[vertex[1]][1]))
         cross_index[vertex[0]] = i
-        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], bbox[0][2] - amount))
+        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], extrude_mm))
 
     # create the walls
     faces = []
@@ -161,9 +159,16 @@ def extrude(mesh, opts):
             faces.append((p0, p1, p2))
             faces.append((p0, p2, p3))
 
-        # floor
-        if opts['floor']:
-            faces.append((p2, floor_center_vertex, p3))
+    # floor
+    if opts['floor']:
+        tri = pymesh.triangle()
+        tri.points = floor_vertices
+        tri.max_area = 0.05
+        tri.split_boundary = False
+        tri.verbosity = 1
+        tri.run()
+        floor = make_3d(tri.mesh, extrude_mm)
+        save_mesh("floor", floor);
 
     # make the walls
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
@@ -172,15 +177,16 @@ def extrude(mesh, opts):
     if opts['debug']:
         save_mesh("walls", walls);
 
-    mesh = pymesh.merge_meshes([mesh, walls])
+    if opts['floor']:
+        mesh = pymesh.merge_meshes([mesh, walls, floor])
+    else:
+        mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
         save_mesh("merged", mesh);
 
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
 # TODO: Detect inside out meshes, turn right side in.
-#       Output intermediate models into a debug dir
-#       Do I need the floor vertices?
 #       Make extrude optional
 def make_solid(mesh, code, opts):
 
@@ -335,6 +341,12 @@ def make_solid(mesh, code, opts):
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--no-extrude', '-n', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):
+
+    if opts['debug']:
+        try:
+            os.mkdir("debug")
+        except FileExistsError:
+            pass
 
     if opts['url_top'] and opts['url_bottom']:
         print("Cannot use url_top and url_bottom at the same time. pick one!")
