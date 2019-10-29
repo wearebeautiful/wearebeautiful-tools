@@ -12,6 +12,8 @@ from pylab import imread
 from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
+import matplotlib.pyplot as plt
+import triangle
 
 import pymesh
 import click
@@ -161,14 +163,18 @@ def extrude(mesh, opts):
 
     # floor
     if opts['floor']:
-        tri = pymesh.triangle()
-        tri.points = floor_vertices
-        tri.max_area = 0.05
-        tri.split_boundary = False
-        tri.verbosity = 1
-        tri.run()
-        floor = make_3d(tri.mesh, extrude_mm)
-        save_mesh("floor", floor);
+        edge_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
+        t = triangle.triangulate({ 'vertices' : edge_xy, 'segments' : edges }, "pD")
+        points = np.array(t['vertices'].tolist())
+        faces = np.array(t['triangles'].tolist())
+        plt.triplot(points[:,0], points[:,1], faces, linewidth=0.2)
+        plt.plot(points[:,0], points[:,1], 'o', markersize=.1)
+        plt.savefig('debug/triangulation.png', dpi=300)
+        plt.clf()
+
+        floor = make_3d(pymesh.form_mesh(points, faces), extrude_mm)
+        if opts['debug']:
+            save_mesh("floor", floor);
 
     # make the walls
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
