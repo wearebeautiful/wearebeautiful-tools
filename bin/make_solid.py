@@ -13,7 +13,7 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 import matplotlib.pyplot as plt
-import triangle
+import tripy
 
 import pymesh
 import click
@@ -164,10 +164,24 @@ def extrude(mesh, opts):
     # floor
     if opts['floor']:
         edge_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
-        t = triangle.triangulate({ 'vertices' : edge_xy, 'segments' : edges }, "pD")
-        points = np.array(t['vertices'].tolist())
-        faces = np.array(t['triangles'].tolist())
-        plt.triplot(points[:,0], points[:,1], faces, linewidth=0.2)
+        triangles = tripy.earclip(edge_xy)
+
+        points = []
+        for triangle in triangles:
+            for i,t in enumerate(triangle):
+                if t not in points:
+                    points.append(t)
+        print(points)
+
+        tri_list = []
+        for triangle in triangles:
+            tri_list.append((
+                points.index(triangle[0]),
+                points.index(triangle[1]),
+                points.index(triangle[2]))
+            )
+
+        plt.triplot(points[:,0], points[:,1], tri_list, linewidth=0.2)
         plt.plot(points[:,0], points[:,1], 'o', markersize=.1)
         plt.savefig('debug/triangulation.png', dpi=300)
         plt.clf()
