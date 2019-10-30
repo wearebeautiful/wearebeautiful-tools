@@ -14,6 +14,7 @@ from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 import matplotlib.pyplot as plt
 import triangle
+from shapely.geometry import Polygon, Point
 
 import pymesh
 import click
@@ -163,13 +164,22 @@ def extrude(mesh, opts):
 
     # floor
     if opts['floor']:
-        edge_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
-        t = triangle.triangulate({ 'vertices' : edge_xy, 'segments' : edges }, "pD")
+        edge_points_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
+        t = triangle.triangulate({ 'vertices' : edge_points_xy, 'segments' : edges }, "p")
         points = np.array(t['vertices'].tolist())
         faces = np.array(t['triangles'].tolist())
+
+        edges_xy = [ (vertices[p0][0], vertices[p0][1]) for p0, p1 in edges ]
+        poly = Polygon(edges_xy)
+
+        filtered = []
+        for x, y in points:
+            if (x, y) not in edge_points and not Point(x, y).within(poly):
+                plt.plot((x), (y), 'o', markersize=.3)
+
+
         plt.triplot(points[:,0], points[:,1], faces, linewidth=0.2)
-        plt.plot(points[:,0], points[:,1], 'o', markersize=.1)
-        plt.savefig('debug/triangulation.png', dpi=300)
+        plt.savefig('debug/triangulation.png', dpi=600)
         plt.clf()
 
         floor = make_3d(pymesh.form_mesh(points, faces), extrude_mm)
