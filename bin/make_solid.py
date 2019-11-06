@@ -13,7 +13,6 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 import matplotlib.pyplot as plt
-from shapely.geometry import Polygon, Point
 
 import pymesh
 import click
@@ -140,7 +139,7 @@ def extrude(mesh, opts):
     vertices.append(center)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
-    edges, edge_points, floor = find_border(mesh, opts)
+    edges, edge_points, floor = find_border(mesh, opts, extrude_mm)
 
     floor_vertices = []
     cross_index = {}
@@ -174,13 +173,14 @@ def extrude(mesh, opts):
         save_mesh("walls", walls);
 
     if opts['floor']:
+        if opts['flip_floor']:
+            floor = flip_mesh(floor)
         mesh = pymesh.merge_meshes([mesh, walls, floor])
     else:
         mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
         save_mesh("merged", mesh);
 
-    sys.exit(-1)
 
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
@@ -336,6 +336,7 @@ def make_solid(mesh, code, opts):
 @click.option('--floor', '-f', is_flag=True, default=True)
 @click.option('--flip-after-extrude', '-fl', is_flag=True, default=False)
 @click.option('--flip-walls', '-fw', is_flag=True, default=False)
+@click.option('--flip-floor', '-fw', is_flag=True, default=False)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--no-extrude', '-n', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):

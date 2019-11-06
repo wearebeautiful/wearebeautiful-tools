@@ -3,8 +3,9 @@ import sys
 import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
-from transform import save_mesh
+from transform import save_mesh, make_3d
 import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, Point
 
 
 def find_edges_with(i, edge_set):
@@ -43,55 +44,63 @@ def stitch_boundaries(edges):
     return boundary_lst
 
 
-def find_boundary(points, alpha, only_outer=True):
-    """
-    Compute the alpha shape (concave hull) of a set of points.
-    :param points: np.array of shape (n,2) points.
-    :param alpha: alpha value.
-    :param only_outer: boolean value to specify if we keep only the outer border
-    or also inner edges.
-    :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
-    the indices in the points array.
-    """
-    assert points.shape[0] > 3, "Need at least four points"
+def mesh_from_xy_points(faces_xy, extrude_mm):
+
+    index = {}
+    inverse = {}
+    count = 0
+    for face in faces_xy:
+        for point in face:
+            if tuple(point) not in index:
+                index[tuple(point)] = count
+                inverse[count] = point
+                count += 1
+
+    vertices = []
+    for i in index.values():
+        vertices.append(inverse[i])
+
+    faces = []
+    for face in faces_xy:
+        new_face = []
+        for point in face:
+            new_face.append(index[tuple(point)])
+        faces.append(new_face)
+        
+    return make_3d(pymesh.form_mesh(np.array(vertices), np.array(faces)), extrude_mm)
 
 
-    tri = Delaunay(points)
-    plt.triplot(points[:,0], points[:,1], tri.vertices, linewidth=0.2)
-    plt.savefig('debug/triangulation.png', dpi=600)
+def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
 
+    edges = np.array(edges)
+    poly = Polygon(edges)
+    assert edges.shape[0] > 3, "Need at least four points"
 
-#    points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in edge_points ]
-#    x_points = [ x for x, y in points_xy ]
-#    y_points = [ y for x, y in points_xy ]
-#    plt.scatter(x_points, y_points, s = .1)
+    tri = Delaunay(edges)
+#    plt.triplot(edges[:,0], edges[:,1], tri.vertices, linewidth=0.2)
 
-    edges = set()
-    # Loop over triangles:
-    # ia, ib, ic = indices of corner points of the triangle
+    vertices = []
+    vertices_xy = []
     for ia, ib, ic in tri.vertices:
-        pa = points[ia]
-        pb = points[ib]
-        pc = points[ic]
-        # Computing radius of triangle circumcircle
-        # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
-        a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
-        b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
-        c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
-        s = (a + b + c) / 2.0
-        area = np.sqrt(s * (s - a) * (s - b) * (s - c))
-        if area:
-            circum_r = a * b * c / (4.0 * area)
-            if circum_r < alpha:
-                add_edge(edges, ia, ib)
-                add_edge(edges, ib, ic)
-                add_edge(edges, ic, ia)
+        pa = edges[ia]
+        pb = edges[ib]
+        pc = edges[ic]
 
-    return stitch_boundaries(edges)
+        centroid_x = (pa[0] + pb[0] + pc[0]) / 3.0
+        centroid_y = (pa[1] + pb[1] + pc[1]) / 3.0
+        if Point(centroid_x, centroid_y).within(poly):
+            vertices.append((ia, ib, ic))
+            vertices_xy.append((pa, pb, pc))
+
+    plt.triplot(edges[:,0], edges[:,1], vertices, linewidth=0.2)
+
+    plt.savefig('debug/triangulation.png', dpi=1200)
+    plt.clf()
+
+    return mesh_from_xy_points(vertices_xy, extrude_mm)
 
 
-
-def find_border(mesh, opts):
+def find_border(mesh, opts, extrude_mm):
 
     def inc(index, key):
         try:
@@ -127,12 +136,17 @@ def find_border(mesh, opts):
         print("Could not find edge of the surface. Is this a solid??")
         sys.exit(-1)
 
-    points = list(points)
-    points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
-    find_boundary(np.array(points_xy), 2.0)
     edges = stitch_boundaries(edges)[0]
 
+    edges_xy = []
+    for edge in edges:
+        edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
+
+    floor = triangulate(edges_xy, 2.0, opts, extrude_mm)
+
     if opts['debug']:
+        points = list(points)
+        points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
         x_points = [ x for x, y in points_xy ]
         y_points = [ y for x, y in points_xy ]
         plt.scatter(x_points, y_points, s = .1)
@@ -144,4 +158,4 @@ def find_border(mesh, opts):
         plt.savefig('debug/edge.png', dpi=600)
         plt.clf()
 
-    return edges, points, None
+    return edges, points, floor
