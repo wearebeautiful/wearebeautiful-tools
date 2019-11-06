@@ -13,7 +13,6 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 import matplotlib.pyplot as plt
-import triangle
 from shapely.geometry import Polygon, Point
 
 import pymesh
@@ -141,7 +140,7 @@ def extrude(mesh, opts):
     vertices.append(center)
     points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
 
-    edges, edge_points = find_border(mesh, opts)
+    edges, edge_points, floor = find_border(mesh, opts)
 
     floor_vertices = []
     cross_index = {}
@@ -164,36 +163,6 @@ def extrude(mesh, opts):
 
     # floor
     if opts['floor']:
-        edge_points_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
-        t = triangle.triangulate({ 'vertices' : edge_points_xy, 'segments' : edges }, "pq")
-        points = np.array(t['vertices'].tolist())
-        faces = np.array(t['triangles'].tolist())
-
-        edges_xy = [ (vertices[p0][0], vertices[p0][1]) for p0, p1 in edges ]
-        poly = Polygon(edges_xy)
-
-        filtered = []
-        for face in faces:
-            centroid_x = (points[face[0]][0] + points[face[1]][0] + points[face[2]][0]) / 3.0
-            centroid_y = (points[face[0]][1] + points[face[1]][1] + points[face[2]][1]) / 3.0
-            if Point(centroid_x, centroid_y).within(poly):
-                filtered.append(face)
-
-        faces = np.array(filtered)
-#        plt.scatter(centroids[:,0], centroids[:,1], s = .1, c = "#FF0000")
-
-        plt.triplot(points[:,0], points[:,1], faces, linewidth=0.2)
-        plt.savefig('debug/triangulation.png', dpi=600)
-
-        points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in edge_points ]
-        x_points = [ x for x, y in points_xy ]
-        y_points = [ y for x, y in points_xy ]
-        plt.scatter(x_points, y_points, s = .1)
-
-        plt.savefig('debug/floor.png', dpi=600)
-        plt.clf()
-
-        floor = make_3d(pymesh.form_mesh(points, faces), extrude_mm)
         if opts['debug']:
             save_mesh("floor", floor);
 

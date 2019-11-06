@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
-import alphashape
 from transform import save_mesh
 import matplotlib.pyplot as plt
 
@@ -58,6 +57,15 @@ def find_boundary(points, alpha, only_outer=True):
 
 
     tri = Delaunay(points)
+    plt.triplot(points[:,0], points[:,1], tri.vertices, linewidth=0.2)
+    plt.savefig('debug/triangulation.png', dpi=600)
+
+
+#    points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in edge_points ]
+#    x_points = [ x for x, y in points_xy ]
+#    y_points = [ y for x, y in points_xy ]
+#    plt.scatter(x_points, y_points, s = .1)
+
     edges = set()
     # Loop over triangles:
     # ia, ib, ic = indices of corner points of the triangle
@@ -121,8 +129,7 @@ def find_border(mesh, opts):
 
     points = list(points)
     points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
-    alpha_shape = alphashape.alphashape(points_xy, 2.0)
-
+    find_boundary(np.array(points_xy), 2.0)
     edges = stitch_boundaries(edges)[0]
 
     if opts['debug']:
@@ -137,4 +144,4 @@ def find_border(mesh, opts):
         plt.savefig('debug/edge.png', dpi=600)
         plt.clf()
 
-    return edges, points
+    return edges, points, None
