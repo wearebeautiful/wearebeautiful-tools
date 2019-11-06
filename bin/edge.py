@@ -129,12 +129,12 @@ def find_border(mesh, opts):
         x_points = [ x for x, y in points_xy ]
         y_points = [ y for x, y in points_xy ]
         plt.scatter(x_points, y_points, s = .1)
-        plt.savefig('debug/points-edge.png')
-        plt.clf()
+        plt.savefig('debug/points-edge.png', dpi=600)
 
         x_points = [ mesh.vertices[p0][0] for p0, p1 in edges ]
         y_points = [ mesh.vertices[p0][1] for p0, p1 in edges ]
         plt.plot(x_points, y_points, linewidth=1)
-        plt.savefig('debug/edge.png')
+        plt.savefig('debug/edge.png', dpi=600)
+        plt.clf()
 
     return edges, points

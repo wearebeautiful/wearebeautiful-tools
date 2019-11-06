@@ -165,7 +165,7 @@ def extrude(mesh, opts):
     # floor
     if opts['floor']:
         edge_points_xy = [ (vertices[p][0], vertices[p][1]) for p in edge_points ]
-        t = triangle.triangulate({ 'vertices' : edge_points_xy, 'segments' : edges }, "p")
+        t = triangle.triangulate({ 'vertices' : edge_points_xy, 'segments' : edges }, "pq")
         points = np.array(t['vertices'].tolist())
         faces = np.array(t['triangles'].tolist())
 
@@ -173,13 +173,24 @@ def extrude(mesh, opts):
         poly = Polygon(edges_xy)
 
         filtered = []
-        for x, y in points:
-            if (x, y) not in edge_points and not Point(x, y).within(poly):
-                plt.plot((x), (y), 'o', markersize=.3)
+        for face in faces:
+            centroid_x = (points[face[0]][0] + points[face[1]][0] + points[face[2]][0]) / 3.0
+            centroid_y = (points[face[0]][1] + points[face[1]][1] + points[face[2]][1]) / 3.0
+            if Point(centroid_x, centroid_y).within(poly):
+                filtered.append(face)
 
+        faces = np.array(filtered)
+#        plt.scatter(centroids[:,0], centroids[:,1], s = .1, c = "#FF0000")
 
         plt.triplot(points[:,0], points[:,1], faces, linewidth=0.2)
         plt.savefig('debug/triangulation.png', dpi=600)
+
+        points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in edge_points ]
+        x_points = [ x for x, y in points_xy ]
+        y_points = [ y for x, y in points_xy ]
+        plt.scatter(x_points, y_points, s = .1)
+
+        plt.savefig('debug/floor.png', dpi=600)
         plt.clf()
 
         floor = make_3d(pymesh.form_mesh(points, faces), extrude_mm)
@@ -199,6 +210,8 @@ def extrude(mesh, opts):
         mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
         save_mesh("merged", mesh);
+
+    sys.exit(-1)
 
     return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
 
@@ -407,3 +420,6 @@ if __name__ == "__main__":
     print("make_solid.py running, made with fussy love in Gdansk. <3\n")
     solid()
     sys.exit(0)
+
+
+
