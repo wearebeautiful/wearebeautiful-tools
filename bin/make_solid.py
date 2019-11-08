@@ -162,6 +162,10 @@ def extrude(mesh, opts):
 
     # floor
     if opts['floor']:
+        if opts['flip_floor']:
+            floor = flip_mesh(floor)
+#        floor = pymesh.split_long_edges(floor, .2)[0]
+        floor = pymesh.remove_obtuse_triangles(floor)[0]
         if opts['debug']:
             save_mesh("floor", floor);
 
@@ -172,9 +176,11 @@ def extrude(mesh, opts):
     if opts['debug']:
         save_mesh("walls", walls);
 
+
+    if opts['debug']:
+        save_mesh("cleaned", mesh);
+
     if opts['floor']:
-        if opts['flip_floor']:
-            floor = flip_mesh(floor)
         mesh = pymesh.merge_meshes([mesh, walls, floor])
     else:
         mesh = pymesh.merge_meshes([mesh, walls])
@@ -182,7 +188,8 @@ def extrude(mesh, opts):
         save_mesh("merged", mesh);
 
 
-    return pymesh.remove_duplicated_vertices(mesh, tol=.1)[0]
+
+    return mesh
 
 # TODO: Detect inside out meshes, turn right side in.
 #       Make extrude optional

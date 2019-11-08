@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import pymesh
 from scipy.spatial import Delaunay
-from transform import save_mesh, make_3d
+from transform import save_mesh, mesh_from_xy_points, flip_mesh
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, Point
 
@@ -44,32 +44,6 @@ def stitch_boundaries(edges):
     return boundary_lst
 
 
-def mesh_from_xy_points(faces_xy, extrude_mm):
-
-    index = {}
-    inverse = {}
-    count = 0
-    for face in faces_xy:
-        for point in face:
-            if tuple(point) not in index:
-                index[tuple(point)] = count
-                inverse[count] = point
-                count += 1
-
-    vertices = []
-    for i in index.values():
-        vertices.append(inverse[i])
-
-    faces = []
-    for face in faces_xy:
-        new_face = []
-        for point in face:
-            new_face.append(index[tuple(point)])
-        faces.append(new_face)
-        
-    return make_3d(pymesh.form_mesh(np.array(vertices), np.array(faces)), extrude_mm)
-
-
 def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
 
     edges = np.array(edges)
@@ -77,7 +51,6 @@ def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
     assert edges.shape[0] > 3, "Need at least four points"
 
     tri = Delaunay(edges)
-#    plt.triplot(edges[:,0], edges[:,1], tri.vertices, linewidth=0.2)
 
     vertices = []
     vertices_xy = []
@@ -92,12 +65,19 @@ def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
             vertices.append((ia, ib, ic))
             vertices_xy.append((pa, pb, pc))
 
-    plt.triplot(edges[:,0], edges[:,1], vertices, linewidth=0.2)
+    if opts['debug']:
+        plt.triplot(edges[:,0], edges[:,1], vertices, linewidth=0.2)
+        plt.savefig('debug/triangulation.png', dpi=1200)
+        plt.clf()
 
-    plt.savefig('debug/triangulation.png', dpi=1200)
-    plt.clf()
+    mesh = mesh_from_xy_points(vertices_xy, extrude_mm)
 
-    return mesh_from_xy_points(vertices_xy, extrude_mm)
+    v = np.array((mesh.vertices[mesh.faces[0][0]], mesh.vertices[mesh.faces[0][1]], mesh.vertices[mesh.faces[0][2]]))
+    normal = np.cross(v[1]-v[0], v[2]-v[0])
+    if normal[2] > 0.0:
+        mesh = flip_mesh(mesh)
+
+    return mesh
 
 
 def find_border(mesh, opts, extrude_mm):

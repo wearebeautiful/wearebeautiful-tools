@@ -111,3 +111,28 @@ def save_mesh(filename, mesh):
     file_index += 1
     pymesh.meshio.save_mesh(filename, mesh)
     print("wrote %s" % filename)
+
+
+def mesh_from_xy_points(faces_xy, extrude_mm):
+    index = {}
+    inverse = {}
+    count = 0
+    for face in faces_xy:
+        for point in face:
+            if tuple(point) not in index:
+                index[tuple(point)] = count
+                inverse[count] = point
+                count += 1
+
+    vertices = []
+    for i in index.values():
+        vertices.append(inverse[i])
+
+    faces = []
+    for face in faces_xy:
+        new_face = []
+        for point in face:
+            new_face.append(index[tuple(point)])
+        faces.append(new_face)
+        
+    return make_3d(pymesh.form_mesh(np.array(vertices), np.array(faces)), extrude_mm)
