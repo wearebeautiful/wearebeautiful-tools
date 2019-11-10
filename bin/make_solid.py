@@ -13,6 +13,8 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
 import matplotlib.pyplot as plt
+from line_triangle import get_mesh_line_intersections
+from pyoctree import pyoctree as ot
 
 import pymesh
 import click
@@ -149,16 +151,42 @@ def extrude(mesh, opts):
         cross_index[vertex[0]] = i
         vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], extrude_mm))
 
+    print("build walls")
+
     # create the walls
+    tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
+    print("Size of Octree               = %.3fmm" % tree.root.size)
+    print("Number of Octnodes in Octree = %d" % tree.getNumberOfNodes())
+    print("Number of polys in Octree    = %d" % tree.numPolys)
+
     faces = []
+    hist = {}
+    dots = []
     for p0, p1 in edges:
+        # these were revesed p1, p0, which didn't feel right wrt to surface normals. if shit goes weird, undo!
         p2 = cross_index[p1] + vertex_offset
         p3 = cross_index[p0] + vertex_offset
+
+        p0_xyz = list(mesh.vertices[p0])
+        p1_xyz = list(mesh.vertices[p0])
+        p1_xyz[2] = 0.0
+
+        ints = set()
+        for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
+            ints.add((tuple(i.p), i.s))
+
+        ints = list(ints)
+        if len(ints) > 100:
+            continue
+            for i in ints:
+                dots.append(pymesh.generate_icosphere(.01, i[0]))
 
         # walls
         if opts['walls']:
             faces.append((p0, p1, p2))
             faces.append((p0, p2, p3))
+
+    print("walls done")
 
     # floor
     if opts['floor']:
@@ -171,6 +199,8 @@ def extrude(mesh, opts):
 
     # make the walls
     walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
+#    dots = pymesh.merge_meshes(dots)
+#    walls = pymesh.merge_meshes([walls, dots])
     if opts['flip_walls']:
         walls = flip_mesh(walls)
     if opts['debug']:
@@ -181,7 +211,7 @@ def extrude(mesh, opts):
         save_mesh("cleaned", mesh);
 
     if opts['floor']:
-        mesh = pymesh.merge_meshes([mesh, walls, floor])
+        mesh = pymesh.merge_meshes([mesh, walls, floor]) 
     else:
         mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
