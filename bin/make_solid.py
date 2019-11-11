@@ -137,19 +137,12 @@ def extrude(mesh, opts):
 
     vertices = list(mesh.vertices)
 
-    center = (bbox[0][0] + ((bbox[1][0] - bbox[0][0]) / 2.0), bbox[0][1] + ((bbox[1][1] - bbox[0][1]) / 2.0), extrude_mm)
-    vertices.append(center)
-    points = np.array([ (vertex[0], vertex[1]) for vertex in mesh.vertices ])
-
     edges, edge_points, floor = find_border(mesh, opts, extrude_mm)
 
-    floor_vertices = []
     cross_index = {}
     vertex_offset = len(vertices)
     for i, vertex in enumerate(edges):
-        floor_vertices.append((mesh.vertices[vertex[1]][0], mesh.vertices[vertex[1]][1]))
         cross_index[vertex[0]] = i
-        vertices.append((mesh.vertices[vertex[0]][0], mesh.vertices[vertex[0]][1], extrude_mm))
 
     print("build walls")
 
@@ -163,7 +156,6 @@ def extrude(mesh, opts):
     hist = {}
     dots = []
     for p0, p1 in edges:
-        # these were revesed p1, p0, which didn't feel right wrt to surface normals. if shit goes weird, undo!
         p2 = cross_index[p1] + vertex_offset
         p3 = cross_index[p0] + vertex_offset
 
