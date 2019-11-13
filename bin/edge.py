@@ -6,6 +6,7 @@ from scipy.spatial import Delaunay
 from transform import save_mesh, mesh_from_xy_points, flip_mesh
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, Point
+from pyoctree import pyoctree as ot
 
 
 def find_edges_with(i, edge_set):
@@ -43,6 +44,26 @@ def stitch_boundaries(edges):
 
     return boundary_lst
 
+TOLERANCE = .001
+
+def find_missing_points_from_mesh(edges, mesh):
+    missing = []
+    for i, pt in enumerate(edges):
+        found = False
+        for v in mesh.vertices:
+            diff_x = math.fabs(pt[0] - v[0]) 
+            diff_y = math.fabs(pt[1] - v[1]) 
+
+            if diff_x < TOLERANCE and diff_y < TOLERANCE:
+                found = True
+                break
+
+        if not found:
+            missing.append(pt)
+            print("point %d" % i, pt, "not in index")
+
+    return missing
+
 
 def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
 
@@ -52,8 +73,8 @@ def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
 
     tri = Delaunay(edges)
 
-    vertices = []
-    vertices_xy = []
+    faces = []
+    faces_xy = []
     for ia, ib, ic in tri.vertices:
         pa = edges[ia]
         pb = edges[ib]
@@ -62,15 +83,19 @@ def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
         centroid_x = (pa[0] + pb[0] + pc[0]) / 3.0
         centroid_y = (pa[1] + pb[1] + pc[1]) / 3.0
         if Point(centroid_x, centroid_y).within(poly):
-            vertices.append((ia, ib, ic))
-            vertices_xy.append((pa, pb, pc))
+            faces.append((ia, ib, ic))
+            faces_xy.append((pa, pb, pc))
 
     if opts['debug']:
-        plt.triplot(edges[:,0], edges[:,1], vertices, linewidth=0.2)
+        plt.triplot(edges[:,0], edges[:,1], faces, linewidth=0.2)
         plt.savefig('debug/triangulation.png', dpi=1200)
         plt.clf()
 
-    mesh = mesh_from_xy_points(vertices_xy, extrude_mm)
+    mesh = mesh_from_xy_points(faces_xy, extrude_mm)
+
+    index = {}
+    for i, pt in enumerate(mesh.vertices):
+        index[(pt[0], pt[1])]  = i
 
     v = np.array((mesh.vertices[mesh.faces[0][0]], mesh.vertices[mesh.faces[0][1]], mesh.vertices[mesh.faces[0][2]]))
     normal = np.cross(v[1]-v[0], v[2]-v[0])
@@ -80,7 +105,7 @@ def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
     return mesh
 
 
-def find_border(mesh, opts, extrude_mm):
+def find_boundary(mesh):
 
     def inc(index, key):
         try:
@@ -116,13 +141,41 @@ def find_border(mesh, opts, extrude_mm):
         print("Could not find edge of the surface. Is this a solid??")
         sys.exit(-1)
 
-    edges = stitch_boundaries(edges)[0]
+    return stitch_boundaries(edges)[0]
 
+
+def create_walls_and_floor(mesh, opts, extrude_mm):
+
+    # Find the edge of the surface
+    edges_surface = find_boundary(mesh)
+
+    # from the edges, create a new triangulated mesh
     edges_xy = []
-    for edge in edges:
+    for edge in edges_surface:
         edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
 
+    print("create octree")
+    tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
+
+    print("triangulate")
     floor = triangulate(edges_xy, 2.0, opts, extrude_mm)
+
+    # Find the edge of the surface
+    edges_floor = find_boundary(floor)
+
+    # find the matching starting points on the floor and the mesh
+    for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
+
+
+    index_surface = 0
+    index_floor = 0
+    while True:
+        pt_s_xyz = mesh.vertices[edges_surface[index_surface][0]]
+        pt_f_xyz = floor.vertices[edges_floor[index_floor][0]] 
+        print(pt_s_xyz)
+        print(pt_f_xyz)
+        sys.exit(-1)
+
 
     if opts['debug']:
         points = list(points)
@@ -135,7 +188,55 @@ def find_border(mesh, opts, extrude_mm):
         x_points = [ mesh.vertices[p0][0] for p0, p1 in edges ]
         y_points = [ mesh.vertices[p0][1] for p0, p1 in edges ]
         plt.plot(x_points, y_points, linewidth=1)
+
+        x_missing = [ x for x, y in missing ]
+        y_missing = [ y for x, y in missing ]
+        plt.scatter(x_missing, y_missing, s = 1.0, c="#FF0000")
+
         plt.savefig('debug/edge.png', dpi=600)
         plt.clf()
 
-    return edges, points, floor
+    return floor, walls
+
+
+def parked(mesh):
+    # create the walls
+    print("Size of Octree               = %.3fmm" % tree.root.size)
+    print("Number of Octnodes in Octree = %d" % tree.getNumberOfNodes())
+    print("Number of polys in Octree    = %d" % tree.numPolys)
+
+    faces = []
+    hist = {}
+    dots = []
+    for p0, p1 in edges:
+        p2 = cross_index[p1] + vertex_offset
+        p3 = cross_index[p0] + vertex_offset
+
+        p0_xyz = list(mesh.vertices[p0])
+        p1_xyz = list(mesh.vertices[p0])
+        p1_xyz[2] = 0.0
+
+        ints = set()
+        for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
+            ints.add((tuple(i.p), i.s))
+
+        ints = list(ints)
+        if len(ints) > 100:
+            continue
+            for i in ints:
+                dots.append(pymesh.generate_icosphere(.01, i[0]))
+
+        # walls
+        if opts['walls']:
+            faces.append((p0, p1, p2))
+            faces.append((p0, p2, p3))
+
+    vertices = list(mesh.vertices)
+
+    edges, edge_points, floor = find_border(mesh, opts, extrude_mm)
+
+    cross_index = {}
+    vertex_offset = len(vertices)
+    for i, vertex in enumerate(edges):
+        cross_index[vertex[0]] = i
+

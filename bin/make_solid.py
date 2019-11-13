@@ -5,16 +5,13 @@ from time import time
 import numpy as np
 from math import fabs, pow, sqrt
 from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
-from edge import find_border
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
 from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
-import matplotlib.pyplot as plt
-from line_triangle import get_mesh_line_intersections
-from pyoctree import pyoctree as ot
+from edge import create_walls_and_floor
 
 import pymesh
 import click
@@ -135,57 +132,15 @@ def extrude(mesh, opts):
     bbox = get_fast_bbox(mesh)
     extrude_mm = bbox[0][2] - opts['extrude']
 
-    vertices = list(mesh.vertices)
-
-    edges, edge_points, floor = find_border(mesh, opts, extrude_mm)
-
-    cross_index = {}
-    vertex_offset = len(vertices)
-    for i, vertex in enumerate(edges):
-        cross_index[vertex[0]] = i
-
     print("build walls")
-
-    # create the walls
-    tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
-    print("Size of Octree               = %.3fmm" % tree.root.size)
-    print("Number of Octnodes in Octree = %d" % tree.getNumberOfNodes())
-    print("Number of polys in Octree    = %d" % tree.numPolys)
-
-    faces = []
-    hist = {}
-    dots = []
-    for p0, p1 in edges:
-        p2 = cross_index[p1] + vertex_offset
-        p3 = cross_index[p0] + vertex_offset
-
-        p0_xyz = list(mesh.vertices[p0])
-        p1_xyz = list(mesh.vertices[p0])
-        p1_xyz[2] = 0.0
-
-        ints = set()
-        for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
-            ints.add((tuple(i.p), i.s))
-
-        ints = list(ints)
-        if len(ints) > 100:
-            continue
-            for i in ints:
-                dots.append(pymesh.generate_icosphere(.01, i[0]))
-
-        # walls
-        if opts['walls']:
-            faces.append((p0, p1, p2))
-            faces.append((p0, p2, p3))
-
-    print("walls done")
+    floor, walls = create_walls_and_floor(mesh, opts, extrude_mm)
 
     # floor
     if opts['floor']:
         if opts['flip_floor']:
             floor = flip_mesh(floor)
 #        floor = pymesh.split_long_edges(floor, .2)[0]
-        floor = pymesh.remove_obtuse_triangles(floor)[0]
+#        floor = pymesh.remove_obtuse_triangles(floor)[0]
         if opts['debug']:
             save_mesh("floor", floor);
 
