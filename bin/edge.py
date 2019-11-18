@@ -144,6 +144,85 @@ def find_boundary(mesh):
     return stitch_boundaries(edges)[0]
 
 
+def walk_edges(mesh, edges_surface, floor, edges_floor):
+
+    # find the point on the floor edge that matches to the first point in the surface edge
+    floor_index = -1
+    pt_s_xyz = mesh.vertices[edges_surface[0][0]]
+    for i, edge in enumerate(edges_floor):
+        pt_f_xyz = floor.vertices[edge[0]]
+        if pt_f_xyz[0] == pt_s_xyz[0] and pt_f_xyz[1] == pt_s_xyz[1]:
+            floor_index = i
+            break
+
+    floor_start = floor_index
+    print("floor index: %d" % floor_index)
+
+    matched = 0
+    # Walk the two surfaces point by point, checking for new or missing points in the 
+    # floor edge. If points match, create two triangles for the wall edge. If they
+    # Do not create only one triangle for the wall.
+    for i, edge in enumerate(edges_surface):
+        floor_index %= len(floor.vertices)
+        pt_s_xyz = mesh.vertices[edge[0]]
+        pt_f_xyz = floor.vertices[edges_floor[floor_index][0]] 
+#        print(pt_s_xyz)
+#        print("  ", pt_f_xyz)
+
+        # Is the corresponding point there as we expect it?
+        if pt_s_xyz[0] == pt_f_xyz[0] and pt_s_xyz[1] == pt_f_xyz[1]:
+            floor_index += 1
+            matched += 1
+        else:
+            # The point is not there. Either a new point as been added or the point we expected is gone.
+            # scan ahead on the floor edge, can we find the point there?
+            offset = 1
+            found = False
+            while True:
+                pt_xyz = floor.vertices[edges_floor[(floor_index + offset) % len(floor.vertices)][0]]
+                if pt_s_xyz[0] == pt_xyz[0] and pt_s_xyz[1] == pt_xyz[1]:
+                    print("   found matching floor point %s points later." % offset)
+                    floor_index += offset
+                    found = True
+                    matched += 1
+                    break
+
+                offset += 1
+                if (floor_index + offset) % len(floor.vertices) == floor_start:
+                    print("not found")
+                    break
+
+
+                if offset > 5:
+                    print(floor_index)
+                    print("Too many new points have been inserted in the floor. (%d)" % matched)
+                    return False
+
+            if not found:
+                # Scan ahead in the surface points and see if the point is there
+                offset = 1
+                found = False
+                while True:
+                    pt_xyz = mesh.vertices[edges_surface[index_surface + offset][0]]
+                    if pt_f_xyz[0] == pt_xyz[0] and pt_f_xyz[1] == pt_xyz[1]:
+                        print("   found matching surfeace point %s points later." % offset)
+                        index_surface += offset
+                        matched += 1
+                        found = True
+                        break
+
+                    offset += 1
+                    if offset > 3:
+                        print("Too many points have been deleted in the floor. (%d)" % matched)
+                        return False
+                
+        if floor_index > len(edges_floor):
+            print("wrap outer loop")
+            floor_index = 0
+
+    return True
+
+
 def create_walls_and_floor(mesh, opts, extrude_mm):
 
     # Find the edge of the surface
@@ -155,7 +234,7 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
         edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
 
     print("create octree")
-    tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
+    #tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
 
     print("triangulate")
     floor = triangulate(edges_xy, 2.0, opts, extrude_mm)
@@ -163,19 +242,17 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
     # Find the edge of the surface
     edges_floor = find_boundary(floor)
 
-    # find the matching starting points on the floor and the mesh
-    for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
+    print("num points in floor edge %d" % len(edges_floor))
+    print("num points in surface edge %d" % len(edges_surface))
 
-
-    index_surface = 0
-    index_floor = 0
-    while True:
-        pt_s_xyz = mesh.vertices[edges_surface[index_surface][0]]
-        pt_f_xyz = floor.vertices[edges_floor[index_floor][0]] 
-        print(pt_s_xyz)
-        print(pt_f_xyz)
-        sys.exit(-1)
-
+    # refactor the following into a function that can be called and if it fails, we reverse
+    # the floor points and try again
+    if not walk_edges(mesh, edges_surface, floor, edges_floor):
+        print("Could not match edges, reversing floor points")
+        edges_floor.reverse()
+        if not walk_edges(mesh, edges_surface, floor, edges_floor):
+            print("Could not zip up floor and surface edges.")
+            sys.exit(-1)
 
     if opts['debug']:
         points = list(points)
@@ -197,6 +274,8 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
         plt.clf()
 
     return floor, walls
+
+
 
 
 def parked(mesh):
