@@ -143,6 +143,9 @@ def find_boundary(mesh):
 
     return stitch_boundaries(edges)[0]
 
+def dist(pt0, pt1):
+    return math.sqrt(math.pow(pt1[0] - pt0[0], 2) + math.pow(pt1[1] - pt0[1], 2))
+
 
 def walk_edges(mesh, edges_surface, floor, edges_floor):
 
@@ -174,12 +177,13 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             floor_index += 1
             matched += 1
         else:
+            print("%s scan ahead on floor" % floor_index)
             # The point is not there. Either a new point as been added or the point we expected is gone.
             # scan ahead on the floor edge, can we find the point there?
             offset = 1
             found = False
             while True:
-                pt_xyz = floor.vertices[edges_floor[(floor_index + offset) % len(floor.vertices)][0]]
+                pt_xyz = floor.vertices[edges_floor[(floor_index + offset) % len(edges_floor)][0]]
                 if pt_s_xyz[0] == pt_xyz[0] and pt_s_xyz[1] == pt_xyz[1]:
                     print("   found matching floor point %s points later." % offset)
                     floor_index += offset
@@ -187,36 +191,61 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
                     matched += 1
                     break
 
+                if dist(pt_s_xyz, pt_f_xyz) < 0.0001:
+                    print("   found fuzzy matching floor point %s points later." % offset)
+                    floor_index += offset
+                    found = True
+                    matched += 1
+                    break
+
                 offset += 1
-                if (floor_index + offset) % len(floor.vertices) == floor_start:
-                    print("not found")
+                if (floor_index + offset) % len(edges_floor) == floor_start:
+                    print("   not found")
                     break
 
 
-                if offset > 5:
-                    print(floor_index)
-                    print("Too many new points have been inserted in the floor. (%d)" % matched)
+            if found:
+                print("   Found point in floor %d points later, after matching %d points" % (offset, matched))
+                if offset > 10:
+                    print("Too many new points have been inserted in the floor. (%d)" % offset)
                     return False
 
             if not found:
+                print("   %s: scan ahead on surface" % i)
                 # Scan ahead in the surface points and see if the point is there
                 offset = 1
                 found = False
+                surface_index = i
+                surface_start = surface_index
                 while True:
-                    pt_xyz = mesh.vertices[edges_surface[index_surface + offset][0]]
-                    if pt_f_xyz[0] == pt_xyz[0] and pt_f_xyz[1] == pt_xyz[1]:
-                        print("   found matching surfeace point %s points later." % offset)
-                        index_surface += offset
+                    pt_s_xyz = mesh.vertices[edges_surface[(surface_index + offset) % len(edges_surface)][0]]
+                    if pt_f_xyz[0] == pt_s_xyz[0] and pt_f_xyz[1] == pt_s_xyz[1]:
+                        print("      found matching surface point %s points later." % offset)
+                        surface_index += offset
                         matched += 1
                         found = True
                         break
 
+                    if dist(pt_f_xyz, pt_s_xyz) < 0.0001:
+                        print("      found fuzzy matching surface point %s points later." % offset)
+                        floor_index += offset
+                        found = True
+                        matched += 1
+                        break
+
                     offset += 1
-                    if offset > 3:
-                        print("Too many points have been deleted in the floor. (%d)" % matched)
-                        return False
+                    if (surface_index + offset) % len(edges_surface) == surface_start:
+                        print("      not found")
+                        break
+
+                if not found and offset > 10:
+                    print("      Too many points have been deleted in the floor. (%d)" % offset)
+                    return False
+
+                if found:
+                    print("      Found point in surface %d points later, after matching %d points" % (offset, matched))
                 
-        if floor_index > len(edges_floor):
+        if floor_index >= len(edges_floor):
             print("wrap outer loop")
             floor_index = 0
 
@@ -248,11 +277,15 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
     # refactor the following into a function that can be called and if it fails, we reverse
     # the floor points and try again
     if not walk_edges(mesh, edges_surface, floor, edges_floor):
+        print("---------------------------------------------")
         print("Could not match edges, reversing floor points")
         edges_floor.reverse()
         if not walk_edges(mesh, edges_surface, floor, edges_floor):
             print("Could not zip up floor and surface edges.")
             sys.exit(-1)
+
+    print("Walked edges successfully!")
+    sys.exit(0)
 
     if opts['debug']:
         points = list(points)
@@ -274,7 +307,6 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
         plt.clf()
 
     return floor, walls
-
 
 
 
