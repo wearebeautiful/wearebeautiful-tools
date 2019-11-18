@@ -3,18 +3,10 @@ Model import format specification
 
 Format version: 1
 
-File contents
--------------
+short_codes:
+------------
 
-In order to import an model files into the site, the file needs to be in a ZIP compressed file containing:
-
-* manifest.json                - A JSON document that defines the metadata for the model. See below
-* solid.stl                    - print solid in resolution suited for printing.
-* surface-orig.stl             - original resolution surface, for archival purposes.
-* surface-medium.stl           - A surface in correct orientation, viewable on a larger screen such as a desktop.
-* surface-low.stl              - A surface in correct orientation, viewable on a mobile phone or tablet.
-* screenshot.jpg               - A screenshot of the model as shown on the site, suitable for previewing the model
-                               
+part, postion, arrangement, excited = BSNN
 
 
 manifest.json
