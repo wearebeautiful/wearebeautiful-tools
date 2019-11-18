@@ -133,7 +133,7 @@ def extrude(mesh, opts):
     extrude_mm = bbox[0][2] - opts['extrude']
 
     print("build walls")
-    floor, walls = create_walls_and_floor(mesh, opts, extrude_mm)
+    walls, floor = create_walls_and_floor(mesh, opts, extrude_mm)
 
     # floor
     if opts['floor']:
@@ -145,14 +145,10 @@ def extrude(mesh, opts):
             save_mesh("floor", floor);
 
     # make the walls
-    walls = pymesh.form_mesh(np.array(vertices), np.array(faces))
-#    dots = pymesh.merge_meshes(dots)
-#    walls = pymesh.merge_meshes([walls, dots])
     if opts['flip_walls']:
         walls = flip_mesh(walls)
     if opts['debug']:
         save_mesh("walls", walls);
-
 
     if opts['debug']:
         save_mesh("cleaned", mesh);
@@ -163,8 +159,6 @@ def extrude(mesh, opts):
         mesh = pymesh.merge_meshes([mesh, walls])
     if opts['debug']:
         save_mesh("merged", mesh);
-
-
 
     return mesh
 

@@ -159,9 +159,10 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             break
 
     floor_start = floor_index
-    print("floor index: %d" % floor_index)
 
     matched = 0
+    point_pairs = []
+
     # Walk the two surfaces point by point, checking for new or missing points in the 
     # floor edge. If points match, create two triangles for the wall edge. If they
     # Do not create only one triangle for the wall.
@@ -169,15 +170,15 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
         floor_index %= len(floor.vertices)
         pt_s_xyz = mesh.vertices[edge[0]]
         pt_f_xyz = floor.vertices[edges_floor[floor_index][0]] 
-#        print(pt_s_xyz)
-#        print("  ", pt_f_xyz)
 
         # Is the corresponding point there as we expect it?
         if pt_s_xyz[0] == pt_f_xyz[0] and pt_s_xyz[1] == pt_f_xyz[1]:
             floor_index += 1
             matched += 1
+
+            point_pairs.append(((pt_s_xyz[0], pt_s_xyz[1], pt_s_xyz[2]), (pt_f_xyz[0], pt_f_xyz[1], pt_f_xyz[2])))
         else:
-            print("%s scan ahead on floor" % floor_index)
+#            print("%s scan ahead on floor" % floor_index)
             # The point is not there. Either a new point as been added or the point we expected is gone.
             # scan ahead on the floor edge, can we find the point there?
             offset = 1
@@ -185,54 +186,44 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             while True:
                 pt_xyz = floor.vertices[edges_floor[(floor_index + offset) % len(edges_floor)][0]]
                 if pt_s_xyz[0] == pt_xyz[0] and pt_s_xyz[1] == pt_xyz[1]:
-                    print("   found matching floor point %s points later." % offset)
+#                    print("   found matching floor point %s points later." % offset)
                     floor_index += offset
                     found = True
                     matched += 1
+                    point_pairs.append(((pt_s_xyz[0], pt_s_xyz[1], pt_s_xyz[2]), (pt_xyz[0], pt_xyz[1], pt_xyz[2])))
                     break
 
-                if dist(pt_s_xyz, pt_f_xyz) < 0.0001:
-                    print("   found fuzzy matching floor point %s points later." % offset)
-                    floor_index += offset
-                    found = True
-                    matched += 1
-                    break
-
+                point_pairs.append(((), (pt_xyz[0], pt_xyz[1], pt_xyz[2])))
                 offset += 1
                 if (floor_index + offset) % len(edges_floor) == floor_start:
-                    print("   not found")
+#                    print("   not found")
                     break
 
 
             if found:
-                print("   Found point in floor %d points later, after matching %d points" % (offset, matched))
+#                print("   Found point in floor %d points later, after matching %d points" % (offset, matched))
                 if offset > 10:
                     print("Too many new points have been inserted in the floor. (%d)" % offset)
-                    return False
+                    return None
 
             if not found:
-                print("   %s: scan ahead on surface" % i)
+#                print("   %s: scan ahead on surface" % i)
                 # Scan ahead in the surface points and see if the point is there
                 offset = 1
                 found = False
                 surface_index = i
                 surface_start = surface_index
                 while True:
-                    pt_s_xyz = mesh.vertices[edges_surface[(surface_index + offset) % len(edges_surface)][0]]
-                    if pt_f_xyz[0] == pt_s_xyz[0] and pt_f_xyz[1] == pt_s_xyz[1]:
-                        print("      found matching surface point %s points later." % offset)
+                    pt_xyz = mesh.vertices[edges_surface[(surface_index + offset) % len(edges_surface)][0]]
+                    if pt_f_xyz[0] == pt_xyz[0] and pt_f_xyz[1] == pt_xyz[1]:
+#                        print("      found matching surface point %s points later." % offset)
                         surface_index += offset
                         matched += 1
                         found = True
+                        point_pairs.append(((pt_xyz[0], pt_xyz[1], pt_xyz[2]), (pt_f_xyz[0], pt_f_xyz[1], pt_f_xyz[2])))
                         break
 
-                    if dist(pt_f_xyz, pt_s_xyz) < 0.0001:
-                        print("      found fuzzy matching surface point %s points later." % offset)
-                        floor_index += offset
-                        found = True
-                        matched += 1
-                        break
-
+                    point_pairs.append(((pt_xyz[0], pt_xyz[1], pt_xyz[2]), ()))
                     offset += 1
                     if (surface_index + offset) % len(edges_surface) == surface_start:
                         print("      not found")
@@ -240,16 +231,26 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
 
                 if not found and offset > 10:
                     print("      Too many points have been deleted in the floor. (%d)" % offset)
-                    return False
+                    return None
 
-                if found:
-                    print("      Found point in surface %d points later, after matching %d points" % (offset, matched))
+#                if found:
+#                    print("      Found point in surface %d points later, after matching %d points" % (offset, matched))
                 
         if floor_index >= len(edges_floor):
-            print("wrap outer loop")
             floor_index = 0
 
-    return True
+
+    # TODO: Handle case where single triangles need to be added
+    wall_faces = []
+    for i in range(len(point_pairs)):
+        pair0 = point_pairs[i]
+        pair1 = point_pairs[(i + 1) % len(point_pairs)]
+
+        if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+            wall_faces.append((pair0[0], pair1[0], pair0[1]))
+            wall_faces.append((pair0[1], pair1[0], pair1[1]))
+
+    return mesh_from_xy_points(wall_faces)
 
 
 def create_walls_and_floor(mesh, opts, extrude_mm):
@@ -276,18 +277,19 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
 
     # refactor the following into a function that can be called and if it fails, we reverse
     # the floor points and try again
-    if not walk_edges(mesh, edges_surface, floor, edges_floor):
+    walls = walk_edges(mesh, edges_surface, floor, edges_floor)
+    if not walls:
         print("---------------------------------------------")
         print("Could not match edges, reversing floor points")
         edges_floor.reverse()
-        if not walk_edges(mesh, edges_surface, floor, edges_floor):
+        walls = walk_edges(mesh, edges_surface, floor, edges_floor)
+        if not walls:
             print("Could not zip up floor and surface edges.")
             sys.exit(-1)
 
     print("Walked edges successfully!")
-    sys.exit(0)
 
-    if opts['debug']:
+    if 0: #opts['debug']:
         points = list(points)
         points_xy = [ (mesh.vertices[p][0], mesh.vertices[p][1]) for p in points ]
         x_points = [ x for x, y in points_xy ]
@@ -306,8 +308,7 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
         plt.savefig('debug/edge.png', dpi=600)
         plt.clf()
 
-    return floor, walls
-
+    return walls, floor
 
 
 def parked(mesh):
