@@ -17,11 +17,13 @@ def find_edges_with(i, edge_set):
 
 def stitch_boundaries(edges):
     edge_set = edges.copy()
+
     boundary_lst = []
     while len(edge_set) > 0:
         boundary = []
         edge0 = edge_set.pop()
         boundary.append(edge0)
+        
         last_edge = edge0
         while len(edge_set) > 0:
             i,j = last_edge
@@ -43,6 +45,7 @@ def stitch_boundaries(edges):
         boundary_lst.append(boundary)
 
     return boundary_lst
+
 
 TOLERANCE = .001
 
@@ -140,6 +143,7 @@ def find_boundary(mesh):
     if len(edges) == 0:
         print("Could not find edge of the surface. Is this a solid??")
         sys.exit(-1)
+
 
     return stitch_boundaries(edges)[0]
 
@@ -267,8 +271,8 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             wall_faces.append((pair1[0], pair1[1], pair0[1]))
             continue
 
-        print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
-        assert(0)
+#        print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
+#        assert(0)
 
     return mesh_from_xy_points(wall_faces)
 
@@ -288,23 +292,22 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
 
     print("triangulate")
     floor = triangulate(edges_xy, 2.0, opts, extrude_mm)
+    if opts['debug']:
+        save_mesh("floor", floor);
 
     # Find the edge of the surface
     edges_floor = find_boundary(floor)
 
-    print("num points in floor edge %d" % len(edges_floor))
-    print("num points in surface edge %d" % len(edges_surface))
+#    print("num points in floor edge %d" % len(edges_floor))
+#    print("num points in surface edge %d" % len(edges_surface))
 
     # refactor the following into a function that can be called and if it fails, we reverse
     # the floor points and try again
     walls = walk_edges(mesh, edges_surface, floor, edges_floor)
     if not walls:
-        print("---------------------------------------------")
-        print("Could not match edges, reversing floor points")
         edges_floor.reverse()
         walls = walk_edges(mesh, edges_surface, floor, edges_floor)
         if not walls:
-            print("Could not zip up floor and surface edges.")
             sys.exit(-1)
 
     print("Walked edges successfully!")
@@ -327,6 +330,7 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
 
         plt.savefig('debug/edge.png', dpi=600)
         plt.clf()
+
 
     return walls, floor
 

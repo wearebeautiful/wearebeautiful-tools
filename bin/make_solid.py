@@ -141,8 +141,6 @@ def extrude(mesh, opts):
             floor = flip_mesh(floor)
 #        floor = pymesh.split_long_edges(floor, .2)[0]
 #        floor = pymesh.remove_obtuse_triangles(floor)[0]
-        if opts['debug']:
-            save_mesh("floor", floor);
 
     # make the walls
     if opts['flip_walls']:
