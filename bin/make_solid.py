@@ -95,10 +95,10 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
         text = rotate(text, (0,0,0), (0, 1, 0), -90)
         text = rotate(text, (0,0,0), (0, 0, 1), 180)
         text = rotate(text, (0,0,0), (1, 0, 0), 180)
-    elif side == 'bottom':
+    elif side == 'top':
         text = rotate(text, (0,0,0), (0, 1, 0), 90)
         text = rotate(text, (0,0,0), (0, 0, 1), -90)
-    elif side == 'top':
+    elif side == 'bottom':
         text = rotate(text, (0,0,0), (0, 1, 0), 90)
         text = rotate(text, (0,0,0), (0, 0, 1), 90)
 
@@ -117,9 +117,9 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
         trans_x = inner_box_dims[1][1] + ubox[1][1] - opts['text_depth']
     elif side == 'right':
         trans_x = -inner_box_dims[1][1] - ubox[1][1] + opts['text_depth']
-    elif side == 'bottom':
-        trans_y = -inner_box_dims[1][0] - ubox[1][0] + opts['text_depth']
     elif side == 'top':
+        trans_y = -inner_box_dims[1][0] - ubox[1][0] + opts['text_depth']
+    elif side == 'bottom':
         trans_y = inner_box_dims[1][0] + ubox[1][0] - opts['text_depth']
 
     trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset']

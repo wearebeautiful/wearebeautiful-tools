@@ -202,7 +202,7 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
 
             if found:
 #                print("   Found point in floor %d points later, after matching %d points" % (offset, matched))
-                if offset > 10:
+                if offset > 25:
                     print("Too many new points have been inserted in the floor. (%d)" % offset)
                     return None
 
@@ -249,6 +249,26 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
         if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
             wall_faces.append((pair0[0], pair1[0], pair0[1]))
             wall_faces.append((pair0[1], pair1[0], pair1[1]))
+            continue
+
+        if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
+            wall_faces.append((pair0[0], pair1[0], pair0[1]))
+            continue
+
+        if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 0 and len(pair1[1]) == 3:
+            wall_faces.append((pair0[0], pair1[1], pair0[1]))
+            continue
+
+        if len(pair0[0]) == 3 and len(pair0[1]) == 0 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+            wall_faces.append((pair0[0], pair1[0], pair1[1]))
+            continue
+
+        if len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+            wall_faces.append((pair1[0], pair1[1], pair0[1]))
+            continue
+
+        print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
+        assert(0)
 
     return mesh_from_xy_points(wall_faces)
 
