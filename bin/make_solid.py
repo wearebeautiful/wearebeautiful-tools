@@ -134,22 +134,7 @@ def extrude(mesh, opts):
 
     print("build walls")
     walls, floor = create_walls_and_floor(mesh, opts, extrude_mm)
-
-    # floor
-    if opts['floor']:
-        if opts['flip_floor']:
-            floor = flip_mesh(floor)
-#        floor = pymesh.split_long_edges(floor, .2)[0]
-#        floor = pymesh.remove_obtuse_triangles(floor)[0]
-
-    # make the walls
-    if opts['flip_walls']:
-        walls = flip_mesh(walls)
-    if opts['debug']:
-        save_mesh("walls", walls);
-
-    if opts['debug']:
-        save_mesh("cleaned", mesh);
+ 
 
     if opts['floor']:
         mesh = pymesh.merge_meshes([mesh, walls, floor]) 
@@ -163,8 +148,6 @@ def extrude(mesh, opts):
 # TODO: Detect inside out meshes, turn right side in.
 #       Make extrude optional
 def make_solid(mesh, code, opts):
-
-    print("make solid")
 
     # perform initial rotation
     if opts['rotate_x']:

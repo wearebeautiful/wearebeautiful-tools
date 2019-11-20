@@ -2,11 +2,13 @@ import math
 import sys
 import numpy as np
 import pymesh
+from random import random
 from scipy.spatial import Delaunay
-from transform import save_mesh, mesh_from_xy_points, flip_mesh
+from transform import save_mesh, mesh_from_xy_points, flip_mesh, get_fast_bbox_2d
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, Point
 from pyoctree import pyoctree as ot
+from intersect import closed_segment_intersect
 
 
 def find_edges_with(i, edge_set):
@@ -70,8 +72,24 @@ def find_missing_points_from_mesh(edges, mesh):
 
 def triangulate(edges, alpha, opts, extrude_mm, only_outer=True):
 
-    edges = np.array(edges)
     poly = Polygon(edges)
+    edges.append((0,0))
+
+    bbox = get_fast_bbox_2d(edges)
+    width = bbox[1][0] - bbox[0][0]
+    height = bbox[1][1] - bbox[0][1]
+
+    for i in range(300):
+        while True:
+            x = (random() * width) - (width/2.0)
+            y = (random() * height) - (height/2.0)
+            if not Point(x, y).within(poly):
+                continue
+            edges.append((x,y))
+            break
+
+
+    edges = np.array(edges)
     assert edges.shape[0] > 3, "Need at least four points"
 
     tri = Delaunay(edges)
@@ -151,7 +169,7 @@ def dist(pt0, pt1):
     return math.sqrt(math.pow(pt1[0] - pt0[0], 2) + math.pow(pt1[1] - pt0[1], 2))
 
 
-def walk_edges(mesh, edges_surface, floor, edges_floor):
+def walk_edges(mesh, edges_surface, floor, edges_floor, opts, extrude_mm):
 
     # find the point on the floor edge that matches to the first point in the surface edge
     floor_index = -1
@@ -207,7 +225,7 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             if found:
 #                print("   Found point in floor %d points later, after matching %d points" % (offset, matched))
                 if offset > 25:
-                    print("Too many new points have been inserted in the floor. (%d)" % offset)
+#                    print("Too many new points have been inserted in the floor. (%d)" % offset)
                     return None
 
             if not found:
@@ -230,7 +248,7 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
                     point_pairs.append(((pt_xyz[0], pt_xyz[1], pt_xyz[2]), ()))
                     offset += 1
                     if (surface_index + offset) % len(edges_surface) == surface_start:
-                        print("      not found")
+#                        print("      not found")
                         break
 
                 if not found and offset > 10:
@@ -244,41 +262,102 @@ def walk_edges(mesh, edges_surface, floor, edges_floor):
             floor_index = 0
 
 
-    # TODO: Handle case where single triangles need to be added
     wall_faces = []
+    last_s_pt = ()
+    last_f_pt = ()
+
     for i in range(len(point_pairs)):
         pair0 = point_pairs[i]
         pair1 = point_pairs[(i + 1) % len(point_pairs)]
 
         if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+             pass
+#            wall_faces.append((pair0[0], pair1[0], pair0[1]))
+#            wall_faces.append((pair0[1], pair1[0], pair1[1]))
+        elif len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
             wall_faces.append((pair0[0], pair1[0], pair0[1]))
-            wall_faces.append((pair0[1], pair1[0], pair1[1]))
-            continue
-
-        if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
-            wall_faces.append((pair0[0], pair1[0], pair0[1]))
-            continue
-
-        if len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 0 and len(pair1[1]) == 3:
+        elif len(pair0[0]) == 3 and len(pair0[1]) == 3 and len(pair1[0]) == 0 and len(pair1[1]) == 3:
+            # this clause causes errors to be added!
+            print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
             wall_faces.append((pair0[0], pair1[1], pair0[1]))
-            continue
+#        elif len(pair0[0]) == 3 and len(pair0[1]) == 0 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+#            print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
+#            wall_faces.append((pair0[0], pair1[0], pair1[1]))
+#        elif len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
+#            # this creates real shit 
+#            wall_faces.append((pair1[0], pair1[1], pair0[1]))
+#            print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
+#        elif len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 0 and len(pair1[1]) == 3:
+#            wall_faces.append(((last_s_pt[0], last_s_pt[1], last_s_pt[2]), pair1[1], pair0[1]))
+#        elif len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
+#            wall_faces.append(((last_s_pt[0], last_s_pt[1], last_s_pt[2]), pair1[0], pair0[1]))
+#        elif len(pair0[0]) == 3 and len(pair0[1]) == 0 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
+#            wall_faces.append(((last_f_pt[0], last_f_pt[1], last_f_pt[2]), pair0[0], pair1[0]))
+#        else:
+#            print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
+#            assert(0)
 
-        if len(pair0[0]) == 3 and len(pair0[1]) == 0 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
-            wall_faces.append((pair0[0], pair1[0], pair1[1]))
-            continue
+        if len(pair0[0]) == 3:
+            last_s_pt = pair0[0]
+        if len(pair0[1]) == 3:
+            last_f_pt = pair0[1]
 
-        if len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 3:
-            wall_faces.append((pair1[0], pair1[1], pair0[1]))
-            continue
+    walls = mesh_from_xy_points(wall_faces)
+    if opts['flip_walls']:
+        walls = flip_mesh(walls)
 
-#        print("case %d %d %d %d" % (len(pair0[0]), len(pair0[1]), len(pair1[0]), len(pair1[1])))
-#        assert(0)
+    if opts['debug']:
+        print(edges_surface[0])
+        dot = pymesh.generate_icosphere(1, (mesh.vertices[edges_surface[0][0]][0],  
+                                            mesh.vertices[edges_surface[0][0]][1], 
+                                            mesh.vertices[edges_surface[0][0]][2]))
+        save_mesh("walls", pymesh.merge_meshes([dot, walls]))
 
-    return mesh_from_xy_points(wall_faces)
+    return walls
+
+#            wall_faces.append((last_s_pt, pair1[1], pair0[1]))
+#        elif len(pair0[0]) == 0 and len(pair0[1]) == 3 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
+#            wall_faces.append((last_s_pt[0], pair1[0], pair0[1]))
+#        elif len(pair0[0]) == 3 and len(pair0[1]) == 0 and len(pair1[0]) == 3 and len(pair1[1]) == 0:
+#            wall_faces.append((last_f_pt, pair0[0], pair1[0]))
+
+def check_for_self_intersections(opts, mesh, points, points_int):
+
+    si_points = set()
+
+    count = 0
+    for i in range(len(points)):
+        for j in range(len(points)):
+            if i == j:
+                continue
+            pt0 = points[i]
+            pt1 = points[(i + 1) % len(points)]
+            pt2 = points[j]
+            pt3 = points[(j + 1) % len(points)]
+            if closed_segment_intersect(pt0, pt1, pt2, pt3):
+                if i < j:
+                    si_points.add("%d-%d" % (i, j))
+                else:
+                    si_points.add("%d-%d" % (j, i))
+
+    si_points = list(si_points)
+    dots = []
+    for pt in si_points:
+        p0, p1 = pt.split('-')
+        p_xyz = mesh.vertices[int(p0)]
+        dots.append(pymesh.generate_icosphere(1, p_xyz))
+
+    if opts['debug']:
+        dots.append(mesh)
+        mesh = pymesh.merge_meshes(dots)
+        save_mesh("si", mesh);
+
+    return len(si_points)
 
 
 def create_walls_and_floor(mesh, opts, extrude_mm):
 
+    print("Find boundary")
     # Find the edge of the surface
     edges_surface = find_boundary(mesh)
 
@@ -287,27 +366,37 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
     for edge in edges_surface:
         edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
 
-    print("create octree")
+    print("check for self intersections")
+    count = check_for_self_intersections(opts, mesh, edges_xy, edges_surface)
+    if count:
+        print("Found %d self intersections" % count)
+
     #tree = ot.PyOctree(np.array(mesh.vertices),np.array(mesh.faces))
 
     print("triangulate")
     floor = triangulate(edges_xy, 2.0, opts, extrude_mm)
-    if opts['debug']:
-        save_mesh("floor", floor);
+    if opts['floor'] and opts['flip_floor']:
+        floor = flip_mesh(floor)
 
     # Find the edge of the surface
     edges_floor = find_boundary(floor)
 
-#    print("num points in floor edge %d" % len(edges_floor))
-#    print("num points in surface edge %d" % len(edges_surface))
+    if opts['debug']:
+        dot = pymesh.generate_icosphere(1, (floor.vertices[edges_floor[0][0]][0], floor.vertices[edges_floor[0][0]][1], extrude_mm))
+        new_floor = pymesh.merge_meshes([dot, floor])
+        save_mesh("floor", new_floor);
+
+    print("num points in floor edge %d" % len(edges_floor))
+    print("num points in surface edge %d" % len(edges_surface))
 
     # refactor the following into a function that can be called and if it fails, we reverse
     # the floor points and try again
-    walls = walk_edges(mesh, edges_surface, floor, edges_floor)
+    walls = walk_edges(mesh, edges_surface, floor, edges_floor, opts, extrude_mm)
     if not walls:
         edges_floor.reverse()
-        walls = walk_edges(mesh, edges_surface, floor, edges_floor)
+        walls = walk_edges(mesh, edges_surface, floor, edges_floor, opts, extrude_mm)
         if not walls:
+            print("Cannot walk edges. fail!")
             sys.exit(-1)
 
     print("Walked edges successfully!")

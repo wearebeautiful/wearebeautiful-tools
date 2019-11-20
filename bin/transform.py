@@ -6,7 +6,7 @@ from scale_mesh import flip_mesh
 
 def get_fast_bbox(mesh):
 
-    bbox= [[100000,100000,10000], [0,0, 0]]
+    bbox = [[100000,100000,100000], [0,0,0]]
     for vertex in mesh.vertices:
 
         if vertex[0] > bbox[1][0]:
@@ -25,6 +25,24 @@ def get_fast_bbox(mesh):
             bbox[0][2] = vertex[2]
 
     return bbox
+
+def get_fast_bbox_2d(points):
+
+    bbox = [[100000,100000], [0,0]]
+    for vertex in points:
+
+        if vertex[0] > bbox[1][0]:
+            bbox[1][0] = vertex[0]
+        if vertex[0] < bbox[0][0]:
+            bbox[0][0] = vertex[0]
+
+        if vertex[1] > bbox[1][1]:
+            bbox[1][1] = vertex[1]
+        if vertex[1] < bbox[0][1]:
+            bbox[0][1] = vertex[1]
+
+    return bbox
+
 
 def center_around_origin(mesh):
 
