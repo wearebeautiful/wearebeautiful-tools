@@ -424,44 +424,43 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
     return walls, floor
 
 
-def parked(mesh):
-    # create the walls
-    print("Size of Octree               = %.3fmm" % tree.root.size)
-    print("Number of Octnodes in Octree = %d" % tree.getNumberOfNodes())
-    print("Number of polys in Octree    = %d" % tree.numPolys)
+def simple_extrude(mesh, extrude_mm):
+
+
+    vertices = []
+    for vertex in mesh.vertices:
+        vertices.append((vertex[0], vertex[1], vertex[2]))
+
+    num_vertices = len(vertices)
+    for vertex in mesh.vertices:
+        vertices.append((vertex[0], vertex[1], vertex[2]-extrude_mm))
+
+    edges = find_boundary(mesh)
 
     faces = []
-    hist = {}
-    dots = []
-    for p0, p1 in edges:
-        p2 = cross_index[p1] + vertex_offset
-        p3 = cross_index[p0] + vertex_offset
+    for face in mesh.faces:
+        faces.append((face[0], face[1], face[2]))
+    for face in mesh.faces:
+#        faces.append((face[0] + num_vertices, face[1] + num_vertices, face[2] + num_vertices))
+        faces.append((face[0] + num_vertices, face[2] + num_vertices, face[1] + num_vertices))
 
-        p0_xyz = list(mesh.vertices[p0])
-        p1_xyz = list(mesh.vertices[p0])
-        p1_xyz[2] = 0.0
+    print("make octtree")
+    tree = ot.PyOctree(np.array(vertices),np.array(faces, dtype=np.int32))
 
-        ints = set()
-        for i in tree.rayIntersection(np.array([p0_xyz,p1_xyz],dtype=np.float32)):
-            ints.add((tuple(i.p), i.s))
+    for i, edge in enumerate(edges):
+        p0t_xyz = list(vertices[edge[0]])
+        p0b_xyz = list(vertices[edge[0] + num_vertices])
+        ints0 = tree.rayIntersection(np.array([p0t_xyz, p0b_xyz],dtype=np.float32))
 
-        ints = list(ints)
-        if len(ints) > 100:
-            continue
-            for i in ints:
-                dots.append(pymesh.generate_icosphere(.01, i[0]))
+        p1t_xyz = list(vertices[edge[1]])
+        p1b_xyz = list(vertices[edge[1] + num_vertices])
+        ints1 = tree.rayIntersection(np.array([p1t_xyz, p1b_xyz],dtype=np.float32))
+        print(len(ints0), len(ints1))
 
-        # walls
-        if opts['walls']:
-            faces.append((p0, p1, p2))
-            faces.append((p0, p2, p3))
+        if len(ints0) == 2 and len(ints1) == 2:
+            faces.append((edge[0], edge[1], edge[0] + num_vertices))
+            faces.append((edge[1], edge[1] + num_vertices, edge[0] + num_vertices))
 
-    vertices = list(mesh.vertices)
+    solid = pymesh.form_mesh(np.array(vertices), np.array(faces))
 
-    edges, edge_points, floor = find_border(mesh, opts, extrude_mm)
-
-    cross_index = {}
-    vertex_offset = len(vertices)
-    for i, vertex in enumerate(edges):
-        cross_index[vertex[0]] = i
-
+    return solid

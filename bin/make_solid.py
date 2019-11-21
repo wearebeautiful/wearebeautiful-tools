@@ -11,7 +11,7 @@ from pylab import imread
 from scipy.ndimage import gaussian_filter
 from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
-from edge import create_walls_and_floor
+from edge import create_walls_and_floor, simple_extrude
 
 import pymesh
 import click
@@ -127,27 +127,14 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     return translate(text, (trans_x,trans_y,trans_z))
 
 
-def extrude(mesh, opts):
-
-    bbox = get_fast_bbox(mesh)
-    extrude_mm = bbox[0][2] - opts['extrude']
-
-    print("build walls")
-    walls, floor = create_walls_and_floor(mesh, opts, extrude_mm)
- 
-
-    if opts['floor']:
-        mesh = pymesh.merge_meshes([mesh, walls, floor]) 
-    else:
-        mesh = pymesh.merge_meshes([mesh, walls])
-    if opts['debug']:
-        save_mesh("merged", mesh);
-
-    return mesh
-
-# TODO: Detect inside out meshes, turn right side in.
+# TODO: 
 #       Make extrude optional
 def make_solid(mesh, code, opts):
+
+    if opts['no_extrude']:
+        assert(0)
+
+    mesh = center_around_origin(mesh)
 
     # perform initial rotation
     if opts['rotate_x']:
@@ -164,16 +151,14 @@ def make_solid(mesh, code, opts):
 
     mesh = center_around_origin(mesh)
 
-    if not opts['no_extrude']:
-        print("extrude ...")
-        mesh = extrude(mesh, opts)
-        mesh = center_around_origin(mesh)
-
-    if opts['flip_after_extrude']:
-        mesh = flip_mesh(mesh)
-
+    print("extrude ...")
+    bbox = get_fast_bbox(mesh)
+    surface_height = (bbox[1][2] - bbox[0][2])
+    extrude_mm = surface_height + opts['extrude']
+    mesh = simple_extrude(mesh, extrude_mm)
+    mesh = center_around_origin(mesh)
     if opts['debug']:
-        save_mesh("after-extruded", mesh);
+        save_mesh("extruded", mesh);
 
     bbox = get_fast_bbox(mesh)
 
@@ -184,9 +169,13 @@ def make_solid(mesh, code, opts):
         bbox[1][0] -= opts['crop']
         bbox[1][1] -= opts['crop']
 
+    bbox[1][2] -= surface_height
+
     inner_box_dims = copy.deepcopy(bbox)
 
     inner_box = pymesh.generate_box_mesh(bbox[0], bbox[1])
+    if opts['debug']:
+        save_mesh("inner_box", inner_box);
 
     bbox[0][0] -= OUTER_BOX_MM
     bbox[0][1] -= OUTER_BOX_MM
@@ -293,9 +282,6 @@ def make_solid(mesh, code, opts):
 @click.option('--label-offset', '-o', default=0, type=float)
 @click.option('--walls', '-w', is_flag=True, default=True)
 @click.option('--floor', '-f', is_flag=True, default=True)
-@click.option('--flip-after-extrude', '-fl', is_flag=True, default=False)
-@click.option('--flip-walls', '-fw', is_flag=True, default=False)
-@click.option('--flip-floor', '-fw', is_flag=True, default=False)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--no-extrude', '-n', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):
@@ -349,6 +335,3 @@ if __name__ == "__main__":
     print("make_solid.py running, made with fussy love in Gdansk. <3\n")
     solid()
     sys.exit(0)
-
-
-
