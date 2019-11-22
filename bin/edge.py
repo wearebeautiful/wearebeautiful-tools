@@ -467,7 +467,16 @@ def simple_extrude(mesh, opts, extrude_mm):
     for vertex in mesh.vertices:
         vertices.append((vertex[0], vertex[1], vertex[2]-extrude_mm))
 
+    print("find boundary")
     edges = find_boundary(mesh)
+
+    # from the edges, create a new triangulated mesh
+    edges_xy = []
+    for edge in edges:
+        edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
+
+    print("check for self intersections")
+    count = check_for_self_intersections(opts, mesh, edges_xy, edges)
 
     faces = []
     for face in mesh.faces:
