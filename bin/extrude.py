@@ -187,30 +187,30 @@ def simple_extrude(mesh, opts, extrude_mm):
     for face in mesh.faces:
         faces.append((face[0] + num_vertices, face[2] + num_vertices, face[1] + num_vertices))
 
-    print("make octtree")
-    tree = ot.PyOctree(np.array(vertices),np.array(faces, dtype=np.int32))
+#    print("make octtree")
+#    tree = ot.PyOctree(np.array(vertices),np.array(faces, dtype=np.int32))
 
     panels = 0
     for i, edge in enumerate(edges):
-        p0t_xyz = list(vertices[edge[0]])
-        p0b_xyz = list(vertices[edge[0] + num_vertices])
-        ints0 = tree.rayIntersection(np.array([p0t_xyz, p0b_xyz],dtype=np.float32))
+#        p0t_xyz = list(vertices[edge[0]])
+#        p0b_xyz = list(vertices[edge[0] + num_vertices])
+#        ints0 = tree.rayIntersection(np.array([p0t_xyz, p0b_xyz],dtype=np.float32))
 
-        p1t_xyz = list(vertices[edge[1]])
-        p1b_xyz = list(vertices[edge[1] + num_vertices])
-        ints1 = tree.rayIntersection(np.array([p1t_xyz, p1b_xyz],dtype=np.float32))
+#        p1t_xyz = list(vertices[edge[1]])
+#        p1b_xyz = list(vertices[edge[1] + num_vertices])
+#        ints1 = tree.rayIntersection(np.array([p1t_xyz, p1b_xyz],dtype=np.float32))
 
-        ints0 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
-        ints1 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
+#        ints0 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
+#        ints1 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
 
-        if len(ints0):
-            for i in ints0:
-                print("0: %.4f " % (i.s), i.p)
-        if len(ints1):
-            for i in ints1:
-                print("1: %.4f " % (i.s), i.p)
+#        if len(ints0):
+#            for i in ints0:
+#                print("0: %.4f " % (i.s), i.p)
+#        if len(ints1):
+#            for i in ints1:
+#                print("1: %.4f " % (i.s), i.p)
 
-        if len(ints0) == 0 and len(ints1) == 0:
+        if True: #len(ints0) == 0 and len(ints1) == 0:
             if opts['flip_walls']:
                 faces.append((edge[0], edge[0] + num_vertices, edge[1]))
                 faces.append((edge[1], edge[0] + num_vertices, edge[1] + num_vertices))
