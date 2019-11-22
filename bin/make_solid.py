@@ -4,14 +4,13 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from transform import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
+from utils import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
 from scipy.ndimage import gaussian_filter
-from scipy.spatial import Delaunay
 from stl_tools import numpy2stl
-from edge import create_walls_and_floor, simple_extrude
+from extrude import simple_extrude
 
 import pymesh
 import click
@@ -75,7 +74,7 @@ def make_text_mesh(text, large):
     os.unlink(image)
 
     text = pymesh.meshio.load_mesh(stl)
-    os.unlink(stl)
+#    os.unlink(stl)
 
     return text
 
