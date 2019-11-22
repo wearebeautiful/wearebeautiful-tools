@@ -10,6 +10,7 @@ from shapely.geometry import Polygon, Point
 from pyoctree import pyoctree as ot
 from intersect import closed_segment_intersect
 
+TOLERANCE = .00001
 
 def find_edges_with(i, edge_set):
     i_first = [j for (x,j) in edge_set if x==i]
@@ -49,7 +50,6 @@ def stitch_boundaries(edges):
     return boundary_lst
 
 
-TOLERANCE = .001
 
 def find_missing_points_from_mesh(edges, mesh):
     missing = []
@@ -423,9 +423,41 @@ def create_walls_and_floor(mesh, opts, extrude_mm):
 
     return walls, floor
 
+# This may need to be improved -- it picks the last matching point which may not be ideal.
+def dedup_intersection_list(ints, p0, p1):
 
-def simple_extrude(mesh, extrude_mm):
+#    print(p0)
+#    print(p1)
+#    print("before: ")
+#    for i in ints:
+#        print("  ", i.s,i.p)
 
+    filtered = []
+    for int in ints:
+        d0 = dist(int.p, p0)
+        d1 = dist(int.p, p1)
+        if d0 > TOLERANCE or d1 > TOLERANCE:
+            filtered.append(int)
+
+    ints = filtered            
+
+#    print("after")
+#    for i in ints:
+#        print("  ", i.s,i.p)
+
+
+    dedup = []
+    ints = sorted(ints, key=lambda i: i.s)
+
+    for i in range(len(ints)):
+        if i == len(ints) - 1 or ints[i+1].s - ints[i].s > TOLERANCE:
+            dedup.append(ints[i])
+
+
+    return dedup            
+
+
+def simple_extrude(mesh, opts, extrude_mm):
 
     vertices = []
     for vertex in mesh.vertices:
@@ -441,12 +473,12 @@ def simple_extrude(mesh, extrude_mm):
     for face in mesh.faces:
         faces.append((face[0], face[1], face[2]))
     for face in mesh.faces:
-#        faces.append((face[0] + num_vertices, face[1] + num_vertices, face[2] + num_vertices))
         faces.append((face[0] + num_vertices, face[2] + num_vertices, face[1] + num_vertices))
 
     print("make octtree")
     tree = ot.PyOctree(np.array(vertices),np.array(faces, dtype=np.int32))
 
+    panels = 0
     for i, edge in enumerate(edges):
         p0t_xyz = list(vertices[edge[0]])
         p0b_xyz = list(vertices[edge[0] + num_vertices])
@@ -455,11 +487,27 @@ def simple_extrude(mesh, extrude_mm):
         p1t_xyz = list(vertices[edge[1]])
         p1b_xyz = list(vertices[edge[1] + num_vertices])
         ints1 = tree.rayIntersection(np.array([p1t_xyz, p1b_xyz],dtype=np.float32))
-        print(len(ints0), len(ints1))
 
-        if len(ints0) == 2 and len(ints1) == 2:
-            faces.append((edge[0], edge[1], edge[0] + num_vertices))
-            faces.append((edge[1], edge[1] + num_vertices, edge[0] + num_vertices))
+        ints0 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
+        ints1 = dedup_intersection_list(ints0, p0t_xyz, p0b_xyz)
+
+        if len(ints0):
+            for i in ints0:
+                print("0: %.4f " % (i.s), i.p)
+        if len(ints1):
+            for i in ints1:
+                print("1: %.4f " % (i.s), i.p)
+
+        if len(ints0) == 0 and len(ints1) == 0:
+            if opts['flip_walls']:
+                faces.append((edge[0], edge[0] + num_vertices, edge[1]))
+                faces.append((edge[1], edge[0] + num_vertices, edge[1] + num_vertices))
+            else:
+                faces.append((edge[0], edge[1], edge[0] + num_vertices))
+                faces.append((edge[1], edge[1] + num_vertices, edge[0] + num_vertices))
+            panels += 1
+
+    print("created %d panels" % panels)
 
     solid = pymesh.form_mesh(np.array(vertices), np.array(faces))
 

@@ -7,7 +7,7 @@ import numpy as np
 def create_surface():
 
     center = (0,0,0)
-    steps = 16 
+    steps = 128 
 
     faces = []
     vertices = [center]

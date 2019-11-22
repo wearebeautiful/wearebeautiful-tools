@@ -127,12 +127,7 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     return translate(text, (trans_x,trans_y,trans_z))
 
 
-# TODO: 
-#       Make extrude optional
-def make_solid(mesh, code, opts):
-
-    if opts['no_extrude']:
-        assert(0)
+def make_solid(mesh, opts):
 
     mesh = center_around_origin(mesh)
 
@@ -155,13 +150,17 @@ def make_solid(mesh, code, opts):
     bbox = get_fast_bbox(mesh)
     surface_height = (bbox[1][2] - bbox[0][2])
     extrude_mm = surface_height + opts['extrude']
-    mesh = simple_extrude(mesh, extrude_mm)
+    mesh = simple_extrude(mesh, opts, extrude_mm)
     mesh = center_around_origin(mesh)
     if opts['debug']:
         save_mesh("extruded", mesh);
 
-    bbox = get_fast_bbox(mesh)
+    return mesh, surface_height
 
+
+def modify_solid(mesh, surface_height, code, opts):
+
+    bbox = get_fast_bbox(mesh)
     if opts['crop']:
         bbox[0][0] += opts['crop']
         bbox[0][1] += opts['crop']
@@ -169,7 +168,6 @@ def make_solid(mesh, code, opts):
         bbox[1][0] -= opts['crop']
         bbox[1][1] -= opts['crop']
 
-    bbox[1][2] -= surface_height
 
     inner_box_dims = copy.deepcopy(bbox)
 
@@ -185,6 +183,8 @@ def make_solid(mesh, code, opts):
 
     bbox[1][0] += OUTER_BOX_MM
     bbox[1][1] += OUTER_BOX_MM
+
+    bbox[0][2] -= surface_height
 
 
     print("make modifications")
@@ -213,6 +213,8 @@ def make_solid(mesh, code, opts):
 #    outer_box = pymesh.boolean(outer_box, hook_box, operation="union", engine="igl")
 #    if opts['debug']:
 #        save_mesh("modified", outer_box);
+
+
 
     if opts['url_top']:
         url_side = 'top';
@@ -246,9 +248,9 @@ def make_solid(mesh, code, opts):
         save_mesh("before-subtract", outer_box);
 
     print("final subtract")
+    if surface_height:
+        mesh = translate(mesh, (0, 0, -surface_height))
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
-
-
 
 
 # New features
@@ -281,6 +283,7 @@ def make_solid(mesh, code, opts):
 @click.option('--extrude', '-e', default=2, type=float)
 @click.option('--label-offset', '-o', default=0, type=float)
 @click.option('--walls', '-w', is_flag=True, default=True)
+@click.option('--flip-walls', '-w', is_flag=True, default=True)
 @click.option('--floor', '-f', is_flag=True, default=True)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--no-extrude', '-n', is_flag=True, default=False)
@@ -319,7 +322,14 @@ def solid(code, src_file, dest_file, **opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    mesh = make_solid(mesh, code, opts)
+    if not opts['no_extrude']:
+        mesh, surface_height = make_solid(mesh, opts)
+    else:
+        mesh = center_around_origin(mesh)
+        surface_height = 0
+
+    mesh = modify_solid(mesh, surface_height, code, opts)
+    mesh = center_around_origin(mesh)
     print("is manifold: ", mesh.is_manifold())
     print("is closed: ", mesh.is_closed())
     pymesh.meshio.save_mesh(dest_file, mesh);
