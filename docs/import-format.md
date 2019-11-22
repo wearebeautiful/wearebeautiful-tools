@@ -104,10 +104,13 @@ Allowable values and their short cut codes:
 
 | short| full text |
 |------|---------|
-| Y    |body |
+| A    |anatomical |
+| F    |full body |
+| L    |lower body |
+| U    |upper body |
 | B    |breast |
 | S    |bust |
-| U    |buttocks |
+| K    |buttocks |
 | N    |nipple |
 | P    |penis |
 | T    |torso |

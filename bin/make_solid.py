@@ -80,7 +80,7 @@ def make_text_mesh(text, large):
     return text
 
 
-def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
+def move_text_to_surface(text, inner_box_dims, side, opts, text_scale, horiz_offset, vert_offset):
 
     text = center_around_origin(text)
 
@@ -122,7 +122,9 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale):
     elif side == 'bottom':
         trans_y = inner_box_dims[1][0] + ubox[1][0] - opts['text_depth']
 
+    trans_y += horiz_offset
     trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset']
+    trans_z += vert_offset
 
     return translate(text, (trans_x,trans_y,trans_z))
 
@@ -234,15 +236,17 @@ def modify_solid(mesh, surface_height, code, opts):
     elif opts['code_right']:
         code_side = 'right';
 
-    print("make url")
-    url = make_text_mesh("wearebeautiful.info", True)
-    url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'])
-    outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
+    if not opts['no_url']:
+        print("make url")
+        url = make_text_mesh("wearebeautiful.info", True)
+        url = move_text_to_surface(url, inner_box_dims, url_side, opts, opts['url_scale'], opts['url_h_offset'], opts['url_v_offset'])
+        outer_box = pymesh.boolean(outer_box, url, operation="union", engine="igl")
 
-    print("make code")
-    code = make_text_mesh(code, False)
-    code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'])
-    outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
+    if not opts['no_code']:
+        print("make code")
+        code = make_text_mesh(code, False)
+        code = move_text_to_surface(code, inner_box_dims, code_side, opts, opts['code_scale'], opts['code_h_offset'], opts['code_v_offset'])
+        outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
     if opts['debug']:
         save_mesh("before-subtract", outer_box);
@@ -276,6 +280,10 @@ def modify_solid(mesh, surface_height, code, opts):
 @click.option('--code-right', '-cr', is_flag=True, default=False)
 @click.option('--code-top', '-ct', is_flag=True, default=False)
 @click.option('--z-offset', '-z', default=2.0, type=float)
+@click.option('--code-v-offset', '-cvo', default=0.0, type=float)
+@click.option('--url-v-offset', '-uvo', default=0.0, type=float)
+@click.option('--code-h-offset', '-cvo', default=0.0, type=float)
+@click.option('--url-h-offset', '-uvo', default=0.0, type=float)
 @click.option('--code-scale', '-cz', default=.7, type=float)
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
@@ -287,6 +295,8 @@ def modify_solid(mesh, surface_height, code, opts):
 @click.option('--floor', '-f', is_flag=True, default=True)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--no-extrude', '-n', is_flag=True, default=False)
+@click.option('--no-code', '-n', is_flag=True, default=False)
+@click.option('--no-url', '-n', is_flag=True, default=False)
 def solid(code, src_file, dest_file, **opts):
 
     if opts['debug']:
@@ -313,12 +323,12 @@ def solid(code, src_file, dest_file, **opts):
     if not opts['code_top'] and not opts['code_bottom'] and not opts['code_left'] and not opts['code_right']:
         opts['code_bottom'] = True
 
-    if (opts['code_top'] and opts['url_top']) or \
-        (opts['code_bottom'] and opts['url_bottom']) or \
-        (opts['code_left'] and opts['url_left']) or \
-        (opts['code_right'] and opts['url_right']): 
-        print("Cannot apply code and URL to the same side.")
-        sys.exit(-1)
+#    if (opts['code_top'] and opts['url_top']) or \
+#        (opts['code_bottom'] and opts['url_bottom']) or \
+#        (opts['code_left'] and opts['url_left']) or \
+#        (opts['code_right'] and opts['url_right']): 
+#        print("Cannot apply code and URL to the same side.")
+#        sys.exit(-1)
 
 
     mesh = pymesh.meshio.load_mesh(src_file);

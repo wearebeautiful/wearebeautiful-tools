@@ -12,15 +12,15 @@ import pymesh
 import click
 
 def resize_mesh(mesh, scale):
-    new_faces = []
-    for face in mesh.faces:
-        new_face = []
-        for f in list(face):
-            new_face.append(f * scale)
+    new_vertices = []
+    for vertex in mesh.vertices:
+        new_vertex = []
+        for v in list(vertex):
+            new_vertex.append(v * scale)
 
-        new_faces.append(new_face)
+        new_vertices.append(new_vertex)
 
-    return pymesh.form_mesh(mesh.vertices, np.array(new_faces))
+    return pymesh.form_mesh(np.array(mesh.vertices), mesh.faces)
 
 
 @click.command()
