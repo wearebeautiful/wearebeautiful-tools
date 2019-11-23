@@ -15,7 +15,9 @@
   </head>
   <body>
 
-  {%- include 'navbar.html' -%}
+  {% if not bare %}
+     {%- include 'navbar.html' -%}
+  {% endif %}
   <div class="container-fluid">
     {% block content %}
     {% endblock%}
