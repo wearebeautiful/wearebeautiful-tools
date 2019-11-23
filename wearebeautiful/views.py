@@ -7,7 +7,6 @@ import config
 bp = Blueprint('index', __name__)
 
 @bp.route('/')
-@auth.login_required
 def index():
     if auth.username():
         return render_template("index.html")
