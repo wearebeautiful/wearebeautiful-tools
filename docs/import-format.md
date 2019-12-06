@@ -23,13 +23,10 @@ following keys:
     "released":       "2019-07-09",
     "gender":         "female",
     "gender_comment": "",
-    "country":        "ES",
-    "age":            34,
     "body_type":      "thin",
     "body_part":      "bust",
     "pose":           "normal",
     "mother":         "vaginal",
-    "ethnicity":      "of carribean descent",
     "tags":           ["#post-pregnancy"],
     "modification":   ["pregnancy", "breastfed"],
     "comment":        "Model was breastfeeding at the time.",       
@@ -68,22 +65,6 @@ gender
 If other is given for gender, a command giving more information must be present in
 the "gender_comment" field.
 
-country
--------
-
-A two character ISO country code
-
-age
----
-
-Age in years of the model when model was created.
-
-
-ethnicity
----------
-
-This is a free form text field that the model should self declare. There is no existing taxonomy that handles
-this well on a glabal scale. 
 
 
 body_type
