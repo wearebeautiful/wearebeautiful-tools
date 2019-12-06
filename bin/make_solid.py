@@ -286,7 +286,7 @@ def modify_solid(mesh, surface_height, code, opts):
 @click.option('--code-scale', '-cz', default=.7, type=float)
 @click.option('--url-scale', '-uz', default=.7, type=float)
 @click.option('--crop', '-c', default=1, type=float)
-@click.option('--text-depth', '-td', default=.7, type=float)
+@click.option('--text-depth', '-td', default=1, type=float)
 @click.option('--extrude', '-e', default=2, type=float)
 @click.option('--label-offset', '-o', default=0, type=float)
 @click.option('--walls', '-w', is_flag=True, default=True)
