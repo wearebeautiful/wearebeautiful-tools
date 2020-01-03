@@ -67,4 +67,3 @@ def create_floor():
     pymesh.meshio.save_mesh("test_floor.stl", mesh)
 
 create_surface()
-create_floor()

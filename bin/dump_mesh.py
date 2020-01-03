@@ -4,7 +4,7 @@ import sys
 import os
 from time import time
 import numpy as np
-from transform import get_fast_bbox
+from utils import get_fast_bbox
 
 import pymesh
 import click
