@@ -30,7 +30,7 @@ following keys:
     "pose":           "normal",
     "mother":         "vaginal",
     "ethnicity":      "of carribean descent",
-    "tags":           ["#post-pregnancy"],
+    "tags":           ["post_pregnancy"],
     "modification":   ["pregnancy", "breastfed"],
     "comment":        "Model was breastfeeding at the time.",       
     "other":          {}
@@ -109,7 +109,6 @@ Allowable values and their short cut codes:
 | L    |lower body |
 | U    |upper body |
 | B    |breast |
-| S    |bust |
 | K    |buttocks |
 | N    |nipple |
 | P    |penis |
