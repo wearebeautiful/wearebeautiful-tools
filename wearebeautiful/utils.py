@@ -2,7 +2,6 @@ import pymesh
 import math
 import os
 import numpy as np
-from scale_mesh import flip_mesh
 
 def get_fast_bbox(mesh):
 
@@ -110,11 +109,15 @@ def translate(mesh, translation_vector):
     return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
 
 
-def mirror(mesh, mirror_axes):
+def flip_mesh(mesh):
+    new_faces = []
+    for face in mesh.faces:
+        new_face = list(face)
+        new_face.reverse()
+        new_faces.append(new_face)
 
-    mesh = scale(mesh, (-1.0, -1.0, -1.0))
-    mesh = flip_mesh(mesh)
-    return mesh
+    return pymesh.form_mesh(mesh.vertices, np.array(new_faces))
+
 
 def make_3d(mesh, offset):
     vertices = [ (vertex[0], vertex[1], offset) for vertex in mesh.vertices]

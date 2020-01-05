@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Dumbass mesh scale function
@@ -20,7 +20,7 @@ def resize_mesh(mesh, scale):
 
         new_vertices.append(new_vertex)
 
-    return pymesh.form_mesh(np.array(mesh.vertices), mesh.faces)
+    return pymesh.form_mesh(np.array(new_vertices), mesh.faces)
 
 
 @click.command()
