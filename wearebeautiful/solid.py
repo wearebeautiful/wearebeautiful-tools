@@ -4,13 +4,13 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from utils import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
+from wearebeautiful.utils import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
+from wearebeautiful.extrude import simple_extrude
 from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
 from scipy.ndimage import gaussian_filter
 from stl_tools import numpy2stl
-from extrude import simple_extrude
 
 import pymesh
 import click
@@ -27,7 +27,7 @@ HOOK_BOX_DEPTH = 10
 LARGE_TEXT_WIDTH = 540
 SMALL_TEXT_WIDTH = 470
 TEXT_HEIGHT = 70
-FONT_FILE = "d-din.ttf"
+FONT_FILE = "font/d-din.ttf"
 IMAGE_FILE = "/tmp/text.png"
 TEXT_STL_FILE = "/tmp/text.stl"
 
@@ -349,8 +349,3 @@ def usage(command):
     with click.Context(command) as ctx:
         click.echo(command.get_help(ctx))
 
-
-if __name__ == "__main__":
-    print("make_solid.py running, made with fussy love in Gdansk. <3\n")
-    solid()
-    sys.exit(0)

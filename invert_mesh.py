@@ -11,7 +11,7 @@ import numpy as np
 import pymesh
 import click
 
-from scale_mesh import flip_mesh
+from wearebeautiful.scale_mesh import flip_mesh
 
 
 @click.command()

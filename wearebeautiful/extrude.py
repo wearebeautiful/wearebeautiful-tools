@@ -1,15 +1,18 @@
 import math
 import sys
+from random import random
+
 import numpy as np
 import pymesh
-from random import random
 from scipy.spatial import Delaunay
-from utils import save_mesh, mesh_from_xy_points, flip_mesh, get_fast_bbox_2d
+from wearebeautiful.utils import save_mesh, mesh_from_xy_points, flip_mesh, get_fast_bbox_2d
+from wearebeautiful.intersect import closed_segment_intersect
 import matplotlib.pyplot as plt
 from pyoctree import pyoctree as ot
-from intersect import closed_segment_intersect
+
 
 TOLERANCE = .00001
+
 
 def find_edges_with(i, edge_set):
     i_first = [j for (x,j) in edge_set if x==i]

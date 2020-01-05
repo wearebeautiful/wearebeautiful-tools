@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
 from time import time
 import numpy as np
-from utils import get_fast_bbox
+from wearebeautiful.utils import get_fast_bbox
 
 import pymesh
 import click
