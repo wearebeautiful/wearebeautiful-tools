@@ -1,10 +1,3 @@
-PRINT_FILE = "solid.stl"
-SURFACE_FILE = "surface.stl"
-SURFACE_MED_FILE = "surface-medium.stl"
-SURFACE_LOW_FILE = "surface-low.stl"
-SCREENSHOT_FILE = "screenshot.jpg"
-MANIFEST_FILE = "manifest.json"
-
 MIN_FREETEXT_FIELD_LEN = 5
 FORMAT_VERSION = 1 
 LOW_RES_SEGMENT_LEN = .5
@@ -15,12 +8,9 @@ REQUIRED_KEYS = [
     "id", 
     "created", 
     "gender", 
-    "country", 
-    "age", 
     "body_type", 
     "body_part", 
     "mother", 
-    "ethnicity", 
     "released", 
     "pose",
     "arrangement",
@@ -51,10 +41,12 @@ BODY_TYPES = [
 ]
 
 BODY_PART = { 
-     "body" : "Y", 
+     "anatomical" : "A", 
+     "full body" : "F", 
+     "lower body" : "L", 
+     "upper body" : "U", 
      "breast" : "B", 
-     "bust" : "S", 
-     "buttocks" : "U", 
+     "buttocks" : "K", 
      "nipple" : "N", 
      "penis" : "P", 
      "torso" : "T", 

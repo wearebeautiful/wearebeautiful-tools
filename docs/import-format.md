@@ -104,7 +104,7 @@ Allowable values and their short cut codes:
 
 | short|full text |
 |------|---------|
-| N    |not-excited |
+| N    |not excited |
 | X    |excited |
 | P    |partially excited |
 
@@ -141,7 +141,7 @@ Is the model a mother? If so, how was/were the child/children delivered?
 
 | Allowable values |
 | --------- |
-| not |
+| no  |
 | vaginal |
 | caesarean |
 

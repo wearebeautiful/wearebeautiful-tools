@@ -2,10 +2,9 @@ import sys
 import os
 from time import time
 import numpy as np
-from wearebeautiful.utils import flip_mesh
+from wearebeautiful.utils import flip_mesh, center_around_origin
 
 import pymesh
-import click
 
 def fix_mesh(mesh, target_len, opts):
     bbox_min, bbox_max = mesh.bbox;
@@ -54,18 +53,13 @@ def fix_mesh(mesh, target_len, opts):
     return mesh;
 
 
-@click.command()
-@click.option('--cleanup', default=False, help='Clean the mesh before scaling')
-@click.option('--invert/--no-invert', default=False, help='Flip the normals on the STL file')
-@click.argument("len", nargs=1, type=float)
-@click.argument("in_file", nargs=1)
-@click.argument("out_file", nargs=1)
-def scale(invert, len, in_file, out_file, **opts):
+def scale_mesh(invert, len, in_file, out_file, opts):
 
     mesh = pymesh.meshio.load_mesh(in_file);
 
     print("start: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
     mesh = fix_mesh(mesh, len, opts);
+    mesh = center_around_origin(mesh)
     print("  fix: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
 
     if mesh.num_vertices == 0 or mesh.num_faces == 0:
@@ -77,8 +71,3 @@ def scale(invert, len, in_file, out_file, **opts):
         print(" flip: %d vertexes, %d faces." % (mesh.num_vertices, mesh.num_faces))
 
     pymesh.meshio.save_mesh(out_file, mesh);
-
-
-def usage(command):
-    with click.Context(command) as ctx:
-        click.echo(command.get_help(ctx))

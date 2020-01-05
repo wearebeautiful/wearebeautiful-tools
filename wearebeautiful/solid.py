@@ -4,16 +4,14 @@ import copy
 from time import time
 import numpy as np
 from math import fabs, pow, sqrt
-from wearebeautiful.utils import rotate, scale, translate, get_fast_bbox, mirror, make_3d, center_around_origin, save_mesh
+from wearebeautiful.utils import rotate, scale, translate, get_fast_bbox, make_3d, center_around_origin, save_mesh, flip_mesh
 from wearebeautiful.extrude import simple_extrude
-from scale_mesh import flip_mesh
 import subprocess
 from pylab import imread
 from scipy.ndimage import gaussian_filter
 from stl_tools import numpy2stl
 
 import pymesh
-import click
 
 
 OUTER_BOX_MM = 15
@@ -128,7 +126,7 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale, horiz_off
     return translate(text, (trans_x,trans_y,trans_z))
 
 
-def make_solid(mesh, opts):
+def make_solid_main(mesh, opts):
 
     mesh = center_around_origin(mesh)
 
@@ -256,48 +254,7 @@ def modify_solid(mesh, surface_height, code, opts):
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
-# New features
-# - Extrude amount
-# - Label offset on face (as %)
-# - Fix right label depth
-
-@click.command()
-@click.argument("code", nargs=1)
-@click.argument("src_file", nargs=1)
-@click.argument("dest_file", nargs=1)
-@click.option('--rotate-x', '-rx', default=0, type=int)
-@click.option('--rotate-y', '-ry', default=0, type=int)
-@click.option('--rotate-z', '-rz', default=0, type=int)
-@click.option('--url-top', '-ut', is_flag=True, default=False)
-@click.option('--url-bottom', '-ub', is_flag=True, default=False)
-@click.option('--url-left', '-ul', is_flag=True, default=False)
-@click.option('--url-right', '-ur', is_flag=True, default=False)
-@click.option('--url-top', '-ct', is_flag=True, default=False)
-@click.option('--code-top', '-ct', is_flag=True, default=False)
-@click.option('--code-bottom', '-cb', is_flag=True, default=False)
-@click.option('--code-left', '-cl', is_flag=True, default=False)
-@click.option('--code-right', '-cr', is_flag=True, default=False)
-@click.option('--code-top', '-ct', is_flag=True, default=False)
-@click.option('--z-offset', '-z', default=2.0, type=float)
-@click.option('--code-v-offset', '-cvo', default=0.0, type=float)
-@click.option('--url-v-offset', '-uvo', default=0.0, type=float)
-@click.option('--code-h-offset', '-cvo', default=0.0, type=float)
-@click.option('--url-h-offset', '-uvo', default=0.0, type=float)
-@click.option('--code-scale', '-cz', default=.7, type=float)
-@click.option('--url-scale', '-uz', default=.7, type=float)
-@click.option('--crop', '-c', default=1, type=float)
-@click.option('--text-depth', '-td', default=1, type=float)
-@click.option('--extrude', '-e', default=2, type=float)
-@click.option('--label-offset', '-o', default=0, type=float)
-@click.option('--walls', '-w', is_flag=True, default=True)
-@click.option('--flip-walls', '-w', is_flag=True, default=True)
-@click.option('--floor', '-f', is_flag=True, default=True)
-@click.option('--debug', '-d', is_flag=True, default=False)
-@click.option('--no-extrude', '-n', is_flag=True, default=False)
-@click.option('--no-code', '-n', is_flag=True, default=False)
-@click.option('--no-url', '-n', is_flag=True, default=False)
-def solid(code, src_file, dest_file, **opts):
-
+def make_solid(code, src_file, dest_file, opts):
     if opts['debug']:
         try:
             os.mkdir("debug")
@@ -332,7 +289,7 @@ def solid(code, src_file, dest_file, **opts):
 
     mesh = pymesh.meshio.load_mesh(src_file);
     if not opts['no_extrude']:
-        mesh, surface_height = make_solid(mesh, opts)
+        mesh, surface_height = make_solid_main(mesh, opts)
     else:
         mesh = center_around_origin(mesh)
         surface_height = 0
@@ -343,9 +300,3 @@ def solid(code, src_file, dest_file, **opts):
     print("is closed: ", mesh.is_closed())
     pymesh.meshio.save_mesh(dest_file, mesh);
     print("done!")
-
-
-def usage(command):
-    with click.Context(command) as ctx:
-        click.echo(command.get_help(ctx))
-
