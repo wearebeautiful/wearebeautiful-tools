@@ -12,6 +12,7 @@ REQUIRED_KEYS = [
     "body_part", 
     "mother", 
     "released", 
+    "processed", 
     "pose",
     "arrangement",
     "excited"

@@ -11,7 +11,7 @@ from wearebeautiful import model_params as param
 MAX_SCREENSHOT_SIZE = 256000 # 256Kb is enough!
 
 
-def bundle_code(id="", part="", pose="", arrangement="", excited="", manifest=None):
+def make_code(id="", part="", pose="", arrangement="", excited="", manifest=None):
 
     if manifest:
         return "%s-%c%c%c%c" % (manifest['id'], 
