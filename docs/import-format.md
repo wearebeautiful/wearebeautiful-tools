@@ -174,6 +174,8 @@ An array of tags (without hashes) that may also apply to this model.
 
  `["large-hips", "hip-scar"]`  
 
+ Tag words can only contain characters - and a-zA-Z0-9.
+
 
 comment
 -------
