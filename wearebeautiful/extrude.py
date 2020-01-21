@@ -8,7 +8,6 @@ from scipy.spatial import Delaunay
 from wearebeautiful.utils import save_mesh, mesh_from_xy_points, flip_mesh, get_fast_bbox_2d
 from wearebeautiful.intersect import closed_segment_intersect
 import matplotlib.pyplot as plt
-from pyoctree import pyoctree as ot
 
 
 TOLERANCE = .00001
@@ -181,17 +180,14 @@ def simple_extrude(mesh, opts, extrude_mm):
     for edge in edges:
         edges_xy.append((mesh.vertices[edge[0]][0], mesh.vertices[edge[0]][1]))
 
-    print("check for self intersections")
-    count = check_for_self_intersections(opts, mesh, edges_xy, edges)
+#    print("check for self intersections")
+#    count = check_for_self_intersections(opts, mesh, edges_xy, edges)
 
     faces = []
     for face in mesh.faces:
         faces.append((face[0], face[1], face[2]))
     for face in mesh.faces:
         faces.append((face[0] + num_vertices, face[2] + num_vertices, face[1] + num_vertices))
-
-#    print("make octtree")
-#    tree = ot.PyOctree(np.array(vertices),np.array(faces, dtype=np.int32))
 
     panels = 0
     for i, edge in enumerate(edges):

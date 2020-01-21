@@ -132,7 +132,8 @@ def validate_manifest(manifest):
         if type(manifest['modification']) != list:
             return "modification must be a list."
 
-        if len(manifest['modification']) > 0 and manifest['modification'] not in param.MODIFICATIONS:
-            return "modification must be one of: ", param.MODIFICATIONS
+        for mod in manifest['modification']:
+            if mod not in param.MODIFICATIONS:
+                return "modification must be one of: ", param.MODIFICATIONS
 
     return ""

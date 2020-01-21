@@ -51,6 +51,8 @@ def process_surface(manifest, surface, dest_dir):
 
     solid_file = "%s-%s-solid.stl" % (code, mjson["processed"])
     solid_file = os.path.join(dest_dir, solid_file)
+    surface_file = "%s-%s-surface.stl" % (code, mjson["processed"])
+    surface_file = os.path.join(dest_dir, surface_file)
     surface_med_file = "%s-%s-surface-med.stl" % (code, mjson["processed"])
     surface_med_file = os.path.join(dest_dir, surface_med_file)
     surface_low_file = "%s-%s-surface-low.stl" % (code, mjson["processed"])
@@ -60,7 +62,7 @@ def process_surface(manifest, surface, dest_dir):
     make_solid(code, surface, solid_file, default_opts)
 
     print("copying %s" % surface)
-    shutil.copyfile(surface, os.path.join(dest_dir, os.path.basename(surface)))
+    shutil.copyfile(surface, surface_file)
     print("copying %s" % manifest)
     shutil.copyfile(manifest, os.path.join(dest_dir, os.path.basename(manifest)))
 

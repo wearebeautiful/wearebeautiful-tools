@@ -135,15 +135,15 @@ def make_solid_main(mesh, opts):
         mesh = rotate(mesh, (0,0,0), (1, 0, 0), opts['rotate_x'])
 
     if opts['rotate_y']:
-        mesh = rotate(mesh, (0,0,0), (0, 1, 0), opts['rotate_z'])
+        mesh = rotate(mesh, (0,0,0), (0, 1, 0), opts['rotate_y'])
 
     if opts['rotate_z']:
         mesh = rotate(mesh, (0,0,0), (0, 0, 1), opts['rotate_z'])
 
+    mesh = center_around_origin(mesh)
+
     if opts['debug']:
         save_mesh("after-orient", mesh);
-
-    mesh = center_around_origin(mesh)
 
     print("extrude ...")
     bbox = get_fast_bbox(mesh)
@@ -291,6 +291,15 @@ def make_solid(code, src_file, dest_file, opts):
     if not opts['no_extrude']:
         mesh, surface_height = make_solid_main(mesh, opts)
     else:
+        mesh = center_around_origin(mesh)
+        if opts['rotate_x']:
+            mesh = rotate(mesh, (0,0,0), (1, 0, 0), opts['rotate_x'])
+
+        if opts['rotate_y']:
+            mesh = rotate(mesh, (0,0,0), (0, 1, 0), opts['rotate_y'])
+
+        if opts['rotate_z']:
+            mesh = rotate(mesh, (0,0,0), (0, 0, 1), opts['rotate_z'])
         mesh = center_around_origin(mesh)
         surface_height = 0
 
