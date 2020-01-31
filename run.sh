@@ -8,7 +8,14 @@ fi
 
 if [ "$1" = "up" ]
 then
-    docker run -d --rm --name wab-tools -v `pwd`:/code/wab wearebeautiful:tools python3 wearebeautiful/fussy_is_forever.py
+    if [ -z "$2" ]
+    then
+        docker run -d --rm --name wab-tools -v `pwd`:/code/wab wearebeautiful:tools python3 wearebeautiful/fussy_is_forever.py
+    else
+        DIR=$2
+        DIR="${DIR/#\~/$HOME}"
+        docker run -d --rm --name wab-tools -v "$DIR":/archive -v `pwd`:/code/wab wearebeautiful:tools python3 wearebeautiful/fussy_is_forever.py
+    fi
     exit
 fi
 

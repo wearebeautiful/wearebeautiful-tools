@@ -263,16 +263,16 @@ def make_solid(code, src_file, dest_file, opts):
 
     if opts['url_top'] and opts['url_bottom']:
         print("Cannot use url_top and url_bottom at the same time. pick one!")
-        sys.exit(-1)
+        return False
     if opts['url_left'] and opts['url_right']:
         print("Cannot use url_left and url_right at the same time. pick one!")
-        sys.exit(-1)
+        return False
     if opts['code_top'] and opts['code_bottom']:
         print("Cannot use code_top and code_bottom at the same time. pick one!")
-        sys.exit(-1)
+        return False
     if opts['code_left'] and opts['code_right']:
         print("Cannot use code_left and code_right at the same time. pick one!")
-        sys.exit(-1)
+        return False
 
     if not opts['url_top'] and not opts['url_bottom'] and not opts['url_left'] and not opts['url_right']:
         opts['url_top'] = True
@@ -284,7 +284,7 @@ def make_solid(code, src_file, dest_file, opts):
 #        (opts['code_left'] and opts['url_left']) or \
 #        (opts['code_right'] and opts['url_right']): 
 #        print("Cannot apply code and URL to the same side.")
-#        sys.exit(-1)
+#        return False
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
@@ -307,5 +307,7 @@ def make_solid(code, src_file, dest_file, opts):
     mesh = center_around_origin(mesh)
     print("is manifold: ", mesh.is_manifold())
     print("is closed: ", mesh.is_closed())
+    print("writing %s" % dest_file)
     pymesh.meshio.save_mesh(dest_file, mesh);
-    print("done!")
+
+    return True
