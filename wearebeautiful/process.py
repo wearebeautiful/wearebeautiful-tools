@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import shutil
+from copy import copy
 from wearebeautiful.solid import make_solid
 from make_solid import default_opts
 from wearebeautiful.scale import scale_mesh
@@ -64,8 +65,16 @@ def process_surface(manifest, surface, dest_dir):
     except FileExistsError:
         pass
 
+    opts = copy(default_opts)
+    if 'make_solid_args' in mjson:
+        for k in mjson['make_solid_args']:
+            opts[k] = mjson['make_solid_args'][k]
+
+    print(opts)
+    opts['debug'] = True
+
     print("create solid: %s" % solid_file)
-    if not make_solid(code, surface, solid_file, default_opts):
+    if not make_solid(code, surface, solid_file, opts):
         return False
 
     print("copying %s" % surface)
@@ -79,6 +88,3 @@ def process_surface(manifest, surface, dest_dir):
     scale_mesh(False, .5, surface, surface_low_file, { 'cleanup' : False })
 
     return True
-
-
-

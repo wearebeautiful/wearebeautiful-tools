@@ -9,7 +9,7 @@ from wearebeautiful.scale import scale_mesh
 from wearebeautiful.manifest import validate_manifest, make_code
 from wearebeautiful.process import process_surface, get_dest_paths
 
-surface_dir = "/archive/surfaces ready for processing"
+surface_dir = "/archive/surface-archive"
 model_dir = "/archive/model-archive"
 
 
@@ -91,12 +91,12 @@ def process_human_model(human_model_dir, force):
     msg = validate_manifest(mjson)
     if msg:
         print("  Manifest parse error:")
-        print("  " + msg)
+        print("  ", msg)
         sys.exit(-1)
 
-    make_solid = mjson.get('make-solid-args', "")
+    make_solid = mjson.get('make_solid_args', "")
     if not make_solid and mjson['body_part'] not in ['vulva', 'penis']:
-        print("  For non-vulva, non-penis models, please fill out make-solid-args in manifest.json for %s" % human_model_dir)
+        print("  For non-vulva, non-penis models, please fill out make_solid_args in manifest.json for %s" % human_model_dir)
         return
 
     paths = get_dest_paths(mjson, model_dir)

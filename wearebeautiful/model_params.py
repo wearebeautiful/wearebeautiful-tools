@@ -23,7 +23,8 @@ OPTIONAL_KEYS = [
     "comment", 
     "other", 
     "tags", 
-    "modification" 
+    "modification",
+    "make_solid_args"
 ]
 
 GENDERS = [
