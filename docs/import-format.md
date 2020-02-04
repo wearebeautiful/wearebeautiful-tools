@@ -26,7 +26,7 @@ following keys:
     "gender_comment": "",
     "body_type":      "thin",
     "body_part":      "bust",
-    "pose":           "normal",
+    "pose":           "standing",
     "mother":         "vaginal",
     "tags":           ["post_pregnancy"],
     "modification":   ["pregnancy", "breastfed"],
