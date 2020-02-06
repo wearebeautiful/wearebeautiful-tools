@@ -20,7 +20,7 @@ def get_dest_paths(mjson, dest_dir):
     surface_med_file = os.path.join(dest_dir, id, code, surface_med_file)
     surface_low_file = "%s-%s-surface-low.stl" % (code, mjson["processed"])
     surface_low_file = os.path.join(dest_dir, id, code, surface_low_file)
-    manifest_file = "%s-%s-manifest.stl" % (code, mjson["processed"])
+    manifest_file = "%s-%s-manifest.json" % (code, mjson["processed"])
     manifest_file = os.path.join(dest_dir, id, code, manifest_file)
 
     return solid_file, surface_file, surface_med_file, surface_low_file, manifest_file

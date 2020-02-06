@@ -109,3 +109,4 @@ config.py
 static/models
 *.stl
 *.obj
+*.db
