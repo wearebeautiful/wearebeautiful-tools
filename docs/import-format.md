@@ -159,7 +159,7 @@ Indicates modifciation of the model. One of more of the following may be allowed
 | circumcised |
 | augmentated |
 | episiotomy |
-| masectomy  |
+| mastectomy  |
 | labiaplasty |
 | female-to-male |
 | male-to-female |
