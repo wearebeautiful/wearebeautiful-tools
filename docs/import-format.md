@@ -133,6 +133,7 @@ Allowable values and their short cut codes:
 | S    |standing |
 | T    |sitting |
 | L    |lying |
+| U    |lying, legs pulled up |
 
 
 mother
