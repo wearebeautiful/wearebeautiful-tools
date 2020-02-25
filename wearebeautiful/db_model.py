@@ -7,7 +7,7 @@ db = SqliteDatabase(None)
 def create_from_manifest(manifest):
     return DBModel.create(
         model_id = manifest['id'],
-        code = make_code(manifest=manifest),
+        code = make_code(manifest=manifest).split('-')[1],
         created = dateutil.parser.parse(manifest['created']),
         processed = dateutil.parser.parse(manifest['processed']),
         released = dateutil.parser.parse(manifest['released']),
@@ -17,8 +17,10 @@ def create_from_manifest(manifest):
         body_part = manifest['body_part'],
         pose = manifest['pose'],
         mother = manifest['mother'],
-        tags = manifest.get('tags', ''),
-        modification = manifest.get('modification', ""),
+        arrangement = manifest['arrangement'],
+        excited = manifest['excited'],
+        tags = ",".join(manifest.get('tags', '')),
+        modification = ",".join(manifest.get('modification', '')),
         comment = manifest.get('comment', "")
     )
 
@@ -44,6 +46,8 @@ class DBModel(Model):
     body_part = TextField()
     pose = TextField()
     mother = TextField()
+    arrangement = TextField()
+    excited = TextField()
     tags = TextField(null = False)
     modification = TextField(null = False)
     comment = TextField(null = False)

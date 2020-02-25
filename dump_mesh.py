@@ -27,8 +27,7 @@ def invert(src_file):
     print("is vertex manifold: ", mesh.is_vertex_manifold())
     print("is closed: ", mesh.is_closed())
     print("is oriented: ", mesh.is_oriented())
-#    print("self intersections: ", len(mesh.detect_self_intersection()))
-#    print("remove degenerated triangles: ", mesh.remove_degenerated_triangles()[1])
+    print("attribute names: ", mesh.attribute_names)
 
 
 def usage(command):
