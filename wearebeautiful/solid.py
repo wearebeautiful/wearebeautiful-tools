@@ -246,11 +246,13 @@ def modify_solid(mesh, surface_height, code, opts):
         outer_box = pymesh.boolean(outer_box, code, operation="union", engine="igl")
 
     if opts['debug']:
-        save_mesh("before-subtract", outer_box);
+        save_mesh("before-subtract outer_box", outer_box);
 
     print("final subtract")
     if surface_height:
         mesh = translate(mesh, (0, 0, -surface_height))
+    if opts['debug']:
+        save_mesh("before-subtract mesh", mesh);
     return pymesh.boolean(mesh, outer_box, operation="difference", engine="igl")
 
 
@@ -288,7 +290,7 @@ def make_solid(code, src_file, dest_file, opts):
 
 
     mesh = pymesh.meshio.load_mesh(src_file);
-    if not opts['no_extrude']:
+    if not opts['solid']:
         mesh, surface_height = make_solid_main(mesh, opts)
     else:
         mesh = center_around_origin(mesh)

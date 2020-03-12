@@ -87,7 +87,7 @@ def validate_manifest(manifest):
 
     for k in manifest.keys():
        if k not in param.REQUIRED_KEYS and k not in param.OPTIONAL_KEYS:
-            return "top level field %s should not appear in manifest.json" % k
+            return "top level field '%s' should not appear in manifest.json" % k
 
     if len(manifest['id']) != 6 or not manifest['id'].isdigit():
         return "Incorrect ID length or non digits in ID."

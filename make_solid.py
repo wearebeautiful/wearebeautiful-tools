@@ -30,7 +30,7 @@ default_opts = {
     'flip_walls' : True,
     'floor' : True,
     'debug' : False,
-    'no_extrude' : False,
+    'solid' : False,
     'no_code' : False,
     'no_url' : False,
 }
@@ -66,7 +66,7 @@ default_opts = {
 @click.option('--flip-walls', '-w', is_flag=True, default=default_opts['flip_walls'])
 @click.option('--floor', '-f', is_flag=True, default=default_opts['floor'])
 @click.option('--debug', '-d', is_flag=True, default=default_opts['debug'])
-@click.option('--no-extrude', '-n', is_flag=True, default=default_opts['no_extrude'])
+@click.option('--solid', '-s', is_flag=True, default=default_opts['solid'])
 @click.option('--no-code', '-n', is_flag=True, default=default_opts['no_code'])
 @click.option('--no-url', '-n', is_flag=True, default=default_opts['no_url'])
 def solid(code, src_file, dest_file, **opts):

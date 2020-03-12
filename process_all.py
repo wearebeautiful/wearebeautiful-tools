@@ -57,15 +57,30 @@ def process_human_model(human_model_dir, force):
 
     manifest_file = None
     surface_file = None
+    stl_file = None
+    solid_file = None
     for filename in os.listdir(human_model_dir):
         if filename in ['.','..']:
             continue
 
         if filename.endswith(".json"):
             manifest_file = filename
+            continue
    
-        if filename.endswith(".stl"):
+        if filename.lower().endswith("solid.stl"):
+            solid_file = filename
+            continue
+
+        if filename.endswith("surface.stl"):
             surface_file = filename
+            continue
+
+        if filename.endswith(".stl"):
+            stl_file = filename
+            continue
+
+    if not surface_file:
+        surface_file = stl_file
 
     if not manifest_file:
         print("  Could not find manifest file in %s. skipping." % human_model_dir)
@@ -77,7 +92,11 @@ def process_human_model(human_model_dir, force):
         return
     surface_file = os.path.join(human_model_dir, surface_file)
 
-    print("  process %s %s" % (manifest_file, surface_file))
+    if solid_file:
+        print("  Found solid file in %s, processing as SOLID!" % human_model_dir)
+        solid_file = os.path.join(human_model_dir, solid_file)
+
+
     try:
         with open(manifest_file, "rb") as f:
             mjson = json.loads(str(f.read().decode('utf-8')))
@@ -94,8 +113,11 @@ def process_human_model(human_model_dir, force):
         print("  ", msg)
         sys.exit(-1)
 
+    if solid_file and 'make_solid_args' in mjson:
+        mjson['make_solid_args']['solid'] = True
+
     make_solid = mjson.get('make_solid_args', "")
-    if not make_solid and mjson['body_part'] not in ['vulva', 'penis']:
+    if not make_solid and mjson['body_part'] not in ['vulva', 'penis', 'breast']:
         print("  For non-vulva, non-penis models, please fill out make_solid_args in manifest.json for %s" % human_model_dir)
         return
 
@@ -106,7 +128,7 @@ def process_human_model(human_model_dir, force):
             complete = False
 
     if not complete or force:
-        if process_surface(manifest_file, surface_file, model_dir):
+        if process_surface(manifest_file, surface_file, solid_file, model_dir):
             print("  process surface complete.")
         else:
             print("  process surface failed. :(")

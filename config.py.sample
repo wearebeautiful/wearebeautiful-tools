@@ -1,7 +1,3 @@
-BUNDLE_DIR="[bundle dir location]"
-SECRET_KEY = "add your key here"
-USE_SITE_AUTH=False
-SITE_USERNAME="test"
-SITE_PASSWORD="test"
-REDIS_HOST="localhost"
-REDIS_PORT=6379
+MODEL_DIR = ""
+SURFACE_DIR = ""
+MODEL_GIT_DIR = ""

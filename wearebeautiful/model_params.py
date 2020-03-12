@@ -24,7 +24,8 @@ OPTIONAL_KEYS = [
     "other", 
     "tags", 
     "modification",
-    "make_solid_args"
+    "make_solid_args",
+    "links"
 ]
 
 GENDERS = [
@@ -72,6 +73,7 @@ POSE = {
     "standing" : "S", 
     "sitting" : "T", 
     "lying" : "L", 
+    "lying, legs pulled up" : "U", 
 }
 
 MODIFICATIONS = [ 
@@ -80,7 +82,7 @@ MODIFICATIONS = [
     "circumcised", 
     "augmented", 
     "episiotomy",
-    "masectomy", 
+    "mastectomy", 
     "labiaplasty", 
     "female-to-male", 
     "male-to-female", 

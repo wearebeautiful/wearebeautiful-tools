@@ -6,11 +6,10 @@ import click
 from wearebeautiful.process import process_surface
 
 @click.command()
-@click.argument("manifest", nargs=1)
-@click.argument("surface", nargs=1)
-@click.argument("dest_dir", nargs=1)
-def process(manifest, surface, dest_dir):
-    process_surface(manifest, surface, dest_dir)
+@click.argument("id", nargs=1)
+@click.argument("code", nargs=1)
+def process(id, code):
+    process_surface(id, code)
 
 
 def usage(command):
