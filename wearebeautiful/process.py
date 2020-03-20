@@ -4,11 +4,29 @@ import json
 import shutil
 import subprocess
 from copy import copy
+import pymesh
 from wearebeautiful.solid import make_solid
 from make_solid import default_opts
 from wearebeautiful.scale import scale_mesh
 from wearebeautiful.manifest import validate_manifest, make_code
+from wearebeautiful.utils import rotate
 import config
+
+def rotate_mesh(filename, rot_x, rot_y, rot_z):
+    src_file = os.path.join("/archive", filename)
+    mesh = pymesh.meshio.load_mesh(src_file);
+
+    if rot_x:
+        mesh = rotate(mesh, (0,0,0), (1, 0, 0), rot_x)
+
+    if rot_y:
+        mesh = rotate(mesh, (0,0,0), (0, 1, 0), rot_y)
+
+    if rot_z:
+        mesh = rotate(mesh, (0,0,0), (0, 0, 1), rot_z)
+
+    pymesh.meshio.save_mesh(src_file, mesh);
+
 
 def get_dest_paths(mjson, dest_dir):
 
@@ -72,7 +90,7 @@ def process_surface(id, code, force = False):
 
     gen_code = make_code(manifest=mjson)
     if "%s-%s" % (id, code) != gen_code:
-        print("Code passed on the command line '%s' and code generated from the manifest.json '%s' do not match!" % (code, gen_code))
+        print("Code passed on the command line '%s-%s' and code generated from the manifest.json '%s' do not match!" % (id, code, gen_code))
         return False
 
     # set up the correction options for make_solid

@@ -8,38 +8,36 @@ from make_solid import default_opts
 from wearebeautiful.scale import scale_mesh
 from wearebeautiful.manifest import validate_manifest, make_code
 from wearebeautiful.process import process_surface, get_dest_paths
-
-surface_dir = "/archive/surface-archive"
-model_dir = "/archive/model-archive"
+import config
 
 
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
 def process_all(force):
 
-    if not os.path.isdir(surface_dir):
-        print("surface dir %s does not exist or is not accessible." % surface_dir)
+    if not os.path.isdir(config.SURFACE_DIR):
+        print("surface dir %s does not exist or is not accessible." % config.SURFACE_DIR)
         sys.exit(-1)
 
-    if not os.path.isdir(model_dir):
-        print("model dir %s does not exist or is not accessible." % model_dir)
+    if not os.path.isdir(config.MODEL_DIR):
+        print("model dir %s does not exist or is not accessible." % config.MODEL_DIR)
         sys.exit(-1)
 
-    for dir in os.listdir(surface_dir):
+    for dir in os.listdir(config.SURFACE_DIR):
         if dir in ['.','..']:
             continue
 
-        full_path = os.path.join(surface_dir, dir)
+        full_path = os.path.join(config.SURFACE_DIR, dir)
         if not os.path.isdir(full_path):
             continue
 
         if len(dir) != 6 or not dir.isdigit():
             continue
 
-        process_human_model_dir(full_path, force)
+        process_human_model_dir(dir, full_path, force)
 
 
-def process_human_model_dir(human_model_dir, force):
+def process_human_model_dir(id, human_model_dir, force):
 
     for dir in os.listdir(human_model_dir):
         if dir in ['.','..']:
@@ -49,91 +47,8 @@ def process_human_model_dir(human_model_dir, force):
             continue
 
         full_path = os.path.join(human_model_dir, dir)
-        print("examine %s:" % full_path)
-        process_human_model(full_path, force)
+        process_surface(id, dir)
 
-
-def process_human_model(human_model_dir, force):
-
-    manifest_file = None
-    surface_file = None
-    stl_file = None
-    solid_file = None
-    for filename in os.listdir(human_model_dir):
-        if filename in ['.','..']:
-            continue
-
-        if filename.endswith(".json"):
-            manifest_file = filename
-            continue
-   
-        if filename.lower().endswith("solid.stl"):
-            solid_file = filename
-            continue
-
-        if filename.endswith("surface.stl"):
-            surface_file = filename
-            continue
-
-        if filename.endswith(".stl"):
-            stl_file = filename
-            continue
-
-    if not surface_file:
-        surface_file = stl_file
-
-    if not manifest_file:
-        print("  Could not find manifest file in %s. skipping." % human_model_dir)
-        return
-    manifest_file = os.path.join(human_model_dir, manifest_file)
-
-    if not surface_file:
-        print("  Could not find surface file in %s. skipping." % human_model_dir)
-        return
-    surface_file = os.path.join(human_model_dir, surface_file)
-
-    if solid_file:
-        print("  Found solid file in %s, processing as SOLID!" % human_model_dir)
-        solid_file = os.path.join(human_model_dir, solid_file)
-
-
-    try:
-        with open(manifest_file, "rb") as f:
-            mjson = json.loads(str(f.read().decode('utf-8')))
-    except IOError as err:
-        print("  problem reading manifest: ", str(err))
-        sys.exit(-1)
-    except json.decoder.JSONDecodeError as err:
-        print("  problem decoding manifest: ", str(err))
-        sys.exit(-1)
-
-    msg = validate_manifest(mjson)
-    if msg:
-        print("  Manifest parse error:")
-        print("  ", msg)
-        sys.exit(-1)
-
-    if solid_file and 'make_solid_args' in mjson:
-        mjson['make_solid_args']['solid'] = True
-
-    make_solid = mjson.get('make_solid_args', "")
-    if not make_solid and mjson['body_part'] not in ['vulva', 'penis', 'breast']:
-        print("  For non-vulva, non-penis models, please fill out make_solid_args in manifest.json for %s" % human_model_dir)
-        return
-
-    paths = get_dest_paths(mjson, model_dir)
-    complete = True
-    for path in paths:
-        if not os.path.exists(path):
-            complete = False
-
-    if not complete or force:
-        if process_surface(manifest_file, surface_file, solid_file, model_dir):
-            print("  process surface complete.")
-        else:
-            print("  process surface failed. :(")
-    else:
-        print("  complete, skipping")
 
 
 def usage(command):
