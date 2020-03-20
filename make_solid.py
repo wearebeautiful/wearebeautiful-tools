@@ -2,9 +2,6 @@ import click
 from wearebeautiful.solid import make_solid
 
 default_opts = {
-    'rotate_x' : 0,
-    'rotate_y' : 0,
-    'rotate_z' : 0,
     'url_top' : False,
     'url_bottom' : False,
     'url_left' : False,
@@ -23,6 +20,7 @@ default_opts = {
     'code_scale' : .7,
     'url_scale' : .7,
     'crop' : 1.0,
+    'crop_xyz' : "",
     'text_depth' : 1.0,
     'extrude' : 2.0,
     'label_offset' : 0,
@@ -38,9 +36,6 @@ default_opts = {
 @click.argument("code", nargs=1)
 @click.argument("src_file", nargs=1)
 @click.argument("dest_file", nargs=1)
-@click.option('--rotate-x', '-rx', default=default_opts['rotate_x'], type=int)
-@click.option('--rotate-y', '-ry', default=default_opts['rotate_y'], type=int)
-@click.option('--rotate-z', '-rz', default=default_opts['rotate_z'], type=int)
 @click.option('--url-top', '-ut', is_flag=True, default=default_opts['url_top'])
 @click.option('--url-bottom', '-ub', is_flag=True, default=default_opts['url_bottom'])
 @click.option('--url-left', '-ul', is_flag=True, default=default_opts['url_left'])
@@ -59,6 +54,7 @@ default_opts = {
 @click.option('--code-scale', '-cz', default=default_opts['code_scale'], type=float)
 @click.option('--url-scale', '-uz', default=default_opts['url_scale'], type=float)
 @click.option('--crop', '-c', default=default_opts['crop'], type=float)
+@click.option('--crop-xyz', '-cx', default=default_opts['crop_xyz'])
 @click.option('--text-depth', '-td', default=default_opts['text_depth'], type=float)
 @click.option('--extrude', '-e', default=default_opts['extrude'], type=float)
 @click.option('--label-offset', '-o', default=default_opts['label_offset'], type=float)
