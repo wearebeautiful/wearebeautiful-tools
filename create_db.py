@@ -3,12 +3,14 @@ import os
 import click
 
 from wearebeautiful.database import create_database
+import config
+
+MODEL_DIR = "/archive/model-archive"
+MODEL_GIT_DIR = "/archive/git-model-repo"
 
 @click.command()
-@click.argument("db_file", nargs=1)
-@click.argument("model_dir", nargs=1)
-def create(db_file, model_dir):
-    create_database(db_file, model_dir)
+def create():
+    create_database(os.path.join(config.MODEL_GIT_DIR, "wab-models.db"), config.MODEL_DIR)
 
 
 def usage(command):
