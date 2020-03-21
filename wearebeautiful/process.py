@@ -118,7 +118,7 @@ def process_surface(id, code, force = False):
     solid_file_gz, surface_file_gz, surface_med_file_gz, surface_low_file_gz, manifest_file_git = get_dest_paths(mjson, comp_dest_dir)
 
     # Now do stuff!
-    if force or (not os.path.exists(solid_file) or not os.path.exists(solid_file_gz)):
+    if force or (not os.path.exists(solid_file)) or (not os.path.exists(solid_file_gz + ".gz")):
         if is_solid:
             print("apply code and url to solid: %s" % solid_input)
             if not make_solid(gen_code, solid_input, solid_file, opts):
@@ -131,26 +131,28 @@ def process_surface(id, code, force = False):
         subprocess.run(["gzip", "-f", solid_file_gz], check=True)
         processed += 1
 
+
     try:
-        if force or (not os.path.exists(surface_file) or not os.path.exists(surface_file_gz + ".gz")):
+        if force or (not os.path.exists(surface_file)) or (not os.path.exists(surface_file_gz + ".gz")):
             shutil.copyfile(surface, surface_file)
             shutil.copyfile(surface, surface_file_gz)
             subprocess.run(["gzip", "-f", surface_file_gz], check=True)
             processed += 1
 
-        if force or (not os.path.exists(manifest_file) or not os.path.exists(manifest_file_git + ".gz")):
+
+        if force or (not os.path.exists(manifest_file) or not os.path.exists(manifest_file_git)):
             shutil.copyfile(manifest, manifest_file)
             shutil.copyfile(manifest_file, manifest_file_git)
             processed += 1
 
-        if force or (not os.path.exists(surface_med_file) or not os.path.exists(surface_med_file_gz + ".gz")):
+        if force or (not os.path.exists(surface_med_file)) or (not os.path.exists(surface_med_file_gz + ".gz")):
             print("scaling medium surface %s" % surface_med_file)
             scale_mesh(False, .3, surface, surface_med_file, { 'cleanup' : False })
             shutil.copyfile(surface_med_file, surface_med_file_gz)
             subprocess.run(["gzip", "-f", surface_med_file_gz], check=True)
             processed += 1
 
-        if force or (not os.path.exists(surface_low_file) or not os.path.exists(surface_low_file_gz + ".gz")):
+        if force or (not os.path.exists(surface_low_file)) or (not os.path.exists(surface_low_file_gz + ".gz")):
             print("scaling low surface %s" % surface_low_file)
             scale_mesh(False, .5, surface, surface_low_file, { 'cleanup' : False })
             shutil.copyfile(surface_low_file, surface_low_file_gz)
@@ -165,8 +167,8 @@ def process_surface(id, code, force = False):
         return False
 
     if not processed:
-        print("Nothing to process, all up to date.")
+        print("%s-%s Nothing to process, all up to date." % (id, code))
     else:
-        print("Processed %d items." % processed)
+        print("%s-%s Processed %d items." % (id, code, processed))
 
     return True

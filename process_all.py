@@ -23,7 +23,7 @@ def process_all(force):
         print("model dir %s does not exist or is not accessible." % config.MODEL_DIR)
         sys.exit(-1)
 
-    for dir in os.listdir(config.SURFACE_DIR):
+    for dir in sorted(os.listdir(config.SURFACE_DIR)):
         if dir in ['.','..']:
             continue
 
@@ -39,7 +39,7 @@ def process_all(force):
 
 def process_human_model_dir(id, human_model_dir, force):
 
-    for dir in os.listdir(human_model_dir):
+    for dir in sorted(os.listdir(human_model_dir)):
         if dir in ['.','..']:
             continue
 

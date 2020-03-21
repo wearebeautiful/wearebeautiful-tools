@@ -1,9 +1,13 @@
 import os
 import json
+import shutil
 
 from peewee import SqliteDatabase
 from wearebeautiful.db_model import DBModel, db, create_from_manifest
 from wearebeautiful.manifest import validate_manifest
+import config
+
+DB_FILE = "wab-models.db"
 
 def add_models(dir):
     for item in os.listdir(dir):
@@ -35,11 +39,21 @@ def add_human_model(dir):
             add_models(dir_name)
 
 
-def create_database(db_file, model_archive):
+def create_database():
+
+    db_file = os.path.join(config.MODEL_GIT_DIR, DB_FILE)
     print("creating db file '%s'" % db_file)
+    try:
+        os.unlink(db_file)
+    except OSError:
+        pass
+
     db.init(db_file)
     db.create_tables([DBModel])
-    for item in os.listdir(model_archive):
-        dir_name = os.path.join(model_archive, item)
+    for item in os.listdir(config.MODEL_DIR):
+        dir_name = os.path.join(config.MODEL_DIR, item)
         if len(item) == 6 and item.isdigit() and os.path.isdir(dir_name):
             add_human_model(dir_name)
+
+    db_file_non_git = os.path.join(config.MODEL_DIR, DB_FILE)
+    shutil.copyfile(db_file, db_file_non_git)
