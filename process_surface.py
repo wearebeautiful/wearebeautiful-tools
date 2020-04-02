@@ -8,8 +8,9 @@ from wearebeautiful.process import process_surface
 @click.command()
 @click.argument("id", nargs=1)
 @click.argument("code", nargs=1)
-def process(id, code):
-    process_surface(id, code)
+@click.argument("version", nargs=1)
+def process(id, code, version):
+    process_surface(id, code, int(version))
 
 
 def usage(command):

@@ -11,22 +11,44 @@ from wearebeautiful import model_params as param
 MAX_SCREENSHOT_SIZE = 256000 # 256Kb is enough!
 
 
-def make_code(id="", part="", pose="", arrangement="", excited="", manifest=None):
+def make_code(id="", part="", pose="", arrangement="", excited="", version=1, manifest=None):
 
     if manifest:
-        return "%s-%c%c%c%c" % (manifest['id'], 
-                                param.BODY_PART[manifest['body_part']],
-                                param.POSE[manifest['pose']],
-                                param.ARRANGEMENT[manifest['arrangement']],
-                                param.EXCITED[manifest['excited']])
+        if version == 1:
+            return "%s-%c%c%c%c" % (manifest['id'], 
+                                    param.BODY_PART[manifest['body_part']],
+                                    param.POSE[manifest['pose']],
+                                    param.ARRANGEMENT[manifest['arrangement']],
+                                    param.EXCITED[manifest['excited']])
+        else:
+            return "%s-%c%c%c%c-%d" % (manifest['id'], 
+                                    param.BODY_PART[manifest['body_part']],
+                                    param.POSE[manifest['pose']],
+                                    param.ARRANGEMENT[manifest['arrangement']],
+                                    param.EXCITED[manifest['excited'], version])
     else:
-        return "%0s-%c%c%c%c" % (id,  part, pose, arrangement, excited)
+        if version == 1:
+            return "%0s-%c%c%c%c" % (id,  part, pose, arrangement, excited)
+        else:
+            return "%0s-%c%c%c%c-%d" % (id,  part, pose, arrangement, excited, version)
 
 
 def parse_code(code):
     try:
-        id, codes = code.split("-")
+        parts = code.split("-")
+        if len(parts) == 2:
+            id = parts[0]
+            codes = parts[1]
+            version = 1
+        else:
+            id = parts[0]
+            codes = parts[1]
+            version = int(parts[2])
+
         if not id.isdigit() and len(id) == 6:
+            raise ValueError
+
+        if version < 1 or version > 99:
             raise ValueError
 
         if not len(codes) == 4:
@@ -35,7 +57,7 @@ def parse_code(code):
         part, pose, arrangement, excited = list(codes)
 
     except ValueError:
-        raise ValueError("Invalid model %s. Must be in format ######-CCCC." % code) 
+        raise ValueError("Invalid model %s. Must be in format ######-CCCC or ######-CCCC-V." % code) 
 
     if part not in param.BODY_PART.values():
         raise ValueError("Invalid body part code '%c'" % part)
@@ -49,7 +71,7 @@ def parse_code(code):
     if excited not in param.EXCITED.values():
         raise ValueError("Invalid excited code '%c'" % excited)
 
-    return (id, part, pose, arrangement, excited)
+    return (id, part, pose, arrangement, excited, version)
 
 
 
@@ -77,9 +99,14 @@ def validate_date(date, partial=False):
 
 
 def validate_manifest(manifest):
-    
-    if manifest['version'] != param.FORMAT_VERSION:
-        return "Incorrect format version. This script can only accept version %s" % param.FORMAT_VERSION
+   
+    try:
+        version = int(manifest['version'])
+    except ValueError:
+        return "Incorrect version. Must be integer between 1 and 99."
+
+    if version < 1 or version > 99:
+        return "Incorrect version. Must be between 1 and 99."
 
     for k in param.REQUIRED_KEYS:
         if k not in manifest.keys():
@@ -103,7 +130,6 @@ def validate_manifest(manifest):
     except ValueError:
         return "Incorrect ID format. Must be a 4 digit number."
 
-
     if manifest['gender'] not in param.GENDERS:
         return "Invalid gender. Must be one of: ", param.GENDERS
 
@@ -122,8 +148,8 @@ def validate_manifest(manifest):
     if manifest['body_type'] not in param.BODY_TYPES:
         return "Invalid body type. Must be one of ", param.BODY_TYPES
 
-    if manifest['mother'] not in param.MOTHER:
-        return "Invalid value for the field mother. Must be one of ", param.MOTHER
+    if manifest['given_birth'] not in param.GIVEN_BIRTH:
+        return "Invalid value for the field given_birth. Must be one of ", param.GIVEN_BIRTH
 
     if 'modification' in manifest:
         if manifest['modification'] == "none":
@@ -133,7 +159,7 @@ def validate_manifest(manifest):
             return "modification must be a list."
 
         for mod in manifest['modification']:
-            if mod not in param.MODIFICATIONS:
-                return "modification must be one of: ", param.MODIFICATIONS
+            if mod not in param.HISTORY:
+                return "modification must be one of: ", param.HISTORY
 
     return ""

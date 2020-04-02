@@ -43,11 +43,25 @@ def process_human_model_dir(id, human_model_dir, force):
         if dir in ['.','..']:
             continue
 
-        if len(dir) != 4:
-            continue
+        parts = dir.split('-')
+        if len(parts) == 1:
+            code = parts[0]
+            version = 1
+
+            if len(code) != 4:
+                continue
+        else:
+            code = parts[0]
+            if len(code) != 4:
+                continue
+            try:
+                version = int(parts[1])
+            except ValueError:
+                continue
 
         full_path = os.path.join(human_model_dir, dir)
-        process_surface(id, dir)
+        print(full_path)
+        process_surface(id, code, version)
 
 
 

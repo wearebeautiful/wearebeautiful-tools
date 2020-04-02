@@ -8,19 +8,21 @@ def create_from_manifest(manifest):
     return DBModel.create(
         model_id = manifest['id'],
         code = make_code(manifest=manifest).split('-')[1],
+        version = manifest['version'],
         created = dateutil.parser.parse(manifest['created']),
-        processed = dateutil.parser.parse(manifest['processed']),
         released = dateutil.parser.parse(manifest['released']),
         gender = manifest['gender'],
         gender_comment = manifest.get('gender_comment', ''),
+        sex = manifest['sex'],
+        sex_comment = manifest.get('sex_comment', ''),
         body_type = manifest['body_type'],
         body_part = manifest['body_part'],
         pose = manifest['pose'],
-        mother = manifest['mother'],
+        given_birth = manifest['given_birth'],
         arrangement = manifest['arrangement'],
         excited = manifest['excited'],
         tags = ",".join(manifest.get('tags', '')),
-        modification = ",".join(manifest.get('modification', '')),
+        history = ",".join(manifest.get('history', '')),
         comment = manifest.get('comment', "")
     )
 
@@ -36,22 +38,23 @@ class DBModel(Model):
 
     id = AutoField()
     model_id = TextField()
+    version = IntegerField()
     code = TextField()
     created = DateField()
     released = DateField()
-    processed = DateField()
     gender = TextField()
     gender_comment = TextField(null = False)
+    sex = TextField()
+    sex_comment = TextField(null = False)
     body_type = TextField()
     body_part = TextField()
     pose = TextField()
-    mother = TextField()
+    given_birth = TextField()
     arrangement = TextField()
     excited = TextField()
     tags = TextField(null = False)
-    modification = TextField(null = False)
+    history = TextField(null = False)
     comment = TextField(null = False)
 
     def __repr__(self):
         return "<DBModel(%s-%s)>" % (self.code, str(self.processed))
-

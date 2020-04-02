@@ -32,25 +32,28 @@ def get_dest_paths(mjson, dest_dir):
 
     code = make_code(manifest=mjson)
     id = mjson['id']
-    solid_file = "%s-%s-solid.stl" % (code, mjson["processed"])
+    solid_file = "%s-%d-solid.stl" % (code, mjson["version"])
     solid_file = os.path.join(dest_dir, solid_file)
-    surface_file = "%s-%s-surface.stl" % (code, mjson["processed"])
+    surface_file = "%s-%d-surface.stl" % (code, mjson["version"])
     surface_file = os.path.join(dest_dir, surface_file)
-    surface_med_file = "%s-%s-surface-med.stl" % (code, mjson["processed"])
+    surface_med_file = "%s-%d-surface-med.stl" % (code, mjson["version"])
     surface_med_file = os.path.join(dest_dir, surface_med_file)
-    surface_low_file = "%s-%s-surface-low.stl" % (code, mjson["processed"])
+    surface_low_file = "%s-%d-surface-low.stl" % (code, mjson["version"])
     surface_low_file = os.path.join(dest_dir, surface_low_file)
-    manifest_file = "%s-%s-manifest.json" % (code, mjson["processed"])
+    manifest_file = "%s-%d-manifest.json" % (code, mjson["version"])
     manifest_file = os.path.join(dest_dir, manifest_file)
 
     return solid_file, surface_file, surface_med_file, surface_low_file, manifest_file
 
 
-def process_surface(id, code, force = False):
+def process_surface(id, code, version, force = False):
 
     processed = 0
 
-    path = os.path.join(config.SURFACE_DIR, id, code)
+    if version > 1:
+        path = os.path.join(config.SURFACE_DIR, id, code + "-%d" % version)
+    else:
+        path = os.path.join(config.SURFACE_DIR, id, code)
     manifest = os.path.join(path, "manifest.json")
     if not os.path.exists(manifest):
         print("manifest file %s does not exist." % manifest)
@@ -72,6 +75,7 @@ def process_surface(id, code, force = False):
         print("model git dir %s does not exist or is not accessible." % config.MODEL_DIR)
         return False
 
+    print(manifest)
     try:
         with open(manifest, "rb") as f:
             mjson = json.loads(str(f.read().decode('utf-8')))
@@ -84,13 +88,17 @@ def process_surface(id, code, force = False):
 
     msg = validate_manifest(mjson)
     if msg:
-        print("Manifest parse error:")
+        print("%s-%s-%d: Manifest parse error:" % (id, code, version))
         print(msg)
         return False
 
     gen_code = make_code(manifest=mjson)
     if "%s-%s" % (id, code) != gen_code:
         print("Code passed on the command line '%s-%s' and code generated from the manifest.json '%s' do not match!" % (id, code, gen_code))
+        return False
+
+    if version != int(mjson['version']):
+        print("Version passed on the command line %d does not match version in manifest.json %d." % (version, int(mjson['version'])))
         return False
 
     # set up the correction options for make_solid

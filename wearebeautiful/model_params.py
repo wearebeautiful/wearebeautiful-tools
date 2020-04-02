@@ -1,5 +1,4 @@
 MIN_FREETEXT_FIELD_LEN = 5
-FORMAT_VERSION = 1 
 LOW_RES_SEGMENT_LEN = .5
 MEDIUM_RES_SEGMENT_LEN = .3
 
@@ -7,12 +6,12 @@ REQUIRED_KEYS = [
     "version", 
     "id", 
     "created", 
+    "sex", 
     "gender", 
     "body_type", 
     "body_part", 
-    "mother", 
+    "given_birth", 
     "released", 
-    "processed", 
     "pose",
     "arrangement",
     "excited"
@@ -20,26 +19,34 @@ REQUIRED_KEYS = [
 
 OPTIONAL_KEYS = [ 
     "gender_comment", 
+    "sex_comment", 
     "comment", 
     "other", 
     "tags", 
-    "modification",
+    "history",
     "make_solid_args",
     "links"
 ]
 
 GENDERS = [
+    "woman", 
+    "man", 
+    "non binary", 
+    "transgender",
+    "cisgender",
+    "other"
+]
+
+SEX = [
     "female", 
     "male", 
-    "trans-mtf", 
-    "trans-ftm", 
+    "intersex", 
     "other"
 ]
 
 BODY_TYPES = [
     "thin", 
-    "fit", 
-    "full", 
+    "average", 
     "overweight"
 ]
 
@@ -54,6 +61,7 @@ BODY_PART = {
      "penis" : "P", 
      "torso" : "T", 
      "vulva" : "V", 
+     "hand" : "H", 
 }
 
 EXCITED = {
@@ -76,7 +84,7 @@ POSE = {
     "lying, legs pulled up" : "U", 
 }
 
-MODIFICATIONS = [ 
+HISTORY = [ 
     "pregnancy", 
     "nursed", 
     "circumcised", 
@@ -89,7 +97,7 @@ MODIFICATIONS = [
     "fgm", 
 ]
 
-MOTHER = [
+GIVEN_BIRTH = [
     "no", 
     "vaginal", 
     "caesarean"

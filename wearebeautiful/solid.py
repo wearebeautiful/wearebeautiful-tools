@@ -99,11 +99,16 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale, horiz_off
     elif side == 'top':
         text = rotate(text, (0,0,0), (0, 1, 0), 90)
         text = rotate(text, (0,0,0), (0, 0, 1), 90)
+    elif side == 'floor':
+        text = rotate(text, (0,0,0), (0, 1, 0), 180)
 
     if side == 'bottom' or side == 'top':
         box_w = inner_box_dims[1][1] - inner_box_dims[0][1]
-    else:
+    elif side == 'left' or side == 'right':
         box_w = inner_box_dims[1][0] - inner_box_dims[0][0]
+    else:
+        box_w = inner_box_dims[1][2] - inner_box_dims[0][2]
+        
 
     scale_f = (box_w * text_scale)  / text_w
     text = scale(text, (scale_f, scale_f, scale_f))
@@ -114,18 +119,24 @@ def move_text_to_surface(text, inner_box_dims, side, opts, text_scale, horiz_off
     if side == 'left':
         trans_x = inner_box_dims[1][1] + ubox[1][1] - opts['text_depth']
         trans_y -= horiz_offset
+        trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset'] + vert_offset
     elif side == 'right':
         trans_x = -inner_box_dims[1][1] - ubox[1][1] + opts['text_depth']
         trans_y += horiz_offset
+        trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset'] + vert_offset
     elif side == 'bottom':
         trans_y = -inner_box_dims[1][0] - ubox[1][0] + opts['text_depth']
         trans_x -= horiz_offset
+        trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset'] + vert_offset
     elif side == 'top':
         trans_y = inner_box_dims[1][0] + ubox[1][0] - opts['text_depth']
         trans_x += horiz_offset
+        trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset'] + vert_offset
+    elif side == 'floor':
+        trans_z = -(inner_box_dims[1][2] + ubox[1][2] - opts['text_depth'])
+        trans_y += horiz_offset
+        trans_x -= vert_offset
 
-    trans_z = (inner_box_dims[0][2] - ubox[0][2]) + opts['z_offset']
-    trans_z += vert_offset
 
     return translate(text, (trans_x,trans_y,trans_z))
 
@@ -217,6 +228,8 @@ def modify_solid(mesh, surface_height, code, opts):
         url_side = 'left';
     elif opts['url_right']:
         url_side = 'right';
+    elif opts['url_floor']:
+        url_side = 'floor';
 
     if opts['code_top']:
         code_side = 'top';
@@ -226,6 +239,8 @@ def modify_solid(mesh, surface_height, code, opts):
         code_side = 'left';
     elif opts['code_right']:
         code_side = 'right';
+    elif opts['code_floor']:
+        code_side = 'floor';
 
     if not opts['no_url']:
         print("make url")
@@ -272,9 +287,9 @@ def make_solid(code, src_file, dest_file, opts):
         print("Cannot use code_left and code_right at the same time. pick one!")
         return False
 
-    if not opts['url_top'] and not opts['url_bottom'] and not opts['url_left'] and not opts['url_right']:
+    if not opts['url_top'] and not opts['url_bottom'] and not opts['url_left'] and not opts['url_right'] and not opts['url_floor']:
         opts['url_left'] = True
-    if not opts['code_top'] and not opts['code_bottom'] and not opts['code_left'] and not opts['code_right']:
+    if not opts['code_top'] and not opts['code_bottom'] and not opts['code_left'] and not opts['code_right'] and not opts['code_floor']:
         opts['code_right'] = True
 
     mesh = pymesh.meshio.load_mesh(src_file);
