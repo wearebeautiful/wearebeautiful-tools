@@ -11,10 +11,10 @@ from wearebeautiful import model_params as param
 MAX_SCREENSHOT_SIZE = 256000 # 256Kb is enough!
 
 
-def make_code(id="", part="", pose="", arrangement="", excited="", version=1, manifest=None):
+def make_code(id="", part="", pose="", arrangement="", excited="", version=1, manifest=None, force_version=False):
 
     if manifest:
-        if version == 1:
+        if manifest['version'] == 1 and not force_version:
             return "%s-%c%c%c%c" % (manifest['id'], 
                                     param.BODY_PART[manifest['body_part']],
                                     param.POSE[manifest['pose']],
@@ -25,9 +25,9 @@ def make_code(id="", part="", pose="", arrangement="", excited="", version=1, ma
                                     param.BODY_PART[manifest['body_part']],
                                     param.POSE[manifest['pose']],
                                     param.ARRANGEMENT[manifest['arrangement']],
-                                    param.EXCITED[manifest['excited'], version])
+                                    param.EXCITED[manifest['excited']], manifest['version'])
     else:
-        if version == 1:
+        if version == 1 and not force_version:
             return "%0s-%c%c%c%c" % (id,  part, pose, arrangement, excited)
         else:
             return "%0s-%c%c%c%c-%d" % (id,  part, pose, arrangement, excited, version)

@@ -30,17 +30,17 @@ def rotate_mesh(filename, rot_x, rot_y, rot_z):
 
 def get_dest_paths(mjson, dest_dir):
 
-    code = make_code(manifest=mjson)
+    code = make_code(manifest=mjson, force_version=True)
     id = mjson['id']
-    solid_file = "%s-%d-solid.stl" % (code, mjson["version"])
+    solid_file = "%s-solid.stl" % (code)
     solid_file = os.path.join(dest_dir, solid_file)
-    surface_file = "%s-%d-surface.stl" % (code, mjson["version"])
+    surface_file = "%s-surface.stl" % (code)
     surface_file = os.path.join(dest_dir, surface_file)
-    surface_med_file = "%s-%d-surface-med.stl" % (code, mjson["version"])
+    surface_med_file = "%s-surface-med.stl" % (code)
     surface_med_file = os.path.join(dest_dir, surface_med_file)
-    surface_low_file = "%s-%d-surface-low.stl" % (code, mjson["version"])
+    surface_low_file = "%s-surface-low.stl" % (code)
     surface_low_file = os.path.join(dest_dir, surface_low_file)
-    manifest_file = "%s-%d-manifest.json" % (code, mjson["version"])
+    manifest_file = "%s-manifest.json" % (code)
     manifest_file = os.path.join(dest_dir, manifest_file)
 
     return solid_file, surface_file, surface_med_file, surface_low_file, manifest_file
@@ -92,9 +92,13 @@ def process_surface(id, code, version, force = False):
         print(msg)
         return False
 
+    cmd_code = "%s-%s" % (id, code)
+    if mjson['version'] > 1:
+        cmd_code += "-%d" % mjson['version']
+
     gen_code = make_code(manifest=mjson)
-    if "%s-%s" % (id, code) != gen_code:
-        print("Code passed on the command line '%s-%s' and code generated from the manifest.json '%s' do not match!" % (id, code, gen_code))
+    if cmd_code != gen_code:
+        print("Code passed on the command line '%s' and code generated from the manifest.json '%s' do not match!" % (cmd_code, gen_code))
         return False
 
     if version != int(mjson['version']):
