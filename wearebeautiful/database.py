@@ -27,9 +27,15 @@ def add_models(dir):
                 print("  manifest not valid, skipping: %s" % err)
                 continue
 
-            print("  add ",dir)
             model = create_from_manifest(manifest)
+            print("  add %s-%s-%d " % (model.model_id, model.code, model.version), end = '')
             model.save()
+
+            screenshot = os.path.join(config.MODEL_GIT_DIR, model.model_id, model.code, "%s-%s-%d-screenshot.jpg" % (model.model_id, model.code, model.version))
+            if not os.path.exists(screenshot):
+                print(" (warning: %s is missing)" % screenshot)
+            else: 
+                print()
 
 
 def add_human_model(dir):

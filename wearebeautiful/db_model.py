@@ -21,8 +21,9 @@ def create_from_manifest(manifest):
         given_birth = manifest['given_birth'],
         arrangement = manifest['arrangement'],
         excited = manifest['excited'],
-        tags = ",".join(manifest.get('tags', '')),
-        history = ",".join(manifest.get('history', '')),
+        tags = ", ".join(manifest.get('tags', '')),
+        history = ", ".join(manifest.get('history', '')),
+        links = " ".join(manifest.get('links', '')),
         comment = manifest.get('comment', "")
     )
 
@@ -54,6 +55,7 @@ class DBModel(Model):
     excited = TextField()
     tags = TextField(null = False)
     history = TextField(null = False)
+    links = TextField(null = False)
     comment = TextField(null = False)
 
     def __repr__(self):
