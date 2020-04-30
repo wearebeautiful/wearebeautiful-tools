@@ -8,6 +8,10 @@ from wearebeautiful.manifest import validate_manifest
 import config
 
 DB_FILE = "wab-models.db"
+MIN_SURFACE_MED_SIZE = 8 * 1024 * 1024
+MAX_SURFACE_MED_SIZE = 12 * 1024 * 1024
+MIN_SURFACE_LOW_SIZE = 1.5 * 1024 * 1024
+MAX_SURFACE_LOW_SIZE = 5 * 1024 * 1024
 
 def add_models(dir):
     for item in os.listdir(dir):
@@ -33,12 +37,20 @@ def add_models(dir):
 
             surface_med = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-med.stl" % (model.model_id, model.code, model.version))
             surface_med_size = os.path.getsize(surface_med)
+            if surface_med_size > MAX_SURFACE_MED_SIZE or surface_med_size < MIN_SURFACE_MED_SIZE:
+                med_size_warn = '*'
+            else:
+                med_size_warn = ' '
 
             surface_low = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-low.stl" % (model.model_id, model.code, model.version))
             surface_low_size = os.path.getsize(surface_low)
+            if surface_low_size > MAX_SURFACE_LOW_SIZE or surface_low_size < MIN_SURFACE_LOW_SIZE:
+                low_size_warn = '*'
+            else:
+                low_size_warn = ' '
 
-            print(" med: %5.2f MB" % (surface_med_size / 1024.0 / 1024.0), end = '')
-            print(" low: %5.2f MB" % (surface_low_size / 1024.0 / 1024.0), end = '')
+            print(" med: %5.2f MB %s " % (surface_med_size / 1024.0 / 1024.0, med_size_warn), end = '')
+            print(" low: %5.2f MB %s " % (surface_low_size / 1024.0 / 1024.0, low_size_warn), end = '')
 
             screenshot = os.path.join(config.MODEL_GIT_DIR, model.model_id, model.code, "%s-%s-%d-screenshot.jpg" % (model.model_id, model.code, model.version))
             if not os.path.exists(screenshot):

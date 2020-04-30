@@ -9,8 +9,18 @@ from wearebeautiful.solid import make_solid
 from make_solid import default_opts
 from wearebeautiful.scale import scale_mesh
 from wearebeautiful.manifest import validate_manifest, make_code
-from wearebeautiful.utils import rotate
+from wearebeautiful.utils import rotate, center_around_origin
 import config
+
+DEFAULT_MED_SURFACE_LEN = .3
+DEFAULT_LOW_SURFACE_LEN = .5
+
+def center_mesh(filename):
+    src_file = os.path.join("/archive", filename)
+    mesh = pymesh.meshio.load_mesh(src_file);
+    mesh = center_around_origin(mesh)
+    pymesh.meshio.save_mesh(src_file, mesh);
+
 
 def rotate_mesh(filename, rot_x, rot_y, rot_z):
     src_file = os.path.join("/archive", filename)
@@ -79,10 +89,10 @@ def process_surface(id, code, version, force = False):
         with open(manifest, "rb") as f:
             mjson = json.loads(str(f.read().decode('utf-8')))
     except IOError as err:
-        print("problem reading manifest: ", str(err))
+        print("%s: problem reading manifest: %s" % (manifest, str(err)))
         return False
     except json.decoder.JSONDecodeError as err:
-        print("problem decoding manifest: ", str(err))
+        print("%s: problem decoding manifest: %s" % (manifest, str(err)))
         return False
 
     msg = validate_manifest(mjson)
@@ -111,6 +121,10 @@ def process_surface(id, code, version, force = False):
             opts[k] = mjson['make_solid_args'][k]
 
     opts['debug'] = True
+    if 'surface_med_len' not in opts:
+        opts['surface_med_len'] = DEFAULT_MED_SURFACE_LEN
+    if 'surface_low_len' not in opts:
+        opts['surface_low_len'] = DEFAULT_LOW_SURFACE_LEN
 
     # Set up the plain copy destination
     dest_dir = os.path.join(config.MODEL_DIR, mjson['id'], code)
@@ -142,14 +156,12 @@ def process_surface(id, code, version, force = False):
         subprocess.run(["gzip", "-f", solid_file_gz], check=True)
         processed += 1
 
-
     try:
         if force or (not os.path.exists(surface_file)) or (not os.path.exists(surface_file_gz + ".gz")):
             shutil.copyfile(surface, surface_file)
             shutil.copyfile(surface, surface_file_gz)
             subprocess.run(["gzip", "-f", surface_file_gz], check=True)
             processed += 1
-
 
         if force or (not os.path.exists(manifest_file) or not os.path.exists(manifest_file_git)):
             shutil.copyfile(manifest, manifest_file)
@@ -158,14 +170,14 @@ def process_surface(id, code, version, force = False):
 
         if force or (not os.path.exists(surface_med_file)) or (not os.path.exists(surface_med_file_gz + ".gz")):
             print("scaling medium surface %s" % surface_med_file)
-            scale_mesh(False, .3, surface, surface_med_file, { 'cleanup' : False })
+            scale_mesh(False, opts['surface_med_len'], surface, surface_med_file, { 'cleanup' : False })
             shutil.copyfile(surface_med_file, surface_med_file_gz)
             subprocess.run(["gzip", "-f", surface_med_file_gz], check=True)
             processed += 1
 
         if force or (not os.path.exists(surface_low_file)) or (not os.path.exists(surface_low_file_gz + ".gz")):
             print("scaling low surface %s" % surface_low_file)
-            scale_mesh(False, .5, surface, surface_low_file, { 'cleanup' : False })
+            scale_mesh(False, opts['surface_low_len'], surface, surface_low_file, { 'cleanup' : False })
             shutil.copyfile(surface_low_file, surface_low_file_gz)
             subprocess.run(["gzip", "-f", surface_low_file_gz], check=True)
             processed += 1
