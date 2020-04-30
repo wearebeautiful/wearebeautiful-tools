@@ -60,7 +60,6 @@ def process_human_model_dir(id, human_model_dir, force):
                 continue
 
         full_path = os.path.join(human_model_dir, dir)
-        print(full_path)
         process_surface(id, code, version)
 
 

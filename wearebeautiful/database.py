@@ -31,11 +31,24 @@ def add_models(dir):
             print("  add %s-%s-%d " % (model.model_id, model.code, model.version), end = '')
             model.save()
 
+            surface_med = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-med.stl" % (model.model_id, model.code, model.version))
+            surface_med_size = os.path.getsize(surface_med)
+
+            surface_low = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-low.stl" % (model.model_id, model.code, model.version))
+            surface_low_size = os.path.getsize(surface_low)
+
+            print(" med: %5.2f MB" % (surface_med_size / 1024.0 / 1024.0), end = '')
+            print(" low: %5.2f MB" % (surface_low_size / 1024.0 / 1024.0), end = '')
+
             screenshot = os.path.join(config.MODEL_GIT_DIR, model.model_id, model.code, "%s-%s-%d-screenshot.jpg" % (model.model_id, model.code, model.version))
             if not os.path.exists(screenshot):
                 print(" (warning: %s is missing)" % screenshot)
-            else: 
+            else:
                 print()
+
+
+
+
 
 
 def add_human_model(dir):

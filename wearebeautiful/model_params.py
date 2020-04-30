@@ -56,7 +56,7 @@ BODY_PART = {
      "lower body" : "L", 
      "upper body" : "U", 
      "breast" : "B", 
-     "buttocks" : "K", 
+     "buttocks" : "O", 
      "nipple" : "N", 
      "penis" : "P", 
      "torso" : "T", 

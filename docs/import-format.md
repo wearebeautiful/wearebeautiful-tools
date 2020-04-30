@@ -91,7 +91,7 @@ Allowable values and their short cut codes:
 | L    |lower body |
 | U    |upper body |
 | B    |breast |
-| K    |buttocks |
+| O    |buttocks |
 | N    |nipple |
 | P    |penis |
 | T    |torso |

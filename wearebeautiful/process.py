@@ -75,7 +75,6 @@ def process_surface(id, code, version, force = False):
         print("model git dir %s does not exist or is not accessible." % config.MODEL_DIR)
         return False
 
-    print(manifest)
     try:
         with open(manifest, "rb") as f:
             mjson = json.loads(str(f.read().decode('utf-8')))
