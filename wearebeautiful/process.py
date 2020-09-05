@@ -64,6 +64,7 @@ def process_surface(id, code, version, force = False):
         path = os.path.join(config.SURFACE_DIR, id, code + "-%d" % version)
     else:
         path = os.path.join(config.SURFACE_DIR, id, code)
+    print(path)
     manifest = os.path.join(path, "manifest.json")
     if not os.path.exists(manifest):
         print("manifest file %s does not exist." % manifest)

@@ -6,11 +6,12 @@ import click
 from wearebeautiful.process import process_surface
 
 @click.command()
+@click.option("-f", "--force", is_flag=True, default=False)
 @click.argument("id", nargs=1)
 @click.argument("code", nargs=1)
 @click.argument("version", nargs=1)
-def process(id, code, version):
-    process_surface(id, code, int(version))
+def process(force, id, code, version):
+    process_surface(id, code, int(version), force)
 
 
 def usage(command):
