@@ -7,13 +7,15 @@ from copy import copy
 import pymesh
 from wearebeautiful.solid import make_solid
 from make_solid import default_opts
-from wearebeautiful.scale import scale_mesh
+from wearebeautiful.scale import downsample_mesh
 from wearebeautiful.manifest import validate_manifest, make_code
 from wearebeautiful.utils import rotate, center_around_origin
 import config
 
 DEFAULT_MED_SURFACE_LEN = .3
 DEFAULT_LOW_SURFACE_LEN = .5
+SURFACE_MED_TARGET_SIZE = 10 * 1024 * 1024   # MB 
+SURFACE_LOW_TARGET_SIZE = 3 * 1024 * 1024   # MB 
 
 def center_mesh(filename):
     src_file = os.path.join("/archive", filename)
@@ -170,15 +172,15 @@ def process_surface(id, code, version, force = False):
             processed += 1
 
         if force or (not os.path.exists(surface_med_file)) or (not os.path.exists(surface_med_file_gz + ".gz")):
-            print("scaling medium surface %s" % surface_med_file)
-            scale_mesh(False, opts['surface_med_len'], surface, surface_med_file, { 'cleanup' : False })
+            print("process medium surface %s" % surface_med_file)
+            downsample_mesh(False, SURFACE_MED_TARGET_SIZE, surface, surface_med_file)
             shutil.copyfile(surface_med_file, surface_med_file_gz)
             subprocess.run(["gzip", "-f", surface_med_file_gz], check=True)
             processed += 1
 
         if force or (not os.path.exists(surface_low_file)) or (not os.path.exists(surface_low_file_gz + ".gz")):
-            print("scaling low surface %s" % surface_low_file)
-            scale_mesh(False, opts['surface_low_len'], surface, surface_low_file, { 'cleanup' : False })
+            print("process low surface %s" % surface_low_file)
+            downsample_mesh(False, SURFACE_LOW_TARGET_SIZE, surface, surface_low_file)
             shutil.copyfile(surface_low_file, surface_low_file_gz)
             subprocess.run(["gzip", "-f", surface_low_file_gz], check=True)
             processed += 1

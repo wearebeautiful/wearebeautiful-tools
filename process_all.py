@@ -60,7 +60,7 @@ def process_human_model_dir(id, human_model_dir, force):
                 continue
 
         full_path = os.path.join(human_model_dir, dir)
-        if not process_surface(id, code, version):
+        if not process_surface(id, code, version, force):
             sys.exit(-1)
 
 

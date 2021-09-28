@@ -79,6 +79,12 @@ def rotate(mesh, offset, rotation_axis, rotation_angle):
     return pymesh.form_mesh(vertices, mesh.faces, mesh.voxels)
 
 
+def clear_color(file):
+    mesh = pymesh.meshio.load_mesh(file);
+    new_mesh = pymesh.form_mesh(mesh.vertices, mesh.faces)
+    pymesh.meshio.save_mesh(file, new_mesh);
+
+
 def scale(mesh, scale_factor):
     """
        mesh is the mesh to be rotated

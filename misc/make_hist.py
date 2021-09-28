@@ -40,10 +40,16 @@ for i, line in enumerate(reader):
     if not i:
         continue
 
-    code = line[0]
-    age = int(line[1])
-    country = line[2]
-    ethnicity = line[3].lower()
+    temp_id = line[0]
+    code = line[1]
+    age = int(line[2])
+    country = line[3]
+    ethnicity = line[4].lower()
+
+    if ethnicity in ('-', ''):
+        ethnicity = "(declined to state)"
+    if country in ('-', ''):
+        country = "(unknown)"
 
     if age:
         try:

@@ -9,7 +9,7 @@ def create_from_manifest(manifest):
         model_id = manifest['id'],
         code = make_code(manifest=manifest).split('-')[1],
         version = manifest['version'],
-        created = dateutil.parser.parse(manifest['created']),
+        created = manifest['created'],
         released = dateutil.parser.parse(manifest['released']),
         gender = manifest['gender'],
         gender_comment = manifest.get('gender_comment', ''),
@@ -41,7 +41,7 @@ class DBModel(Model):
     model_id = TextField()
     version = IntegerField()
     code = TextField()
-    created = DateField()
+    created = TextField()
     released = DateField()
     gender = TextField()
     gender_comment = TextField(null = False)

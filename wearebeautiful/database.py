@@ -37,15 +37,19 @@ def add_models(dir):
 
             surface_med = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-med.stl" % (model.model_id, model.code, model.version))
             surface_med_size = os.path.getsize(surface_med)
-            if surface_med_size > MAX_SURFACE_MED_SIZE or surface_med_size < MIN_SURFACE_MED_SIZE:
-                med_size_warn = '*'
+            if surface_med_size > MAX_SURFACE_MED_SIZE:
+                med_size_warn = '+'
+            elif surface_med_size < MIN_SURFACE_MED_SIZE:
+                med_size_warn = '-'
             else:
                 med_size_warn = ' '
 
             surface_low = os.path.join(config.MODEL_DIR, model.model_id, model.code, "%s-%s-%d-surface-low.stl" % (model.model_id, model.code, model.version))
             surface_low_size = os.path.getsize(surface_low)
-            if surface_low_size > MAX_SURFACE_LOW_SIZE or surface_low_size < MIN_SURFACE_LOW_SIZE:
-                low_size_warn = '*'
+            if surface_low_size > MAX_SURFACE_LOW_SIZE:
+                low_size_warn = '+'
+            elif surface_low_size < MIN_SURFACE_LOW_SIZE:
+                low_size_warn = '-'
             else:
                 low_size_warn = ' '
 

@@ -9,8 +9,8 @@ import click
 @click.argument("len", nargs=1, type=float)
 @click.argument("in_file", nargs=1)
 @click.argument("out_file", nargs=1)
-def scale(invert, len, in_file, out_file, **opts):
-    scale_mesh(invert, len, in_file, out_file, opts)
+def scale(invert, len, in_file, out_file):
+    scale_mesh(invert, len, in_file, out_file)
 
 
 def usage(command):

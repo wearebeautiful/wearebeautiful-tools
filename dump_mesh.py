@@ -22,6 +22,12 @@ def invert(src_file):
     print("dimension: (%-.5f %-.5f %-.5f)" % (bbox[1][0] - bbox[0][0],
                                   bbox[1][1] - bbox[0][1], 
                                   bbox[1][2] - bbox[0][2]))
+    print("bbox: [%.4f,%.4f,%.4f - %.4f,%.4f,%.4f]" % (bbox[0][0],
+                                                       bbox[0][1],
+                                                       bbox[0][2],
+                                                       bbox[1][0],
+                                                       bbox[1][1],
+                                                       bbox[1][2]))
     print("is manifold: ", mesh.is_manifold())
     print("is edge manifold: ", mesh.is_edge_manifold())
     print("is vertex manifold: ", mesh.is_vertex_manifold())
